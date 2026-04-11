@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda | LC1 Goalkeeper</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .shop-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            padding: 8rem 5% 5rem;
+        }
+        
+        .filters {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 8px;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .filter-group {
+            margin-bottom: 2rem;
+        }
+
+        .filter-group h4 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            text-align: left;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(204, 255, 0, 0.1);
+            color: var(--primary-color);
+        }
+
+
+        @media (max-width: 900px) {
+            .shop-container {
+                grid-template-columns: 1fr;
+            }
+            .filters {
+                position: relative;
+                top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html" class="logo sport-font">
+            <i class="fas fa-shield-halved"></i> LC1 GOALKEEPER
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="shop.html" class="active">Tienda</a></li>
+            <li><a href="shop.html?cat=guantes">Guantes</a></li>
+            <li><a href="shop.html?cat=indumentaria">Indumentaria</a></li>
+            <li><a href="admin.html" class="admin-nav-link" title="Panel de Administración"><i class="fas fa-lock"></i></a></li>
+        </ul>
+        <div class="menu-toggle" id="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="cart-icon" id="cart-toggle">
+            <i class="fas fa-shopping-cart fa-lg"></i>
+            <span class="cart-count">0</span>
+        </div>
+    </nav>
+
+    <div class="shop-container">
+        <!-- Sidebar Filters -->
+        <aside class="filters">
+            <div class="filter-group">
+                <h4 class="sport-font">Categorías</h4>
+                <div class="filter-options" id="category-filters">
+                    <button class="filter-btn active" onclick="filterByCategory('all', this)">Todos</button>
+                    <button class="filter-btn" onclick="filterByCategory('guantes', this)">Guantes</button>
+                    <button class="filter-btn" onclick="filterByCategory('indumentaria', this)">Indumentaria</button>
+                    <button class="filter-btn" onclick="filterByCategory('reparacion', this)">Reparación</button>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <h4 class="sport-font">Precio</h4>
+                <div class="filter-options">
+                    <button class="filter-btn" onclick="filterByPrice('low')">Menor precio</button>
+                    <button class="filter-btn" onclick="filterByPrice('high')">Mayor precio</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Product Grid -->
+        <main>
+            <div id="shop-products" class="products-grid">
+                <!-- Products will be injected by JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer style="padding: 3rem 5%; background: #050505; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+        <p>&copy; 2024 LC1 Goalkeeper. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Whatsapp Float -->
+    <a href="https://wa.me/541140236384" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Instagram Float -->
+    <a href="https://www.instagram.com/guantes.lc1?igsh=MTEyMmxrd3R2OGw5eQ==" class="instagram-float" target="_blank">
+        <i class="fab fa-instagram"></i>
+    </a>
+
+    <!-- Toast Component Container -->
+    <div id="toast-container"></div>
+
+    <script src="js/tracker.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/cart.js"></script>
+    <script>
+        // Lógica específica de la página de tienda
+        window.filterByCategory = (cat, btn) => {
+            if (window.app_filter) {
+                window.app_filter(cat);
+            }
+            
+            // UI Update
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+        };
+    </script>
+</body>
+</html>
