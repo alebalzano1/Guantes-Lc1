@@ -142,6 +142,35 @@ nav {
     animation: pulse-glow 2s infinite;
 }
 
+/* Button Base Upgrades */
+.btn-primary {
+    border: none;
+    cursor: pointer;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 1px;
+    transition: var(--transition);
+}
+
+.checkout-btn {
+    background: var(--primary-color) !important;
+    color: #000 !important;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(204, 255, 0, 0.25);
+}
+
+.checkout-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(204, 255, 0, 0.4);
+    background: #e6ff00 !important;
+}
+
+.checkout-btn i {
+    font-size: 1.4rem;
+}
+
 @keyframes pulse-glow {
     0% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0.4); }
     70% { box-shadow: 0 0 0 10px rgba(204, 255, 0, 0); }

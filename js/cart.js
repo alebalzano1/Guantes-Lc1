@@ -33,7 +33,9 @@ function injectCartHTML() {
                     <span>Total:</span>
                     <span id="cart-total">$0</span>
                 </div>
-                <button onclick="checkout()" class="btn-primary" style="width:100%;">Finalizar por WhatsApp</button>
+                <button onclick="checkout()" class="btn-primary checkout-btn" style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px; padding: 1.2rem;">
+                    <i class="fab fa-whatsapp"></i> FINALIZAR COMPRA
+                </button>
             </div>
         </div>
     `;
