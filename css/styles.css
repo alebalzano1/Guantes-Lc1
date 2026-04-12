@@ -1094,6 +1094,14 @@ nav {
     display: none !important;
 }
 
+/* Optimización Móvil: Desactivar efectos pesados */
+@media (max-width: 768px) {
+    .section-identity, 
+    .section-categories, 
+    .section-featured, 
+    .pro-hero,
+    body {
+        background-attachment: scroll !important; /* Elimina lag de scroll en móviles */
     }
 }
 
