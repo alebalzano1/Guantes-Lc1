@@ -133,7 +133,7 @@ window.checkout = () => {
     message += `\n\nPor favor, confirmame disponibilidad y métodos de pago.`;
 
     const encodedMessage = encodeURIComponent(message);
-    const settings = JSON.parse(localStorage.getItem('lc1-settings')) || { whatsapp: '5491100000000' };
+    const settings = JSON.parse(localStorage.getItem('lc1-settings')) || (window.LC1_Data ? window.LC1_Data.settings : { whatsapp: '541140236384' });
     const whatsappUrl = `https://wa.me/${settings.whatsapp}?text=${encodedMessage}`;
     
     // Vaciar carrito después de comprar

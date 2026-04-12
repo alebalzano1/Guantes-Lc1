@@ -1,30 +1,5 @@
-// Data de Productos (Prioridad: LocalStorage -> Fallback Static)
-const staticProducts = [
-    {
-        id: 1,
-        name: "LC1 PRO Elite - Neon G1",
-        price: 45000,
-        category: "guantes",
-        image: "https://images.unsplash.com/photo-1518114139744-245ed43dd4f7?q=80&w=400",
-        featured: true,
-        desc: "Látex alemán de 4mm, corte negativo."
-    },
-    {
-        id: 2,
-        name: "Camiseta LC1 Training Black",
-        price: 18000,
-        category: "indumentaria",
-        image: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=400",
-        featured: true,
-        desc: "Tejido transpirable con tecnología dry-fit."
-    }
-];
-
-const staticCategories = [
-    { id: 1, name: "Guantes", slug: "guantes", desc: "Látex profesional para todo tipo de clima.", image: "Roma/Photoroom_20260409_062835.png" },
-    { id: 2, name: "Indumentaria", slug: "indumentaria", desc: "Camisetas, shorts y protección elite.", image: "Roma/Photoroom_20260409_070006.png" },
-    { id: 3, name: "Reparación", slug: "reparacion", desc: "Devolvele el grip a tus guantes favoritos.", image: "Roma/Photoroom_20260108_133941.png" }
-];
+const staticProducts = window.LC1_Data ? window.LC1_Data.products : [];
+const staticCategories = window.LC1_Data ? window.LC1_Data.categories : [];
 
 const getSafeJSON = (key, defaultValue) => {
     try {
@@ -194,7 +169,7 @@ style.textContent = `
 document.head.appendChild(style);
 // Sync Branding from Admin
 function syncBranding() {
-    const settings = getSafeJSON('lc1-settings', {
+    const settings = getSafeJSON('lc1-settings', window.LC1_Data ? window.LC1_Data.settings : {
         catSectionTitle: 'Explora <span>Categorías</span>',
         featuredSectionTitle: 'Lanzamientos <span>Elite</span>'
     });
