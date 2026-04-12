@@ -13,7 +13,7 @@ const initialProducts = [
         featured: true, 
         available: true, 
         customizable: false, 
-        label: "Más Vendido", 
+        label: "TOP", 
         desc: "Máximo rendimiento y alto agarre en cualquier condición climática. Látex profesional de 4mm." 
     },
     { 
@@ -26,7 +26,7 @@ const initialProducts = [
         featured: false, 
         available: true, 
         customizable: false, 
-        label: "Profesional", 
+        label: "ALTA DEMANDA", 
         desc: "Corte negativo para una sensibilidad superior. Uso profesional garantizado." 
     },
     { 
@@ -106,7 +106,7 @@ const initialProducts = [
         featured: false, 
         available: true, 
         customizable: true, 
-        label: "Custom", 
+        label: "STOCK LIMITADO", 
         desc: "Diseño personalizado de alto rendimiento. Tu nombre, tu estilo." 
     },
     { 

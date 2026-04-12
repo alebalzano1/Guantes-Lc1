@@ -1,17 +1,15 @@
 :root {
     --bg-color: #050505;
     --card-bg: #0f0f0f;
-    --primary-color: #ccff00;
+    --primary-color: #ccff00; /* Neon Lime */
     --primary-hover: #b3df00;
     --text-color: #ffffff;
-    --text-muted: #999999;
+    --text-muted: #888888;
     --accent-color: #ccff00;
-    --shadow-neon: 0 0 30px rgba(204, 255, 0, 0.25);
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.5);
     --glass-bg: rgba(255, 255, 255, 0.02);
-    --glass-border: rgba(255, 255, 255, 0.06);
-    --mesh-gradient: radial-gradient(at 0% 0%, rgba(204, 255, 0, 0.08) 0, transparent 50%), 
-                     radial-gradient(at 100% 100%, rgba(0, 0, 0, 1) 0, transparent 50%);
-    --transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+    --glass-border: rgba(255, 255, 255, 0.05);
+    --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 * {
@@ -98,80 +96,99 @@ nav {
     font-weight: bold;
 }
 
-/* --- Hero Section (Premium Overhaul) --- */
-.hero {
-    height: 100vh;
+/* --- Hero Section (Professional Upgrade) --- */
+.pro-hero {
+    height: 90vh;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
-    text-align: center;
+    padding: 0 10%;
     position: relative;
     background: #000;
-    background-image: var(--mesh-gradient);
-    padding: 0 5%;
     overflow: hidden;
 }
 
-.hero::after {
-    content: '';
+.hero-bg-overlay {
     position: absolute;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(204, 255, 0, 0.1) 0%, transparent 70%);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #000 30%, transparent 100%), 
+                url('../assets/hero-bg.png') center/cover no-repeat;
+    opacity: 0.6;
     z-index: 1;
 }
 
-.hero h1 {
-    font-size: clamp(3rem, 10vw, 6rem);
-    line-height: 0.9;
-    margin-bottom: 1.5rem;
+.hero-content {
     position: relative;
-    z-index: 2;
+    z-index: 10;
+    max-width: 800px;
+}
+
+.hero-tagline {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 4px;
+    margin-bottom: 1rem;
+}
+
+.pro-hero h1 {
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    line-height: 0.95;
+    margin-bottom: 2rem;
     font-weight: 900;
     font-style: italic;
 }
 
-.hero h1 span {
-    color: var(--primary-color);
-    display: block;
-    text-shadow: 0 0 20px rgba(204, 255, 0, 0.3);
-}
-
-.hero p {
+.hero-subtext {
+    font-size: 1.2rem;
     color: var(--text-muted);
-    max-width: 650px;
+    max-width: 550px;
     margin-bottom: 3rem;
-    font-size: 1.25rem;
-    position: relative;
-    z-index: 2;
-    font-weight: 300;
+    line-height: 1.6;
 }
 
-.btn-primary {
-    background: var(--primary-color);
-    color: black;
-    padding: 1.2rem 3.5rem;
-    border: none;
-    border-radius: 50px;
-    font-size: 1.1rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    cursor: pointer;
+.hero-btns {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.btn-secondary {
+    padding: 1.1rem 2.8rem;
+    border: 1px solid var(--text-color);
+    color: var(--text-color);
+    border-radius: 4px;
     text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
     transition: var(--transition);
-    box-shadow: var(--shadow-neon);
-    position: relative;
-    z-index: 2;
 }
 
-.btn-primary:hover {
-    transform: translateY(-3px);
-    background: var(--primary-hover);
+.btn-secondary:hover {
+    background: var(--text-color);
+    color: #000;
+}
+
+/* --- Identity Section --- */
+.section-identity {
+    padding: 8rem 10%;
+    text-align: center;
+    background: #000;
+}
+
+.identity-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.identity-text {
+    font-size: 1.8rem;
+    color: var(--text-color);
+    line-height: 1.4;
+    font-weight: 300;
+    margin-top: 2rem;
 }
 
 /* --- Categories --- */
@@ -529,9 +546,9 @@ nav {
     background: var(--primary-color);
     color: #000;
     border: none;
-    padding: 1.1rem;
-    border-radius: 12px;
-    font-size: 1rem;
+    padding: 1.25rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -540,7 +557,7 @@ nav {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
     margin-top: auto;
     box-shadow: 0 4px 15px rgba(204, 255, 0, 0.2);
 }
@@ -589,34 +606,93 @@ nav {
 }
 
 
-/* --- Order Modal Specialist Styles --- */
-.order-detail-card {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 15px;
-    padding: 1.5rem;
+/* --- Testimonials Grid --- */
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.testimonial-card {
+    padding: 2.5rem;
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+}
+
+.testimonial-card .stars {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+}
+
+.testimonial-card p {
+    font-style: italic;
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.testimonial-card cite {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: normal;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* --- Purchase Info --- */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4rem;
+    text-align: center;
+}
+
+.info-item i {
+    font-size: 2.5rem;
+    color: var(--primary-color);
     margin-bottom: 1.5rem;
 }
 
-.order-item-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 1rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+.info-item h4 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
 }
 
-.order-item-row:last-child {
-    border-bottom: none;
+.info-item p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
 }
 
-.order-total-highlight {
-    font-size: 1.8rem;
-    color: var(--primary-color);
-    font-weight: 900;
-    border-top: 2px solid var(--primary-color);
-    padding-top: 1rem;
-    margin-top: 1rem;
-    display: flex;
-    justify-content: space-between;
+@media (max-width: 850px) {
+    .testimonials-grid, .info-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .pro-hero {
+        text-align: center;
+        padding: 0 5%;
+    }
+    
+    .hero-content {
+        margin: 0 auto;
+    }
+    
+    .hero-btns {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .hero-bg-overlay {
+        background: linear-gradient(#000 40%, transparent 100%), 
+                    url('../assets/hero-bg.png') center/cover no-repeat;
+    }
+    
+    .identity-text {
+        font-size: 1.3rem;
+    }
 }
 
 /* --- Toast Notification System --- */

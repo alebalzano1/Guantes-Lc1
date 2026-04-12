@@ -91,14 +91,15 @@ function renderShop(category) {
 
 function productCard(product) {
     const whatsappNumber = (window.LC1_Data && window.LC1_Data.settings) ? window.LC1_Data.settings.whatsapp : '541140236384';
-    const whatsappMsg = encodeURIComponent(`¡Hola LC1! 👋 Me interesa este producto: ${product.name}. ¿Me podrían asesorar?`);
+    const whatsappMsg = encodeURIComponent(`Hola LC1! 👋 Quiero comprar el guante ${product.name} que tiene un precio de $${product.price.toLocaleString('es-AR')}. ¿Tienen stock?`);
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMsg}`;
 
-    // Lógica de Etiquetas de Urgencia
+    // Lógica de Etiquetas de Urgencia (Branding Pro)
     let badgeHTML = '';
     if (product.label) {
-        const isUrgency = product.label.toLowerCase().includes('unidades') || product.label.toLowerCase().includes('agotar');
-        badgeHTML = `<span class="badge-label ${isUrgency ? 'badge-urgency' : ''}">${product.label}</span>`;
+        const text = product.label.toUpperCase();
+        const isUrgent = text.includes('UNIDADES') || text.includes('AGOTAR');
+        badgeHTML = `<span class="badge-label ${isUrgent ? 'badge-urgency' : ''}">${text}</span>`;
     }
 
     return `

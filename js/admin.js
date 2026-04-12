@@ -446,7 +446,9 @@ window.saveProduct = () => {
 
     if (idToEdit) {
         const index = adminProducts.findIndex(p => p.id === parseInt(idToEdit));
-        adminProducts[index] = newProduct;
+        if (index !== -1) {
+            adminProducts[index] = newProduct;
+        }
     } else {
         adminProducts.push(newProduct);
         // Si el ID estaba en la lista negra (ej: borrado y recreado con mismo ID manual), lo quitamos
@@ -454,10 +456,16 @@ window.saveProduct = () => {
         localStorage.setItem('lc1-deleted-products', JSON.stringify(adminDeletedProducts));
     }
 
+    // Persistencia Atómica
     localStorage.setItem('lc1-products-db', JSON.stringify(adminProducts));
+    
+    // Sincronización Global de Vistas
     renderAdminProducts();
+    renderAdminHomeFeatured();
+    calculateStats(); 
+    
     closeModal();
-    showToast('Producto guardado correctamente', 'success');
+    showToast('Producto actualizado y guardado correctamente', 'success');
 };
 
 window.deleteProduct = (id) => {
@@ -982,7 +990,7 @@ window.saveCategory = () => {
     localStorage.setItem('lc1-categories-db', JSON.stringify(adminCategories));
     renderAdminCategories();
     closeCatModal();
-    showToast(idToEdit ? 'Categoría actualizada' : 'Categoría creada', 'success');
+    showToast(idToEdit ? 'Categoría actualizada correctamente' : 'Categoría creada', 'success');
 };
 
 window.deleteCategory = (id) => {

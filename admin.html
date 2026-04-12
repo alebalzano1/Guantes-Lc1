@@ -988,11 +988,11 @@
                             </div>
                         </div>
                     </div>
+                    <div class="modal-footer" style="padding: 1.5rem 0 0; border:none; background:transparent;">
+                        <button type="button" onclick="closeModal()" class="btn-cancel" style="flex:1;">Cancelar</button>
+                        <button type="submit" class="btn-save" style="flex:2;">Guardar cambios del producto</button>
+                    </div>
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" onclick="closeModal()" class="btn-cancel">Cancelar</button>
-                <button type="submit" form="product-form" class="btn-save">Guardar cambios</button>
             </div>
         </div>
     </div>
@@ -1027,10 +1027,12 @@
                                 <input type="file" id="cat-file" accept="image/*" style="padding: 1rem;">
                             </div>
                         </div>
-                    </div>
-                    <div class="modal-footer" style="padding-top: 2rem;">
-                        <button type="button" class="btn-cancel" onclick="closeCatModal()">Cancelar</button>
-                        <button type="submit" class="btn-save">Guardar Cambios</button>
+                        <div class="form-group-full">
+                            <div class="modal-footer" style="padding: 1.5rem 0 0; border:none; background:transparent;">
+                                <button type="button" class="btn-cancel" onclick="closeCatModal()" style="flex:1;">Cancelar</button>
+                                <button type="submit" class="btn-save" style="flex:2;">Confirmar Categoría</button>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
