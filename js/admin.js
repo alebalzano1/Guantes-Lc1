@@ -30,6 +30,11 @@ const getSafeJSON = (key, defaultValue) => {
 let adminProducts = getSafeJSON('lc1-products-db', adminInitialProducts);
 let adminCategories = getSafeJSON('lc1-categories-db', adminInitialCategories);
 let adminOrders = getSafeJSON('lc1-orders-db', []);
+
+// Listas negras para evitar que la sincronización restaure items eliminados
+let adminDeletedProducts = getSafeJSON('lc1-deleted-products', []);
+let adminDeletedCategories = getSafeJSON('lc1-deleted-categories', []);
+
 let adminSettings = getSafeJSON('lc1-settings', window.LC1_Data ? window.LC1_Data.settings : {
     storeName: 'LC1 GOALKEEPER',
     whatsapp: '541140236384',
@@ -284,7 +289,8 @@ function syncRomaProducts() {
     let updated = false;
 
     adminInitialProducts.forEach(ip => {
-        if (!currentDB.find(p => p.id === ip.id)) {
+        const isDeleted = adminDeletedProducts.includes(ip.id);
+        if (!currentDB.find(p => p.id === ip.id) && !isDeleted) {
             currentDB.push(ip);
             updated = true;
         }
@@ -303,7 +309,8 @@ function syncCategories() {
     let updated = false;
 
     adminInitialCategories.forEach(ic => {
-        if (!currentDB.find(c => c.id === ic.id)) {
+        const isDeleted = adminDeletedCategories.includes(ic.id);
+        if (!currentDB.find(c => c.id === ic.id) && !isDeleted) {
             currentDB.push(ic);
             updated = true;
         }
@@ -451,6 +458,9 @@ window.saveProduct = () => {
         adminProducts[index] = newProduct;
     } else {
         adminProducts.push(newProduct);
+        // Si el ID estaba en la lista negra (ej: borrado y recreado con mismo ID manual), lo quitamos
+        adminDeletedProducts = adminDeletedProducts.filter(id => id !== newProduct.id);
+        localStorage.setItem('lc1-deleted-products', JSON.stringify(adminDeletedProducts));
     }
 
     localStorage.setItem('lc1-products-db', JSON.stringify(adminProducts));
@@ -461,8 +471,16 @@ window.saveProduct = () => {
 
 window.deleteProduct = (id) => {
     showConfirm('¿Estás seguro de que quieres eliminar este producto?', () => {
+        // 1. Añadir a lista negra de eliminados
+        if (!adminDeletedProducts.includes(id)) {
+            adminDeletedProducts.push(id);
+            localStorage.setItem('lc1-deleted-products', JSON.stringify(adminDeletedProducts));
+        }
+
+        // 2. Eliminar del array actual y guardar
         adminProducts = adminProducts.filter(p => p.id !== id);
         localStorage.setItem('lc1-products-db', JSON.stringify(adminProducts));
+        
         renderAdminProducts();
         showToast('Producto eliminado', 'info');
     });
@@ -963,6 +981,9 @@ window.saveCategory = () => {
         if (index !== -1) adminCategories[index] = categoryData;
     } else {
         adminCategories.push(categoryData);
+        // Quitar de lista negra si se recrea
+        adminDeletedCategories = adminDeletedCategories.filter(id => id !== categoryData.id);
+        localStorage.setItem('lc1-deleted-categories', JSON.stringify(adminDeletedCategories));
     }
 
     localStorage.setItem('lc1-categories-db', JSON.stringify(adminCategories));
@@ -973,8 +994,16 @@ window.saveCategory = () => {
 
 window.deleteCategory = (id) => {
     showConfirm('¿Estás seguro de que quieres eliminar esta categoría?', () => {
+        // 1. Añadir a lista negra
+        if (!adminDeletedCategories.includes(id)) {
+            adminDeletedCategories.push(id);
+            localStorage.setItem('lc1-deleted-categories', JSON.stringify(adminDeletedCategories));
+        }
+
+        // 2. Eliminar y guardar
         adminCategories = adminCategories.filter(c => c.id !== id);
         localStorage.setItem('lc1-categories-db', JSON.stringify(adminCategories));
+        
         renderAdminCategories();
         showToast('Categoría eliminada', 'info');
     });
