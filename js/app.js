@@ -11,7 +11,9 @@ const getSafeJSON = (key, defaultValue) => {
     }
 };
 
-const productsList = getSafeJSON('lc1-products-db', staticProducts);
+const productsListSource = getSafeJSON('lc1-products-db', staticProducts);
+// Si por alguna razón la lista está vacía pero tenemos datos estáticos, restauramos
+const productsList = (productsListSource.length === 0 && staticProducts.length > 0) ? staticProducts : productsListSource;
 const categoriesList = getSafeJSON('lc1-categories-db', staticCategories);
 
 // Elementos del DOM
@@ -40,6 +42,11 @@ function renderPage() {
     if (categoriesContainer) renderCategories();
     if (featuredContainer) renderFeatured();
     if (shopContainer) renderShop(currentCategory);
+    
+    // IMPORTANTE: Registrar nuevos elementos para la animación de aparición
+    if (window.reobserveReveal) {
+        setTimeout(window.reobserveReveal, 100);
+    }
 }
 
 function renderCategories() {
@@ -64,22 +71,55 @@ function renderShop(category) {
         ? productsList 
         : productsList.filter(p => p.category === category);
     
+    if (filtered.length === 0) {
+        shopContainer.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 5rem 2rem; border: 1px dashed var(--glass-border); border-radius: 20px;">
+                <i class="fas fa-search" style="font-size: 3rem; color: var(--glass-border); margin-bottom: 1.5rem;"></i>
+                <h3 class="sport-font" style="color: #fff; margin-bottom: 0.5rem;">No encontramos coincidencias</h3>
+                <p style="color: var(--text-muted);">Probá con otra categoría o restablecé los filtros.</p>
+                <button onclick="app_filter('all')" class="btn-buy" style="max-width: 250px; margin: 2rem auto 0;">Ver todos los productos</button>
+            </div>
+        `;
+        return;
+    }
+
     shopContainer.innerHTML = filtered.map(p => productCard(p)).join('');
+    
+    // Registrar nuevos elementos inyectados
+    if (window.reobserveReveal) window.reobserveReveal();
 }
 
 function productCard(product) {
+    const whatsappNumber = (window.LC1_Data && window.LC1_Data.settings) ? window.LC1_Data.settings.whatsapp : '541140236384';
+    const whatsappMsg = encodeURIComponent(`¡Hola LC1! 👋 Me interesa este producto: ${product.name}. ¿Me podrían asesorar?`);
+    const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMsg}`;
+
+    // Lógica de Etiquetas de Urgencia
+    let badgeHTML = '';
+    if (product.label) {
+        const isUrgency = product.label.toLowerCase().includes('unidades') || product.label.toLowerCase().includes('agotar');
+        badgeHTML = `<span class="badge-label ${isUrgency ? 'badge-urgency' : ''}">${product.label}</span>`;
+    }
+
     return `
-        <div class="product-card">
+        <div class="product-card reveal">
+            ${badgeHTML}
             <div class="product-img">
                 <img src="${product.image}" alt="${product.name}" loading="lazy">
             </div>
-            <div class="product-info">
-                <h3>${product.name}</h3>
-                <p class="desc" style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">${product.desc}</p>
-                <p class="price">$${product.price.toLocaleString('es-AR')}</p>
-                <button class="btn-buy" onclick="addToCart(${product.id})">
-                    <i class="fas fa-cart-plus"></i> Agregar al Carrito
-                </button>
+            <div class="product-info" style="padding-top: 0.5rem;">
+                <span class="card-category">${product.category}</span>
+                <h3 class="card-title" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.8rem;">${product.name}</h3>
+                <p class="card-price">$${product.price.toLocaleString('es-AR')}</p>
+                
+                <div class="product-actions" style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn-buy" onclick="addToCart(${product.id})">
+                        <i class="fas fa-shopping-bag"></i> AGREGAR AL CARRITO
+                    </button>
+                    <a href="${whatsappLink}" target="_blank" class="btn-whatsapp">
+                        <i class="fab fa-whatsapp"></i> COMPRAR POR WHATSAPP
+                    </a>
+                </div>
             </div>
         </div>
     `;
@@ -89,6 +129,9 @@ function productCard(product) {
 window.app_filter = (cat) => {
     currentCategory = cat;
     renderShop(cat);
+    
+    // Scroll suave hacia arriba al filtrar
+    window.scrollTo({ top: 300, behavior: 'smooth' });
 };
 
 // Global Sort for Shop Page

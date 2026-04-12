@@ -4,14 +4,14 @@
     --primary-color: #ccff00;
     --primary-hover: #b3df00;
     --text-color: #ffffff;
-    --text-muted: #888888;
+    --text-muted: #999999;
     --accent-color: #ccff00;
-    --shadow-neon: 0 0 20px rgba(204, 255, 0, 0.4);
-    --glass-bg: rgba(255, 255, 255, 0.03);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --mesh-gradient: radial-gradient(at 0% 0%, rgba(204, 255, 0, 0.15) 0, transparent 50%), 
+    --shadow-neon: 0 0 30px rgba(204, 255, 0, 0.25);
+    --glass-bg: rgba(255, 255, 255, 0.02);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --mesh-gradient: radial-gradient(at 0% 0%, rgba(204, 255, 0, 0.08) 0, transparent 50%), 
                      radial-gradient(at 100% 100%, rgba(0, 0, 0, 1) 0, transparent 50%);
-    --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    --transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 * {
@@ -340,10 +340,10 @@ nav {
 }
 
 .product-card:hover, .admin-product-card:hover {
-    transform: translateY(-10px) scale(1.03);
+    transform: translateY(-5px);
     background: rgba(255, 255, 255, 0.04);
     border-color: var(--primary-color);
-    box-shadow: 0 15px 40px -10px rgba(204, 255, 0, 0.3);
+    box-shadow: 0 10px 30px -10px rgba(204, 255, 0, 0.2);
     z-index: 10;
 }
 
@@ -404,27 +404,41 @@ nav {
     object-fit: contain;
 }
 
-.badge-featured {
+.badge-featured, .badge-label {
     position: absolute;
-    top: 10px;
-    left: 10px;
+    top: 15px;
+    left: 15px;
     background: var(--primary-color);
     color: #000;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 900;
     text-transform: uppercase;
-    z-index: 2;
+    z-index: 5;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.badge-urgency {
+    background: #ff3e3e !important;
+    color: #fff !important;
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(255, 62, 62, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 62, 62, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 62, 62, 0); }
 }
 
 .card-category {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 800;
-    color: var(--primary-color);
+    color: var(--text-muted);
     text-transform: uppercase;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
     display: block;
+    letter-spacing: 1px;
 }
 
 .card-id {
@@ -449,11 +463,12 @@ nav {
 }
 
 .card-price {
-    font-size: 1.3rem;
-    font-weight: 800;
-    color: #fff;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--primary-color);
     margin-bottom: 1.5rem;
     display: block;
+    text-shadow: 0 0 15px rgba(204, 255, 0, 0.2);
 }
 
 .card-actions {
@@ -510,14 +525,13 @@ nav {
 
 /* --- Buy Button (Premium Upgrade) --- */
 .btn-buy {
-    width: 90%;
-    margin: 0 auto;
+    width: 100%;
     background: var(--primary-color);
     color: #000;
     border: none;
-    padding: 0.8rem;
-    border-radius: 50px;
-    font-size: 0.85rem;
+    padding: 1.1rem;
+    border-radius: 12px;
+    font-size: 1rem;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -526,19 +540,52 @@ nav {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     margin-top: auto;
     box-shadow: 0 4px 15px rgba(204, 255, 0, 0.2);
 }
 
 .btn-buy:hover {
-    transform: translateY(-3px) scale(1.02);
-    background: var(--primary-hover);
-    box-shadow: 0 10px 25px rgba(204, 255, 0, 0.4);
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(204, 255, 0, 0.4);
 }
 
 .btn-buy:active {
-    transform: scale(0.96);
+    transform: translateY(1px);
+    filter: brightness(0.9);
+}
+
+/* --- WhatsApp Sale Button --- */
+.btn-whatsapp {
+    width: 100%;
+    margin: 0.8rem 0 0;
+    background: transparent;
+    color: #25d366;
+    border: 1px solid #25d366;
+    padding: 0.9rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.btn-whatsapp:hover {
+    background: rgba(37, 211, 102, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(37, 211, 102, 0.2);
+}
+
+.btn-whatsapp:active {
+    transform: translateY(1px);
 }
 
 

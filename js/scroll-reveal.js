@@ -1,33 +1,36 @@
 /**
- * LC1 Goalkeeper - Scroll Reveal Controller
- * Handles the activation of 'reveal' classes as the user scrolls.
+ * LC1 Goalkeeper - Scroll Reveal Controller (Pro Edition)
+ * Handles dynamic observation of 'reveal' elements even after injection.
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-    const reveals = document.querySelectorAll('.reveal');
+const revealOptions = {
+    threshold: 0.15,
+    rootMargin: "0px 0px -50px 0px"
+};
 
-    const revealOptions = {
-        threshold: 0.15,
-        rootMargin: "0px 0px -50px 0px"
-    };
-
-    const revealObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('reveal-active');
-                // observer.unobserve(entry.target); // Keep observing if we want it to repeat, or unobserve for one-time
-            }
-        });
-    }, revealOptions);
-
-    reveals.forEach(el => {
-        revealObserver.observe(el);
+const revealObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('reveal-active');
+            // observer.unobserve(entry.target); 
+        }
     });
+}, revealOptions);
 
-    // Handle Navbar Shrink on Scroll
+// Función global para registrar elementos inyectados dinámicamente
+window.reobserveReveal = () => {
+    const reveals = document.querySelectorAll('.reveal');
+    reveals.forEach(el => revealObserver.observe(el));
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Registro inicial
+    window.reobserveReveal();
+
+    // Lógica adicional para el Navbar
     const nav = document.querySelector('nav');
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 100) {
+        if (window.scrollY > 80) {
             nav.style.padding = "0.8rem 5%";
             nav.style.background = "rgba(10, 10, 10, 0.95)";
         } else {
