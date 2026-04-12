@@ -840,7 +840,7 @@ nav {
     
     .hero-bg-overlay {
         background: linear-gradient(#000 40%, transparent 100%), 
-                    url('../assets/hero-bg.png') center/cover no-repeat;
+                    url('../assets/hero-stadium.png') center/cover no-repeat;
     }
     
     .identity-text {
