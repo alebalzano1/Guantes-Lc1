@@ -644,24 +644,24 @@
 
     <!-- Login Section -->
     <div id="login-section">
-        <div class="login-card">
+        <form id="login-form" class="login-card">
             <div class="logo sport-font" style="color: var(--primary-color);">
                 <i class="fas fa-shield-halved"></i> LC1 GOALKEEPER
             </div>
             <h2 class="sport-font">Portal de Control</h2>
             <div class="input-group">
                 <label>Usuario o Email</label>
-                <input type="text" id="login-email" placeholder="Usuario">
+                <input type="text" id="login-email" placeholder="Usuario" required autocomplete="username">
             </div>
             <div class="input-group">
                 <label>Contraseña</label>
-                <input type="password" id="login-pass" placeholder="••••••••">
+                <input type="password" id="login-pass" placeholder="••••••••" required autocomplete="current-password">
             </div>
-            <button id="btn-login" class="btn-primary" style="width:100%; margin-top: 1rem;">Acceder al Dashboard</button>
+            <button type="submit" id="btn-login" class="btn-primary" style="width:100%; margin-top: 1rem;">Acceder al Dashboard</button>
             <p id="login-error" style="color:#ff4444; margin-top:1.5rem; font-size:0.8rem; display:none;">
                 <i class="fas fa-exclamation-circle"></i> Credenciales incorrectas
             </p>
-        </div>
+        </form>
     </div>
 
     <!-- Dashboard Section -->
