@@ -75,21 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             console.log("[LC1 Admin] Intento de login con usuario:", userInput);
 
-            // SECCIÓN DE BLINDAJE: Fallback directo a credenciales maestras
-            const isMaster = (userInput.toLowerCase() === 'administrador' && passInput === 'admin12345');
-            const isLocal = (userInput.toLowerCase() === adminAuth.user.toLowerCase() && passInput === adminAuth.pass);
+            // Validación contra credenciales guardadas (adminAuth)
+            const isValid = (userInput.toLowerCase() === adminAuth.user.toLowerCase() && passInput === adminAuth.pass);
 
-            if (isMaster || isLocal) {
-                console.log("[LC1 Admin] Acceso concedido (Master/Local).");
+            if (isValid) {
+                console.log("[LC1 Admin] Acceso concedido.");
                 sessionStorage.setItem('lc1-admin-token', 'true');
-                
-                // Forzar reseteo de auth si entramos por Master y los datos locales estaban mal
-                if (isMaster && !isLocal) {
-                    console.log("[LC1 Admin] Sincronizando credenciales locales con Master...");
-                    adminAuth = { user: 'administrador', pass: 'admin12345' };
-                    localStorage.setItem('lc1-admin-auth', JSON.stringify(adminAuth));
-                }
-
                 checkAuth();
             } else {
                 console.warn("[LC1 Admin] Acceso Denegado.");
@@ -843,9 +834,11 @@ function saveAuthSettings() {
     localStorage.setItem('lc1-admin-auth', JSON.stringify(adminAuth));
     showToast('Credenciales actualizadas correctamente', 'success');
     
-    // Reset pass fields
+    // Reset pass fields y forzar recarga para consolidar seguridad
     document.getElementById('set-admin-pass').value = '';
     document.getElementById('set-admin-pass-confirm').value = '';
+    
+    setTimeout(() => location.reload(), 1500);
 }
 
 // --- Image Processing ---
