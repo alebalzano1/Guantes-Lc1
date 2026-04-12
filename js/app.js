@@ -94,23 +94,18 @@ function productCard(product) {
     const whatsappMsg = encodeURIComponent(`Hola LC1! 👋 Quiero comprar el guante ${product.name} que tiene un precio de $${product.price.toLocaleString('es-AR')}. ¿Tienen stock?`);
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMsg}`;
 
-    // Lógica de Etiquetas de Urgencia (Branding Pro)
+    // No usar etiquetas de urgencia para mantener honestidad total
     let badgeHTML = '';
-    if (product.label) {
-        const text = product.label.toUpperCase();
-        const isUrgent = text.includes('UNIDADES') || text.includes('AGOTAR');
-        badgeHTML = `<span class="badge-label ${isUrgent ? 'badge-urgency' : ''}">${text}</span>`;
-    }
 
     return `
         <div class="product-card reveal">
             ${badgeHTML}
-            <div class="product-img">
+            <div class="product-img" onclick="window.location.href='product.html?id=${product.id}'" style="cursor:pointer;">
                 <img src="${product.image}" alt="${product.name}" loading="lazy">
             </div>
             <div class="product-info" style="padding-top: 0.5rem;">
                 <span class="card-category">${product.category}</span>
-                <h3 class="card-title" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.8rem;">${product.name}</h3>
+                <h3 class="card-title" onclick="window.location.href='product.html?id=${product.id}'" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.8rem; cursor:pointer;">${product.name}</h3>
                 <p class="card-price">$${product.price.toLocaleString('es-AR')}</p>
                 
                 <div class="product-actions" style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;">

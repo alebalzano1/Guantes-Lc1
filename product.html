@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Producto | LC1 Goalkeeper</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="product-detail-page">
+
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html" class="logo sport-font">
+            <i class="fas fa-shield-halved"></i> LC1 GOALKEEPER
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="shop.html">Tienda</a></li>
+        </ul>
+        <div class="cart-icon" id="cart-toggle">
+            <i class="fas fa-shopping-cart fa-lg"></i>
+            <span class="cart-count">0</span>
+        </div>
+    </nav>
+
+    <!-- Main Product Detail -->
+    <main class="pd-container">
+        <!-- Left Side: Image -->
+        <section class="pd-image-section">
+            <div class="pd-main-img-wrap reveal">
+                <img id="pd-image" src="" alt="Cargando producto...">
+            </div>
+        </section>
+
+        <!-- Right Side: Meta & Actions -->
+        <section class="pd-info-section reveal">
+            <h1 id="pd-title" class="pd-main-title sport-font">Cargando...</h1>
+            <div id="pd-price" class="pd-price">$0</div>
+            
+            <p id="pd-desc" class="pd-desc">
+                Cargando descripción...
+            </p>
+
+            <div class="pd-actions">
+                <button id="btn-add-cart" class="pd-btn-cart">Comprar ahora</button>
+                <button id="btn-wa-direct" class="pd-btn-wa">
+                    <i class="fab fa-whatsapp"></i> Comprar por WhatsApp
+                </button>
+            </div>
+
+            <div class="pd-features">
+                <div class="pd-feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Máximo agarre profesional</span>
+                </div>
+                <div class="pd-feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Alta durabilidad en todo terreno</span>
+                </div>
+                <div class="pd-feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Ajuste ergonómico superior</span>
+                </div>
+            </div>
+
+            <!-- Trust Grid -->
+            <div class="pd-trust">
+                <div class="trust-item">
+                    <i class="fas fa-truck-fast"></i>
+                    <h5>Envío País</h5>
+                </div>
+                <div class="trust-item">
+                    <i class="fas fa-shield-halved"></i>
+                    <h5>Pago Seguro</h5>
+                </div>
+                <div class="trust-item">
+                    <i class="fas fa-rotate"></i>
+                    <h5>Garantía LC1</h5>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer style="padding: 3rem 5%; background: #050505; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-top: 5rem;">
+        <p>&copy; 2024 LC1 Goalkeeper. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Whatsapp Float -->
+    <a href="https://wa.me/541140236384" class="whatsapp-float" target="_blank" id="wa-float-link">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Scripts -->
+    <script src="js/scroll-reveal.js"></script>
+    <!-- Toast Component Container -->
+    <div id="toast-container"></div>
+
+    <script src="js/products-data.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/product-detail.js"></script>
+</body>
+</html>
