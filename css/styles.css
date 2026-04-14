@@ -1,14 +1,14 @@
 :root {
     --bg-color: #ffffff;
-    --card-bg: #f9f9f9;
+    --card-bg: #fdfdfd;
     --primary-color: #ffcc00; /* Yellow */
     --primary-hover: #e6b800;
     --text-color: #000000;
-    --text-muted: #555555;
+    --text-muted: #444444;
     --accent-color: #ffcc00;
-    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
-    --glass-bg: rgba(0, 0, 0, 0.02);
-    --glass-border: rgba(0, 0, 0, 0.05);
+    --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.08);
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(0, 0, 0, 0.08);
     --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
@@ -40,13 +40,13 @@ nav {
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem 5%;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(0, 0, 0, 0.95);
     backdrop-filter: blur(10px);
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 1000;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .logo {
@@ -66,7 +66,7 @@ nav {
 }
 
 .nav-links a {
-    color: var(--text-color);
+    color: #ffffff;
     text-decoration: none;
     font-weight: 500;
     font-size: 0.9rem;
@@ -82,6 +82,7 @@ nav {
 .cart-icon {
     position: relative;
     cursor: pointer;
+    color: #ffffff;
 }
 
 .cart-count {
@@ -103,10 +104,10 @@ nav {
     align-items: center;
     justify-content: center;
     position: relative;
-    background: #000;
+    background: #fdfdfd;
     overflow: hidden;
     padding-top: 80px;
-    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), 
+    background: linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.9)), 
                 url('../assets/hero-stadium.png') center/cover no-repeat;
 }
 
@@ -193,7 +194,7 @@ nav {
     margin-bottom: 2rem;
     font-weight: 900;
     font-style: italic;
-    color: #fff;
+    color: #000;
     text-transform: uppercase;
 }
 
@@ -233,8 +234,8 @@ nav {
 .btn-secondary.ghost-cta {
     padding: 1.4rem 3rem;
     background: transparent;
-    color: #fff;
-    border: 2px solid rgba(255, 255, 255, 0.6);
+    color: #000;
+    border: 2px solid rgba(0, 0, 0, 0.2);
     font-size: 0.9rem;
     font-weight: 800;
     border-radius: 4px;
@@ -242,8 +243,9 @@ nav {
 }
 
 .btn-secondary.ghost-cta:hover {
-    border-color: #fff;
-    background: rgba(255, 255, 255, 0.15);
+    border-color: #000;
+    background: rgba(0, 0, 0, 0.05);
+    color: #000;
 }
 
 .hero-social-proof {
@@ -262,7 +264,7 @@ nav {
     display: block;
     width: 30px;
     height: 1px;
-    background: rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.1);
 }
 
 
@@ -298,13 +300,13 @@ nav {
     padding: 12rem 10%;
     text-align: center;
     position: relative;
-    background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), 
+    background: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), 
                 url('../assets/identity-bg.png') center/cover no-repeat fixed;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-top: 1px solid rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
 .identity-container {
@@ -324,24 +326,21 @@ nav {
 
 .identity-text {
     font-size: clamp(1.8rem, 4vw, 2.8rem);
-    color: #fff;
+    color: #000;
     line-height: 1.2;
     font-weight: 700;
     font-style: italic;
     text-transform: uppercase;
-    text-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 .section-categories {
-    background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
-                url('../assets/cat-locker-bg.png') center/cover no-repeat fixed;
-    border-top: 1px solid rgba(255,255,255,0.05);
+    background: var(--bg-color);
+    border-top: 1px solid rgba(0,0,0,0.05);
 }
 
 .section-featured {
-    background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
-                url('../assets/featured-turf-bg.png') center/cover no-repeat fixed;
-    border-top: 1px solid rgba(255,255,255,0.05);
+    background: #fdfdfd;
+    border-top: 1px solid rgba(0,0,0,0.05);
 }
 
 /* --- Categories --- */
@@ -400,14 +399,14 @@ nav {
     left: 0;
     width: 100%;
     padding: 2.5rem;
-    background: linear-gradient(transparent, rgba(0,0,0,0.95));
+    background: linear-gradient(transparent, rgba(0,0,0,0.5));
     color: white;
     backdrop-filter: blur(2px);
     transition: var(--transition);
 }
 
 .category-card:hover .category-overlay {
-    background: linear-gradient(transparent, rgba(204, 255, 0, 0.15) 20%, rgba(0,0,0,0.95));
+    background: linear-gradient(transparent, rgba(204, 255, 0, 0.1) 20%, rgba(0,0,0,0.7));
 }
 
 .category-overlay h3 {
@@ -498,15 +497,16 @@ nav {
 
 /* Common Product Card Styles (Enhanced) */
 .product-card, .admin-product-card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--glass-border);
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
     border-radius: 20px;
-    padding: 1rem;
+    padding: 1.25rem;
     position: relative;
     transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.04);
 }
 
 .product-card:hover, .admin-product-card:hover {
@@ -519,17 +519,17 @@ nav {
 
 .product-img, .card-img-container {
     width: 100%;
-    height: 220px;
+    height: 240px;
     border-radius: 14px;
-    background: #000;
+    background: #fdfdfd;
     margin-bottom: 1.2rem;
     position: relative;
     overflow: hidden;
-    border: 1px solid var(--glass-border);
+    border: 1px solid rgba(0,0,0,0.05);
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 12px;
+    padding: 15px;
 }
 /* --- Reveal Animations --- */
 .reveal {
@@ -625,11 +625,19 @@ nav {
 .card-title {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-color); /* Visible on light backgrounds */
     margin-bottom: 0.5rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: var(--transition);
+}
+
+/* Specific overrides for dark sections where white text is needed */
+.section-featured .card-title,
+.section-categories .card-title,
+.admin-section .card-title {
+    color: #000;
 }
 
 .card-price {
@@ -861,18 +869,17 @@ nav {
 
 .toast {
     min-width: 300px;
-    background: rgba(10, 10, 10, 0.9);
+    background: #ffffff;
     border-left: 5px solid var(--primary-color);
-    color: #fff;
+    color: #000;
     padding: 1.2rem;
     border-radius: 10px;
-    backdrop-filter: blur(15px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
     display: flex;
     align-items: center;
     gap: 15px;
     animation: slideInRight 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid rgba(0,0,0,0.05);
 }
 
 .toast.success { border-left-color: #00ff64; }
@@ -942,13 +949,13 @@ nav {
         right: -100%;
         width: 80%;
         height: 100vh;
-        background: rgba(5, 5, 5, 0.98);
+        background: #ffffff;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         z-index: 2000;
         transition: 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-        backdrop-filter: blur(20px);
+        box-shadow: -10px 0 40px rgba(0,0,0,0.1);
         border-left: 1px solid var(--glass-border);
     }
 
@@ -968,7 +975,7 @@ nav {
     .menu-toggle {
         display: block !important;
         font-size: 1.5rem;
-        color: white;
+        color: #ffffff;
         cursor: pointer;
         z-index: 2500;
         margin-left: auto;
@@ -1138,16 +1145,17 @@ nav {
 .product-detail-page {
     padding-top: 100px;
     min-height: 100vh;
-    background: #000;
+    background: #fff; /* White background as requested */
+    color: var(--text-color);
 }
 
 .pd-container {
-    max-width: 1300px;
-    margin: 5rem auto;
+    max-width: 1200px;
+    margin: 3rem auto; /* Reduced margin */
     padding: 0 5%;
     display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 5rem;
+    grid-template-columns: 1.1fr 0.9fr; /* Slightly more balanced columns */
+    gap: 3.5rem; /* Reduced gap */
 }
 
 .pd-image-section {
@@ -1157,12 +1165,13 @@ nav {
 }
 
 .pd-main-img-wrap {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: #fdfdfd;
+    border: 1px solid rgba(0,0,0,0.08); /* Darker border for light theme */
     border-radius: 20px;
     overflow: hidden;
     position: relative;
     cursor: zoom-in;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.05);
 }
 
 .pd-main-img-wrap img {
@@ -1192,6 +1201,9 @@ nav {
     border-radius: 50px;
     text-transform: uppercase;
     letter-spacing: 1px;
+    background: #f4f4f4; /* Light bg for badges */
+    color: var(--text-color);
+    border: 1px solid rgba(0,0,0,0.05);
 }
 
 .pd-badge.urgency {
@@ -1208,18 +1220,19 @@ nav {
 }
 
 .pd-main-title {
-    font-size: 3.5rem;
-    line-height: 1.1;
-    margin-bottom: 1.5rem;
+    font-size: 2.5rem; /* Reduced from 3.5rem */
+    line-height: 1.2;
+    margin-bottom: 1.2rem;
     text-transform: uppercase;
     font-weight: 900;
+    color: #000; /* Black text */
 }
 
 .pd-price {
-    font-size: 2.5rem;
+    font-size: 1.8rem; /* Reduced from 2.5rem */
     color: var(--primary-color);
     font-weight: 900;
-    margin-bottom: 2rem;
+    margin-bottom: 1.8rem;
 }
 
 .pd-desc {
@@ -1279,7 +1292,7 @@ nav {
 .pd-features {
     margin-top: 4rem;
     padding-top: 3rem;
-    border-top: 1px solid rgba(255,255,255,0.05);
+    border-top: 1px solid rgba(0,0,0,0.05); /* Soft border for light theme */
 }
 
 .pd-feature-item {
@@ -1302,10 +1315,11 @@ nav {
 }
 
 .trust-item {
-    background: rgba(255,255,255,0.03);
+    background: #f9f9f9; /* Light background for trust boxes */
     padding: 1.5rem;
     border-radius: 12px;
     text-align: center;
+    border: 1px solid rgba(0,0,0,0.03);
 }
 
 .trust-item i {
@@ -1318,6 +1332,7 @@ nav {
     font-size: 0.8rem;
     margin: 0;
     text-transform: uppercase;
+    color: #333; /* Darker heading */
 }
 
 @media (max-width: 1000px) {
@@ -1335,4 +1350,91 @@ nav {
     .pd-trust {
         grid-template-columns: 1fr;
     }
+}
+
+/* Gallery Navigation & Thumbnails */
+.pd-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #fff;
+    color: #000;
+    border: 1px solid rgba(0,0,0,0.1);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none; /* Controlled by JS */
+    z-index: 10;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: var(--transition);
+    align-items: center;
+    justify-content: center;
+}
+
+.pd-nav-btn:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.pd-nav-btn.prev { left: 15px; }
+.pd-nav-btn.next { right: 15px; }
+
+.pd-thumb {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    background: #fdfdfd;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.pd-thumb:hover {
+    border-color: rgba(204, 255, 0, 0.5);
+}
+
+/* Size Selector Light Theme */
+.pd-size-selector {
+    margin-bottom: 2.5rem;
+}
+
+.pd-size-selector label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 700;
+    color: #000;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+.pd-size-selector select {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background: #fdfdfd;
+    color: #000;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.pd-size-selector select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px rgba(204, 255, 0, 0.15);
+}
+
+#size-error {
+    color: #ff3e3e;
+    display: none;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
 }

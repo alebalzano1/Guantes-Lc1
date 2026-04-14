@@ -35,9 +35,9 @@
         <!-- Left Side: Image -->
         <section class="pd-image-section" style="display:flex; flex-direction:column; gap:15px; position:relative;">
             <div class="pd-main-img-wrap reveal" style="border-radius: 12px; overflow: hidden; position:relative;">
-                <button id="pd-prev" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); background:var(--bg-color); color:var(--text-color); border:1px solid rgba(0,0,0,0.1); width:40px; height:40px; border-radius:50%; cursor:pointer; display:none; z-index:10; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"><i class="fas fa-chevron-left"></i></button>
+                <button id="pd-prev" class="pd-nav-btn prev"><i class="fas fa-chevron-left"></i></button>
                 <img id="pd-image" src="" alt="Cargando producto..." style="width:100%; height:auto;">
-                <button id="pd-next" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:var(--bg-color); color:var(--text-color); border:1px solid rgba(0,0,0,0.1); width:40px; height:40px; border-radius:50%; cursor:pointer; display:none; z-index:10; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"><i class="fas fa-chevron-right"></i></button>
+                <button id="pd-next" class="pd-nav-btn next"><i class="fas fa-chevron-right"></i></button>
             </div>
             <div class="pd-thumbnails" id="pd-thumbnails" style="display:flex; gap:10px; overflow-x:auto;">
                 <!-- Miniaturas cargadas por JS -->
@@ -53,9 +53,9 @@
                 Cargando descripción...
             </p>
 
-            <div class="pd-size-selector" style="margin-bottom: 20px;">
-                <label for="size-select" style="display:block; margin-bottom: 8px; font-weight: 600; color: var(--text-color);">Seleccioná tu talle:</label>
-                <select id="size-select" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--bg-color); color: var(--text-color); font-size: 1rem;">
+            <div class="pd-size-selector">
+                <label for="size-select">Seleccioná tu talle:</label>
+                <select id="size-select">
                     <option value="" disabled selected>Elegí un talle</option>
                     <!-- Sizes injected by JS based on category, using default as fallback -->
                     <option value="7">7</option>
@@ -64,7 +64,7 @@
                     <option value="10">10</option>
                     <option value="11">11</option>
                 </select>
-                <small id="size-error" style="color: red; display: none; margin-top: 5px;">Por favor seleccioná un talle para continuar.</small>
+                <small id="size-error">Por favor seleccioná un talle para continuar.</small>
             </div>
 
             <div class="pd-actions">

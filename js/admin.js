@@ -118,8 +118,10 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.onchange = (e) => {
             const files = e.target.files;
             if (files && files.length > 0) {
-                currentImagesArray = [];
-                document.getElementById('p-preview').innerHTML = '';
+                const preview = document.getElementById('p-preview');
+                if (preview.innerHTML.includes('fa-image')) {
+                    preview.innerHTML = '';
+                }
                 Array.from(files).forEach((file, idx) => processImage(file, 'product', true));
             }
         };
@@ -532,11 +534,7 @@ window.editProduct = (id) => {
     currentImageBase64 = p.image;
     currentImagesArray = p.images || (p.image ? [p.image] : []);
     
-    if (currentImagesArray.length > 0) {
-        document.getElementById('p-preview').innerHTML = currentImagesArray.map(img => `<img src="${img}" style="height:100px; width:auto; border-radius:8px; object-fit:contain; border:2px solid var(--primary-color); flex-shrink:0;">`).join('');
-    } else {
-        document.getElementById('p-preview').innerHTML = `<img src="${p.image}" style="width:100%; height:100%; object-fit:contain;">`;
-    }
+    window.renderProductImagesPreview();
     
     document.getElementById('product-form').dataset.editId = id;
     document.getElementById('modal-title').textContent = 'Editar producto';
@@ -887,6 +885,29 @@ function saveAuthSettings() {
 
 // --- Image Processing ---
 
+window.renderProductImagesPreview = () => {
+    const preview = document.getElementById('p-preview');
+    if (!currentImagesArray || currentImagesArray.length === 0) {
+        preview.innerHTML = `<i class="fas fa-image" style="color:#ccc; font-size:3rem; margin:auto;"></i>`;
+        currentImageBase64 = '';
+        return;
+    }
+    
+    currentImageBase64 = currentImagesArray[0];
+
+    preview.innerHTML = currentImagesArray.map((img, idx) => `
+        <div style="position:relative; flex-shrink:0; display:inline-block; height:100px;">
+            <img src="${img}" style="height:100px; width:auto; border-radius:8px; object-fit:contain; border:2px solid var(--primary-color);">
+            <button type="button" onclick="removeProductImage(${idx})" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; z-index:10;"><i class="fas fa-times"></i></button>
+        </div>
+    `).join('');
+};
+
+window.removeProductImage = (idx) => {
+    currentImagesArray.splice(idx, 1);
+    window.renderProductImagesPreview();
+};
+
 function processImage(file, target = 'product', isMultiple = false) {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -919,12 +940,7 @@ function processImage(file, target = 'product', isMultiple = false) {
             
             if (target === 'product' && isMultiple) {
                 currentImagesArray.push(finalBase64);
-                if (currentImagesArray.length === 1) currentImageBase64 = finalBase64;
-                const preview = document.getElementById('p-preview');
-                const imgEl = document.createElement('img');
-                imgEl.src = finalBase64;
-                imgEl.style.cssText = 'height:100px; width:auto; border-radius:8px; object-fit:contain; border:2px solid var(--primary-color); flex-shrink:0;';
-                preview.appendChild(imgEl);
+                window.renderProductImagesPreview();
             } else {
                 currentImageBase64 = finalBase64;
                 
@@ -948,9 +964,8 @@ window.openModal = (isFeatured = false) => {
     document.getElementById('product-modal').style.display = 'flex';
     document.getElementById('modal-title').textContent = isFeatured ? 'Nuevo Producto Destacado' : 'Nuevo Producto';
     document.getElementById('product-form').reset();
-    document.getElementById('p-preview').innerHTML = `<i class="fas fa-image" style="color:#ccc; font-size:3rem; margin:auto;"></i>`;
-    currentImageBase64 = '';
     currentImagesArray = [];
+    window.renderProductImagesPreview();
     delete document.getElementById('product-form').dataset.editId;
     
     // Si viene desde "Añadir Destacado", marcamos el checkbox

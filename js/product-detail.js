@@ -8,8 +8,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Buscar el producto en los datos cargados (products-data.js)
-    const product = window.LC1_Data.products.find(p => p.id === productId);
+    const getSafeJSON = (key, defaultValue) => {
+        try {
+            const item = localStorage.getItem(key);
+            return item ? JSON.parse(item) : defaultValue;
+        } catch (e) {
+            console.error(`Error parsing LocalStorage key "${key}":`, e);
+            return defaultValue;
+        }
+    };
+
+    const staticProducts = window.LC1_Data ? window.LC1_Data.products : [];
+    const productsList = getSafeJSON('lc1-products-db', staticProducts);
+
+    // Buscar el producto en los datos sincronizados
+    const product = productsList.find(p => p.id === productId);
 
     if (!product) {
         document.body.innerHTML = `<div style="text-align:center; padding:5rem; color:white;"><h1>Producto no encontrado</h1><a href="shop.html" style="color:var(--primary-color);">Volver a la tienda</a></div>`;
@@ -78,7 +91,7 @@ function renderProductDetail(product) {
         product.images.forEach((imgSrc, idx) => {
             const thumb = document.createElement('img');
             thumb.src = imgSrc;
-            thumb.style.cssText = 'width: 60px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: 0.3s; flex-shrink:0;';
+            thumb.className = 'pd-thumb';
             thumb.onclick = () => updateMainImage(idx);
             thumbnailsContainer.appendChild(thumb);
         });
