@@ -1,14 +1,14 @@
 :root {
-    --bg-color: #050505;
-    --card-bg: #0f0f0f;
-    --primary-color: #ccff00; /* Neon Lime */
-    --primary-hover: #b3df00;
-    --text-color: #ffffff;
-    --text-muted: #888888;
-    --accent-color: #ccff00;
-    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.5);
-    --glass-bg: rgba(255, 255, 255, 0.02);
-    --glass-border: rgba(255, 255, 255, 0.05);
+    --bg-color: #ffffff;
+    --card-bg: #f9f9f9;
+    --primary-color: #ffcc00; /* Yellow */
+    --primary-hover: #e6b800;
+    --text-color: #000000;
+    --text-muted: #555555;
+    --accent-color: #ffcc00;
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
+    --glass-bg: rgba(0, 0, 0, 0.02);
+    --glass-border: rgba(0, 0, 0, 0.05);
     --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
@@ -40,13 +40,13 @@ nav {
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem 5%;
-    background: rgba(10, 10, 10, 0.8);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 1000;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .logo {
@@ -234,7 +234,7 @@ nav {
     padding: 1.4rem 3rem;
     background: transparent;
     color: #fff;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.6);
     font-size: 0.9rem;
     font-weight: 800;
     border-radius: 4px;
@@ -243,7 +243,7 @@ nav {
 
 .btn-secondary.ghost-cta:hover {
     border-color: #fff;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .hero-social-proof {

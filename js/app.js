@@ -15,11 +15,17 @@ const productsListSource = getSafeJSON('lc1-products-db', staticProducts);
 // Si por alguna razón la lista está vacía pero tenemos datos estáticos, restauramos
 const productsList = (productsListSource.length === 0 && staticProducts.length > 0) ? staticProducts : productsListSource;
 const categoriesList = getSafeJSON('lc1-categories-db', staticCategories);
+const galleryList = getSafeJSON('lc1-gallery-db', [
+    { id: 1, type: 'image', data: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=600&q=80' },
+    { id: 2, type: 'image', data: 'https://images.unsplash.com/photo-1518605368461-1ee1252326a3?auto=format&fit=crop&w=600&q=80' },
+    { id: 3, type: 'image', data: 'https://images.unsplash.com/photo-1628173499426-11f8e9196b05?auto=format&fit=crop&w=600&q=80' }
+]);
 
 // Elementos del DOM
 const featuredContainer = document.getElementById('featured-products');
 const shopContainer = document.getElementById('shop-products');
 const categoriesContainer = document.getElementById('categories-container');
+const actionGalleryContainer = document.getElementById('action-gallery-container');
 const cartCountElement = document.querySelector('.cart-count');
 
 // Variables de Estado
@@ -42,6 +48,7 @@ function renderPage() {
     if (categoriesContainer) renderCategories();
     if (featuredContainer) renderFeatured();
     if (shopContainer) renderShop(currentCategory);
+    if (actionGalleryContainer) renderActionGallery();
     
     // IMPORTANTE: Registrar nuevos elementos para la animación de aparición
     if (window.reobserveReveal) {
@@ -64,6 +71,31 @@ function renderCategories() {
 function renderFeatured() {
     const featuredItems = productsList.filter(p => p.featured);
     featuredContainer.innerHTML = featuredItems.map(p => productCard(p)).join('');
+}
+
+function renderActionGallery() {
+    if (galleryList.length === 0) {
+        actionGalleryContainer.parentElement.style.display = 'none';
+        return;
+    }
+    actionGalleryContainer.parentElement.style.display = 'block';
+    
+    actionGalleryContainer.innerHTML = galleryList.map(item => {
+        if (item.type === 'video') {
+            return `
+                <div style="height: 300px; border-radius: 12px; overflow: hidden; background: #111;">
+                    <iframe src="${item.data}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
+                </div>
+            `;
+        } else {
+            return `
+                <div style="height: 300px; background: url('${item.data}') center/cover; border-radius: 12px; filter: grayscale(50%); transition: filter 0.3s transform 0.3s; cursor:pointer;" 
+                     onmouseover="this.style.filter='grayscale(0)'; this.style.transform='scale(1.02)';" 
+                     onmouseout="this.style.filter='grayscale(50%)'; this.style.transform='scale(1)';">
+                </div>
+            `;
+        }
+    }).join('');
 }
 
 function renderShop(category) {
@@ -90,31 +122,39 @@ function renderShop(category) {
 }
 
 function productCard(product) {
-    const whatsappNumber = (window.LC1_Data && window.LC1_Data.settings) ? window.LC1_Data.settings.whatsapp : '541140236384';
-    const whatsappMsg = encodeURIComponent(`Hola LC1! 👋 Quiero comprar el guante ${product.name} que tiene un precio de $${product.price.toLocaleString('es-AR')}. ¿Tienen stock?`);
-    const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMsg}`;
+    const isIndumentaria = product.category === 'indumentaria';
+    const sizeOptions = isIndumentaria 
+        ? `<option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option>`
+        : `<option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option>`;
 
-    // No usar etiquetas de urgencia para mantener honestidad total
-    let badgeHTML = '';
+    let sizeHTML = `
+        <div style="margin-bottom: 15px;">
+            <select id="shop-size-${product.id}" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--glass-border); background: var(--bg-color); color: var(--text-color); font-size: 0.9rem;">
+                <option value="" disabled selected>Seleccioná tu talle</option>
+                ${sizeOptions}
+            </select>
+        </div>
+    `;
 
     return `
         <div class="product-card reveal">
-            ${badgeHTML}
             <div class="product-img" onclick="window.location.href='product.html?id=${product.id}'" style="cursor:pointer;">
                 <img src="${product.image}" alt="${product.name}" loading="lazy">
             </div>
-            <div class="product-info" style="padding-top: 0.5rem;">
+            <div class="product-info" style="padding-top: 0.5rem; display: flex; flex-direction: column; flex: 1;">
                 <span class="card-category">${product.category}</span>
                 <h3 class="card-title" onclick="window.location.href='product.html?id=${product.id}'" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.8rem; cursor:pointer;">${product.name}</h3>
-                <p class="card-price">$${product.price.toLocaleString('es-AR')}</p>
+                <p class="card-price" style="margin-bottom: 10px;">$${product.price.toLocaleString('es-AR')}</p>
+                
+                ${sizeHTML}
                 
                 <div class="product-actions" style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;">
-                    <button class="btn-buy" onclick="addToCart(${product.id})">
+                    <button class="btn-buy" onclick="window.addToCartWithSize(${product.id})">
                         <i class="fas fa-shopping-bag"></i> AGREGAR AL CARRITO
                     </button>
-                    <a href="${whatsappLink}" target="_blank" class="btn-whatsapp">
+                    <button class="btn-whatsapp" onclick="window.buyWhatsappWithSize(${product.id})" style="width: 100%;">
                         <i class="fab fa-whatsapp"></i> COMPRAR POR WHATSAPP
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -138,16 +178,23 @@ window.filterByPrice = (order) => {
     shopContainer.innerHTML = sorted.map(p => productCard(p)).join('');
 };
 
-// Lógica de Carrito
-window.addToCart = (productId) => {
+window.addToCartWithSize = (productId) => {
+    const sizeSelect = document.getElementById(`shop-size-${productId}`);
+    if (sizeSelect && !sizeSelect.value) {
+        showToast('Por favor seleccioná un talle para continuar', 'error');
+        return;
+    }
+    const size = sizeSelect ? sizeSelect.value : null;
+
     let cart = getSafeJSON('lc1-cart', []);
     const product = productsList.find(p => p.id === productId);
     
-    const existing = cart.find(item => item.id === productId);
+    // Check if same product with same size exists
+    const existing = cart.find(item => item.id === productId && item.size === size);
     if (existing) {
         existing.quantity += 1;
     } else {
-        cart.push({ ...product, quantity: 1 });
+        cart.push({ ...product, size: size, quantity: 1 });
     }
     
     localStorage.setItem('lc1-cart', JSON.stringify(cart));
@@ -157,12 +204,26 @@ window.addToCart = (productId) => {
     if (window.LC1_Tracker) {
         window.LC1_Tracker.logEvent('add_to_cart', { 
             id: productId, 
-            name: product.name 
+            name: product.name,
+            size: size
         });
     }
     
-    // Alerta estilizada o Notificación (Simple alert por ahora)
     showToast(`${product.name} añadido al carrito`, 'success');
+};
+
+window.buyWhatsappWithSize = (productId) => {
+    const sizeSelect = document.getElementById(`shop-size-${productId}`);
+    if (sizeSelect && !sizeSelect.value) {
+        showToast('Por favor seleccioná un talle para continuar', 'error');
+        return;
+    }
+    const size = sizeSelect ? sizeSelect.value : null;
+    const product = productsList.find(p => p.id === productId);
+    
+    const msg = `Hola LC1! 👋 Quiero comprar el producto: *${product.name}* (Talle: ${size}) que tiene un precio de *$${product.price.toLocaleString('es-AR')}*. ¿Tienen stock?`;
+    const whatsappNumber = (window.LC1_Data && window.LC1_Data.settings) ? window.LC1_Data.settings.whatsapp : '541140236384';
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
 };
 
 function updateCartCount() {

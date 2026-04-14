@@ -638,6 +638,49 @@
                 height: auto !important;
             }
         }
+
+        /* --- Light Mode Overrides for Admin Panel --- */
+        body, #login-section, main.main-content {
+            background: var(--bg-color) !important;
+            color: var(--text-color) !important;
+        }
+        aside.sidebar {
+            background: #f4f4f4 !important;
+            border-right: 1px solid rgba(0,0,0,0.1) !important;
+        }
+        .login-card, .table-container, .card-pro, .order-detail-card, .modal-content, #image-upload-container.modern {
+            background: var(--card-bg) !important;
+            border-color: rgba(0,0,0,0.1) !important;
+            color: var(--text-color) !important;
+        }
+        .input-group input, .admin-input, .admin-select, .admin-textarea, .modal-header, .modal-footer {
+            background: #ffffff !important;
+            color: var(--text-color) !important;
+            border-color: rgba(0,0,0,0.2) !important;
+        }
+        .menu-link { color: var(--text-muted) !important; }
+        .menu-link.active { color: #000 !important; background: var(--primary-color) !important; }
+        .menu-link:hover { color: #000 !important; background: rgba(0,0,0,0.05) !important; }
+        .pro-table th, .pro-table td { background: transparent !important; color: var(--text-color) !important; border-bottom: 1px solid rgba(0,0,0,0.05) !important; }
+        .admin-product-card { background: var(--card-bg) !important; border: 1px solid rgba(0,0,0,0.1) !important; color: var(--text-color) !important;}
+        .card-title { color: var(--text-color) !important; }
+        .btn-editor {
+            background: #f4f4f4 !important;
+            color: var(--text-color) !important;
+            border: 1px solid rgba(0,0,0,0.1) !important;
+            padding: 8px 12px !important;
+            border-radius: 8px !important;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-editor:hover { background: #e0e0e0 !important; }
+        .btn-icon, .card-btn-icon { color: var(--text-color) !important; border-color: rgba(0,0,0,0.2) !important; background: transparent !important; }
+        .btn-icon:hover, .card-btn-icon:hover { background: rgba(0,0,0,0.05) !important; border-color: var(--text-color) !important; }
+        .modal-close { color: var(--text-color) !important; }
+        .admin-checkbox-label { color: var(--text-color) !important; }
+        .admin-label { color: var(--text-muted) !important; }
+        .chart-container { background: var(--card-bg) !important; border-color: rgba(0,0,0,0.1) !important; color: var(--text-color) !important;}
+        h1, h2, h3, h4, p, span { text-shadow: none !important; }
     </style>
 </head>
 <body>
@@ -692,6 +735,11 @@
                 <li class="menu-item">
                     <a href="#" class="menu-link" onclick="switchSection('categories', this)">
                         <i class="fas fa-home"></i> Mi Portada
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" class="menu-link" onclick="switchSection('gallery', this)">
+                        <i class="fas fa-video"></i> Galería Media
                     </a>
                 </li>
                 <li class="menu-item">
@@ -860,6 +908,19 @@
                 </div>
             </div>
 
+            <div id="section-gallery" class="admin-section" style="display:none;">
+                <div class="admin-section-header" style="margin-bottom: 2rem;">
+                    <div style="display:flex; flex-direction:column;">
+                        <h1 class="sport-font" style="color: var(--primary-color); margin-bottom:0;">Arqueros <span>en Acción</span></h1>
+                        <p style="color: var(--text-muted); font-size:0.8rem;">Gestiona fotos y enlaces de videos (Reels/Shorts) para el inicio.</p>
+                    </div>
+                    <button class="btn-primary" onclick="openGalleryModal()" style="font-size: 0.8rem; padding: 0.5rem 1rem;">+ Añadir Media</button>
+                </div>
+                <div id="admin-gallery-grid" class="product-cards-grid" style="margin-bottom: 4rem;">
+                    <!-- Cards via JS -->
+                </div>
+            </div>
+
             <div id="section-settings" class="admin-section" style="display:none;">
                 <div class="top-bar">
                     <h1 class="sport-font">Ajustes del <span>Negocio</span></h1>
@@ -960,11 +1021,11 @@
                         <div class="form-group-full">
                             <label class="admin-label">Foto del producto</label>
                             <div id="image-upload-container" class="modern">
-                                <div class="image-preview-large" id="p-preview">
-                                    <i class="fas fa-image" style="color:#ccc; font-size:3rem;"></i>
+                                <div class="image-preview-large" id="p-preview" style="display:flex; gap:10px; overflow-x:auto; padding:10px; justify-content:flex-start;">
+                                    <i class="fas fa-image" style="color:#ccc; font-size:3rem; margin:auto;"></i>
                                 </div>
                                 <div style="padding: 1rem; border-top: 1px solid var(--glass-border);">
-                                    <input type="file" id="p-file" accept="image/*" style="font-size: 0.8rem; color: #fff;">
+                                    <input type="file" id="p-file" accept="image/*" multiple style="font-size: 0.8rem; color: #fff;">
                                 </div>
                             </div>
                         </div>
@@ -1031,6 +1092,52 @@
                             <div class="modal-footer" style="padding: 1.5rem 0 0; border:none; background:transparent;">
                                 <button type="button" class="btn-cancel" onclick="closeCatModal()" style="flex:1;">Cancelar</button>
                                 <button type="submit" class="btn-save" style="flex:2;">Confirmar Categoría</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery Modal -->
+    <div id="gallery-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="gallery-modal-title" class="sport-font">Añadir a Galería</h2>
+                <button class="modal-close" onclick="closeGalleryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="gallery-form">
+                    <div class="modal-form-grid">
+                        <div class="form-group-full">
+                            <label class="admin-label">Tipo de Contenido</label>
+                            <select id="gal-type" class="admin-select" onchange="toggleGalleryType(this.value)">
+                                <option value="image">Solo Imagen/Foto</option>
+                                <option value="video">Reel / Video (Enlace Embed)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group-full" id="gal-video-container" style="display:none;">
+                            <label class="admin-label">Enlace del Video (Embed URL)</label>
+                            <input type="text" id="gal-video-url" class="admin-input" placeholder="Ej: https://www.youtube.com/embed/XXXXX">
+                            <small style="color:var(--text-muted); margin-top:5px; display:block;">Pega el enlace de "Insertar" iframe del short o reel. Si se deja en blanco e intenta subir imagen, guardará la imagen.</small>
+                        </div>
+                        
+                        <div class="form-group-full" id="gal-image-container">
+                            <label class="admin-label">Subir Foto Directa</label>
+                            <div id="gal-image-upload" class="modern">
+                                <div id="gal-preview" class="image-preview-large">
+                                    <i class="fas fa-image" style="color:#333; font-size:4rem;"></i>
+                                </div>
+                                <input type="file" id="gal-file" accept="image/*" style="padding: 1rem;">
+                            </div>
+                        </div>
+
+                        <div class="form-group-full">
+                            <div class="modal-footer" style="padding: 1.5rem 0 0; border:none; background:transparent;">
+                                <button type="button" class="btn-cancel" onclick="closeGalleryModal()" style="flex:1;">Cancelar</button>
+                                <button type="submit" class="btn-save" style="flex:2;">Guardar Media</button>
                             </div>
                         </div>
                     </div>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preguntas Frecuentes | LC1 Goalkeeper</title>
+    <meta name="description" content="Resolvemos todas tus dudas sobre nuestros productos para arqueros, envíos, y medios de pago. LC1 Goalkeeper.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .faq-hero {
+            padding: 120px 5% 60px;
+            text-align: center;
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1200&q=80') center/cover;
+            color: #fff;
+        }
+        .faq-hero h1 { margin-bottom: 20px; font-size: 3rem; }
+        
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 80px 5%;
+        }
+        
+        .faq-item {
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 20px;
+        }
+        
+        .faq-question {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+        }
+        
+        .faq-question i {
+            color: var(--primary-color);
+            transition: transform 0.3s ease;
+        }
+        
+        .faq-answer {
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .faq-item.active .faq-answer { max-height: 300px; margin-top: 10px; }
+        .faq-item.active .faq-question i { transform: rotate(180deg); }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html" class="logo sport-font">
+            <i class="fas fa-shield-halved"></i> LC1 GOALKEEPER
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="shop.html">Tienda</a></li>
+            <li><a href="faq.html" class="active">FAQ</a></li>
+            <li><a href="admin.html" class="admin-nav-link" title="Panel de Administración"><i class="fas fa-lock"></i></a></li>
+        </ul>
+        <div class="menu-toggle" id="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="cart-icon" id="cart-toggle">
+            <i class="fas fa-shopping-cart fa-lg"></i>
+            <span class="cart-count">0</span>
+        </div>
+    </nav>
+
+    <!-- FAQ Hero -->
+    <section class="faq-hero">
+        <div class="reveal">
+            <h1 class="sport-font">PREGUNTAS <span>FRECUENTES</span></h1>
+            <p>Todo lo que necesitás saber sobre envíos, pagos y nuestros guantes.</p>
+        </div>
+    </section>
+
+    <!-- FAQ Content -->
+    <main class="faq-container">
+        
+        <div class="faq-item reveal">
+            <div class="faq-question">
+                ¿Realizan envíos a todo el país? <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                Sí, enviamos a todos los puntos de Argentina. Los pedidos se despachan en 24/48 horas hábiles tras confirmar el pago, garantizando que tu equipamiento llegue de forma rápida y segura.
+            </div>
+        </div>
+
+        <div class="faq-item reveal">
+            <div class="faq-question">
+                ¿Qué medios de pago aceptan? <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                Podés abonar por Transferencia Bancaria, todas las Tarjetas de Débito y Crédito (solicitá link de pago por WhatsApp) y efectivo si retirás presencialmente o a convenir. Todo pago digital está asegurado.
+            </div>
+        </div>
+
+        <div class="faq-item reveal">
+            <div class="faq-question">
+                ¿Cómo sé qué talle elegir en mis guantes? <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                Al elegir tu producto podrás ver un selector de talaje estándar (generalmente del 7 al 11). Si tenés dudas, comunícate a nuestro WhatsApp para pedir la tabla de medidas y te guiamos en la elección.
+            </div>
+        </div>
+
+        <div class="faq-item reveal">
+            <div class="faq-question">
+                ¿El látex de los guantes es profesional? <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                Totalmente. Utilizamos látex alemán de 4mm en nuestras diversas colecciones, el cual proporciona un máximo rendimiento en agarre, absorción de impacto y durabilidad en condiciones óptimas.
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Purchase Info Section (Reused from Index) -->
+    <section class="section reveal purchase-info" style="padding: 4rem 10%;">
+        <div class="info-grid">
+            <div class="info-item" style="text-align: center;">
+                <i class="fas fa-truck-fast" style="font-size:2rem; color:var(--primary-color); margin-bottom:1rem; display:block;"></i>
+                <h4 class="sport-font">Envíos a todo el país</h4>
+                <p style="color:var(--text-muted); font-size:0.9rem;">Llevamos tu equipo a donde estés de forma rápida y segura.</p>
+            </div>
+            <div class="info-item" style="text-align: center;">
+                <i class="fas fa-headset" style="font-size:2rem; color:var(--primary-color); margin-bottom:1rem; display:block;"></i>
+                <h4 class="sport-font">Atención Personalizada</h4>
+                <p style="color:var(--text-muted); font-size:0.9rem;">Te asesoramos vía WhatsApp para elegir el producto ideal.</p>
+            </div>
+            <div class="info-item" style="text-align: center;">
+                <i class="fas fa-clock" style="font-size:2rem; color:var(--primary-color); margin-bottom:1rem; display:block;"></i>
+                <h4 class="sport-font">Entrega 24/48hs</h4>
+                <p style="color:var(--text-muted); font-size:0.9rem;">Procesamos tu pedido velozmente.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="padding: 3rem 5%; background: var(--bg-color); border-top: 1px solid rgba(0,0,0,0.05); text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+        <p>&copy; 2024 LC1 Goalkeeper. Todos los derechos reservados.</p>
+        <p style="margin-top: 10px; font-weight: 600; color: var(--text-color);">Sitio web desarrollado por Antigravity</p>
+    </footer>
+
+    <!-- Whatsapp Float -->
+    <a href="https://wa.me/541140236384" class="whatsapp-float" target="_blank" id="wa-float-link">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Scripts -->
+    <script src="js/scroll-reveal.js"></script>
+    <!-- Toast Component Container -->
+    <div id="toast-container"></div>
+    <script src="js/products-data.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/cart.js"></script>
+    <script>
+        // Lógica Simple FAQ Acordeón
+        document.querySelectorAll('.faq-question').forEach(item => {
+            item.addEventListener('click', () => {
+                const parent = item.parentElement;
+                // Cerrar otros
+                document.querySelectorAll('.faq-item').forEach(faq => {
+                    if (faq !== parent) faq.classList.remove('active');
+                });
+                // Toggle actual
+                parent.classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -12,6 +12,7 @@ window.onerror = function(msg, url, lineNo, columnNo, error) {
 };
 
 let currentImageBase64 = '';
+let currentImagesArray = [];
 
 // Productos y Categorías de Respaldo (para evitar colisión global)
 const adminInitialProducts = window.LC1_Data ? window.LC1_Data.products : [];
@@ -30,6 +31,11 @@ const getSafeJSON = (key, defaultValue) => {
 let adminProducts = getSafeJSON('lc1-products-db', adminInitialProducts);
 let adminCategories = getSafeJSON('lc1-categories-db', adminInitialCategories);
 let adminOrders = getSafeJSON('lc1-orders-db', []);
+let adminGallery = getSafeJSON('lc1-gallery-db', [
+    { id: 1, type: 'image', data: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=600&q=80' },
+    { id: 2, type: 'image', data: 'https://images.unsplash.com/photo-1518605368461-1ee1252326a3?auto=format&fit=crop&w=600&q=80' },
+    { id: 3, type: 'image', data: 'https://images.unsplash.com/photo-1628173499426-11f8e9196b05?auto=format&fit=crop&w=600&q=80' }
+]);
 
 // Listas negras para evitar que la sincronización restaure items eliminados
 let adminDeletedProducts = getSafeJSON('lc1-deleted-products', []);
@@ -110,8 +116,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('p-file');
     if (fileInput) {
         fileInput.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) processImage(file, 'product');
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                currentImagesArray = [];
+                document.getElementById('p-preview').innerHTML = '';
+                Array.from(files).forEach((file, idx) => processImage(file, 'product', true));
+            }
         };
     }
 
@@ -121,6 +131,15 @@ document.addEventListener('DOMContentLoaded', () => {
         catFileInput.onchange = (e) => {
             const file = e.target.files[0];
             if (file) processImage(file, 'category');
+        };
+    }
+
+    // Image Upload Event (Gallery)
+    const galFileInput = document.getElementById('gal-file');
+    if (galFileInput) {
+        galFileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) processImage(file, 'gallery');
         };
     }
 
@@ -139,6 +158,15 @@ document.addEventListener('DOMContentLoaded', () => {
         categoryForm.onsubmit = (e) => {
             e.preventDefault();
             saveCategory();
+        };
+    }
+
+    // Gallery Form Event
+    const galleryForm = document.getElementById('gallery-form');
+    if (galleryForm) {
+        galleryForm.onsubmit = (e) => {
+            e.preventDefault();
+            saveGalleryItem();
         };
     }
 
@@ -334,6 +362,7 @@ window.switchSection = (sectionId, element = null) => {
         renderAdminCategories();
         renderAdminHomeFeatured();
     }
+    if (sectionId === 'gallery') renderAdminGallery();
     if (sectionId === 'orders') renderAdminOrders();
     if (sectionId === 'stats') calculateStats();
 };
@@ -441,7 +470,8 @@ window.saveProduct = () => {
         available: document.getElementById('p-available').checked,
         featured: document.getElementById('p-featured').checked,
         customizable: document.getElementById('p-customizable').checked,
-        image: currentImageBase64 || (idToEdit ? adminProducts.find(p => p.id === parseInt(idToEdit)).image : '')
+        image: currentImagesArray.length > 0 ? currentImagesArray[0] : (idToEdit ? adminProducts.find(p => p.id === parseInt(idToEdit)).image : ''),
+        images: currentImagesArray.length > 0 ? currentImagesArray : (idToEdit ? (adminProducts.find(p => p.id === parseInt(idToEdit)).images || []) : [])
     };
 
     if (idToEdit) {
@@ -500,7 +530,13 @@ window.editProduct = (id) => {
     document.getElementById('p-customizable').checked = p.customizable || false;
     
     currentImageBase64 = p.image;
-    document.getElementById('p-preview').innerHTML = `<img src="${p.image}" style="width:100%; height:100%; object-fit:contain;">`;
+    currentImagesArray = p.images || (p.image ? [p.image] : []);
+    
+    if (currentImagesArray.length > 0) {
+        document.getElementById('p-preview').innerHTML = currentImagesArray.map(img => `<img src="${img}" style="height:100px; width:auto; border-radius:8px; object-fit:contain; border:2px solid var(--primary-color); flex-shrink:0;">`).join('');
+    } else {
+        document.getElementById('p-preview').innerHTML = `<img src="${p.image}" style="width:100%; height:100%; object-fit:contain;">`;
+    }
     
     document.getElementById('product-form').dataset.editId = id;
     document.getElementById('modal-title').textContent = 'Editar producto';
@@ -851,7 +887,7 @@ function saveAuthSettings() {
 
 // --- Image Processing ---
 
-function processImage(file, target = 'product') {
+function processImage(file, target = 'product', isMultiple = false) {
     const reader = new FileReader();
     reader.onload = (e) => {
         const img = new Image();
@@ -879,12 +915,27 @@ function processImage(file, target = 'product') {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            currentImageBase64 = canvas.toDataURL('image/jpeg', 0.8);
+            const finalBase64 = canvas.toDataURL('image/jpeg', 0.8);
             
-            const previewId = target === 'product' ? 'p-preview' : 'cat-preview';
-            const preview = document.getElementById(previewId);
-            if (preview) {
-                preview.innerHTML = `<img src="${currentImageBase64}" style="width:100%; height:100%; object-fit:${target === 'product' ? 'contain' : 'cover'};">`;
+            if (target === 'product' && isMultiple) {
+                currentImagesArray.push(finalBase64);
+                if (currentImagesArray.length === 1) currentImageBase64 = finalBase64;
+                const preview = document.getElementById('p-preview');
+                const imgEl = document.createElement('img');
+                imgEl.src = finalBase64;
+                imgEl.style.cssText = 'height:100px; width:auto; border-radius:8px; object-fit:contain; border:2px solid var(--primary-color); flex-shrink:0;';
+                preview.appendChild(imgEl);
+            } else {
+                currentImageBase64 = finalBase64;
+                
+                let previewId = 'p-preview';
+                if (target === 'category') previewId = 'cat-preview';
+                if (target === 'gallery') previewId = 'gal-preview';
+                
+                const preview = document.getElementById(previewId);
+                if (preview) {
+                    preview.innerHTML = `<img src="${currentImageBase64}" style="width:100%; height:100%; object-fit:${target === 'product' ? 'contain' : 'cover'};">`;
+                }
             }
         };
         img.src = e.target.result;
@@ -897,8 +948,9 @@ window.openModal = (isFeatured = false) => {
     document.getElementById('product-modal').style.display = 'flex';
     document.getElementById('modal-title').textContent = isFeatured ? 'Nuevo Producto Destacado' : 'Nuevo Producto';
     document.getElementById('product-form').reset();
-    document.getElementById('p-preview').innerHTML = `<i class="fas fa-image" style="color:#ccc; font-size:3rem;"></i>`;
+    document.getElementById('p-preview').innerHTML = `<i class="fas fa-image" style="color:#ccc; font-size:3rem; margin:auto;"></i>`;
     currentImageBase64 = '';
+    currentImagesArray = [];
     delete document.getElementById('product-form').dataset.editId;
     
     // Si viene desde "Añadir Destacado", marcamos el checkbox
@@ -1007,6 +1059,89 @@ window.deleteCategory = (id) => {
         
         renderAdminCategories();
         showToast('Categoría eliminada', 'info');
+    });
+};
+
+// --- Action Gallery Management ---
+
+window.renderAdminGallery = () => {
+    const grid = document.getElementById('admin-gallery-grid');
+    if (!grid) return;
+
+    grid.innerHTML = adminGallery.map(item => `
+        <div class="admin-product-card" style="position:relative;">
+            <div class="card-img-container" style="height: 250px;">
+                ${item.type === 'video' 
+                    ? `<iframe src="${item.data}" style="width:100%; height:100%; object-fit:cover; pointer-events:none;" frameborder="0"></iframe>` 
+                    : `<img src="${item.data}" style="object-fit:cover; width:100%; height:100%;">`
+                }
+            </div>
+            ${item.type === 'video' ? '<div style="position:absolute; top:10px; right:10px; background:var(--primary-color); color:#000; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:0.7rem;"><i class="fas fa-video"></i> VIDEO</div>' : '<div style="position:absolute; top:10px; right:10px; background:#fff; color:#000; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:0.7rem;"><i class="fas fa-image"></i> FOTO</div>'}
+            <div class="card-actions" style="margin-top:0; border-top:1px solid rgba(0,0,0,0.1);">
+                <button class="btn-editor" style="width:100%; color:red !important;" onclick="deleteGalleryItem(${item.id})">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    `).join('');
+};
+
+window.openGalleryModal = () => {
+    document.getElementById('gallery-form').reset();
+    document.getElementById('gal-preview').innerHTML = `<i class="fas fa-image" style="color:#ccc; font-size:3rem;"></i>`;
+    currentImageBase64 = '';
+    toggleGalleryType('image'); // default
+    document.getElementById('gallery-modal').style.display = 'flex';
+};
+
+window.closeGalleryModal = () => {
+    document.getElementById('gallery-modal').style.display = 'none';
+};
+
+window.toggleGalleryType = (type) => {
+    const videoCont = document.getElementById('gal-video-container');
+    const imgCont = document.getElementById('gal-image-container');
+    if (type === 'video') {
+        videoCont.style.display = 'block';
+        imgCont.style.display = 'none';
+        currentImageBase64 = '';
+    } else {
+        videoCont.style.display = 'none';
+        imgCont.style.display = 'block';
+    }
+};
+
+window.saveGalleryItem = () => {
+    const type = document.getElementById('gal-type').value;
+    let dataUrl = '';
+
+    if (type === 'video') {
+        const inputUrl = document.getElementById('gal-video-url').value.trim();
+        if (!inputUrl) return showToast('Pega el enlace del video', 'error');
+        dataUrl = inputUrl;
+    } else {
+        if (!currentImageBase64) return showToast('Sube una imagen primero', 'error');
+        dataUrl = currentImageBase64;
+    }
+
+    adminGallery.push({
+        id: Date.now(),
+        type: type,
+        data: dataUrl
+    });
+
+    localStorage.setItem('lc1-gallery-db', JSON.stringify(adminGallery));
+    renderAdminGallery();
+    closeGalleryModal();
+    showToast('Elemento añadido a la galería', 'success');
+};
+
+window.deleteGalleryItem = (id) => {
+    showConfirm('¿Eliminar este elemento de la galería?', () => {
+        adminGallery = adminGallery.filter(i => i.id !== id);
+        localStorage.setItem('lc1-gallery-db', JSON.stringify(adminGallery));
+        renderAdminGallery();
+        showToast('Elemento eliminado', 'info');
     });
 };
 
