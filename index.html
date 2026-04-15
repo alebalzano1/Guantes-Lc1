@@ -86,8 +86,12 @@
     <!-- Action Gallery Section -->
     <section class="section section-gallery reveal" style="padding: 4rem 5%; text-align: center;">
         <h2 class="sport-font" style="margin-bottom: 2rem;">ARQUEROS EN <span>ACCIÓN</span></h2>
-        <div id="action-gallery-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-            <!-- Gallery media injected by JS -->
+        <div class="gallery-slider-wrapper">
+            <button class="gallery-nav prev" id="gallery-prev"><i class="fas fa-chevron-left"></i></button>
+            <div id="action-gallery-container" class="action-gallery-container">
+                <!-- Gallery items injected by JS -->
+            </div>
+            <button class="gallery-nav next" id="gallery-next"><i class="fas fa-chevron-right"></i></button>
         </div>
     </section>
 

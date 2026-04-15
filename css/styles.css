@@ -1085,16 +1085,19 @@ nav {
     }
 
     /* Hero Tuning */
-    .hero {
-        padding: 0 8%;
+    .pro-hero {
+        padding: 0 5%;
+        min-height: 80vh;
     }
 
-    .hero h1 {
-        font-size: 3.5rem;
+    .pro-hero .elite-title {
+        font-size: clamp(2.5rem, 12vw, 4.5rem) !important;
+        margin-bottom: 1.5rem;
     }
 
-    .hero p {
+    .hero-subtext {
         font-size: 1rem;
+        opacity: 0.9;
     }
 
     /* Grids to 1 Column */
@@ -1109,11 +1112,15 @@ nav {
 
     /* Section Adjustment */
     .section {
-        padding: 4rem 5%;
+        padding: 5rem 6% !important;
+    }
+
+    .section-identity, .section-categories, .section-featured, .section-about {
+        padding: 6rem 8% !important;
     }
 
     .section-title h2 {
-        font-size: 2.2rem;
+        font-size: 2rem !important;
     }
 
     /* Cart Sidebar Mobile Fix */
@@ -1237,6 +1244,7 @@ nav {
     .section-identity, 
     .section-categories, 
     .section-featured, 
+    .section-about,
     .pro-hero,
     body {
         background-attachment: scroll !important; /* Elimina lag de scroll en móviles */
@@ -1615,5 +1623,101 @@ nav {
     }
     .about-content {
         font-size: 1.1rem;
+    }
+}
+
+/* --- Action Gallery Carousel (Elite Upgrade) --- */
+.gallery-slider-wrapper {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+}
+
+.action-gallery-container {
+    display: flex !important;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
+    padding: 1.2rem 0;
+    width: 100%;
+    scroll-behavior: smooth;
+}
+
+.action-gallery-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.gallery-item {
+    flex: 0 0 320px; /* Fixed width for carousel items */
+    height: 420px;
+    scroll-snap-align: center;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), filter 0.4s ease;
+    filter: grayscale(80%);
+}
+
+.gallery-item:hover {
+    transform: scale(1.03);
+    filter: grayscale(0%);
+    box-shadow: 0 20px 40px rgba(249, 255, 32, 0.2);
+}
+
+.gallery-item video, 
+.gallery-item div {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+}
+
+/* Gallery Navigation Arrows */
+.gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.6);
+    color: var(--accent-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.gallery-nav:hover {
+    background: var(--accent-color);
+    color: #000;
+    box-shadow: 0 0 20px rgba(249, 255, 32, 0.5);
+}
+
+.gallery-nav.prev { left: -25px; }
+.gallery-nav.next { right: -25px; }
+
+/* Mobile Optimizations for Gallery */
+@media (max-width: 768px) {
+    .gallery-nav {
+        display: none !important; /* Hide arrows on mobile, swipe is better */
+    }
+    
+    .gallery-item {
+        flex: 0 0 85%; /* Larger cards on mobile */
+        height: 380px;
+    }
+    
+    .action-gallery-container {
+        padding: 0 0 2rem 0;
+        gap: 1rem;
     }
 }

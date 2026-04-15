@@ -74,28 +74,42 @@ function renderFeatured() {
 }
 
 function renderActionGallery() {
+    if (!actionGalleryContainer) return;
+    
     if (galleryList.length === 0) {
-        actionGalleryContainer.parentElement.style.display = 'none';
+        actionGalleryContainer.parentElement.parentElement.style.display = 'none';
         return;
     }
-    actionGalleryContainer.parentElement.style.display = 'block';
+    actionGalleryContainer.parentElement.parentElement.style.display = 'block';
     
     actionGalleryContainer.innerHTML = galleryList.map(item => {
         if (item.type === 'video') {
             return `
-                <div style="height: 300px; border-radius: 12px; overflow: hidden; background: #111;">
+                <div class="gallery-item">
                     <iframe src="${item.data}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
                 </div>
             `;
         } else {
             return `
-                <div style="height: 300px; background: url('${item.data}') center/cover; border-radius: 12px; filter: grayscale(50%); transition: filter 0.3s transform 0.3s; cursor:pointer;" 
-                     onmouseover="this.style.filter='grayscale(0)'; this.style.transform='scale(1.02)';" 
-                     onmouseout="this.style.filter='grayscale(50%)'; this.style.transform='scale(1)';">
+                <div class="gallery-item">
+                    <div style="background: url('${item.data}') center/cover;"></div>
                 </div>
             `;
         }
     }).join('');
+
+    // Logic for navigation arrows
+    const prevBtn = document.getElementById('gallery-prev');
+    const nextBtn = document.getElementById('gallery-next');
+
+    if (prevBtn && nextBtn && actionGalleryContainer) {
+        prevBtn.onclick = () => {
+            actionGalleryContainer.scrollBy({ left: -340, behavior: 'smooth' });
+        };
+        nextBtn.onclick = () => {
+            actionGalleryContainer.scrollBy({ left: 340, behavior: 'smooth' });
+        };
+    }
 }
 
 function renderShop(category) {
