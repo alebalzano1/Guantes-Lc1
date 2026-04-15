@@ -1028,9 +1028,10 @@ nav {
 
 @media (max-width: 768px) {
     /* Base Overflow Fix */
-    body {
-        width: 100%;
-        overflow-x: hidden;
+    body, html {
+        width: 100% !important;
+        overflow-x: hidden !important;
+        position: relative;
     }
 
     /* Navigation Mobile */
@@ -1085,14 +1086,19 @@ nav {
     }
 
     /* Hero Tuning */
+    /* Hero Tuning */
     .pro-hero {
-        padding: 0 5%;
-        min-height: 80vh;
+        padding: 0 5% ;
+        min-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
     .pro-hero .elite-title {
-        font-size: clamp(2.5rem, 12vw, 4.5rem) !important;
-        margin-bottom: 1.5rem;
+        font-size: clamp(2rem, 15vw, 4rem) !important;
+        margin-bottom: 2rem;
+        line-height: 1.1;
     }
 
     .hero-subtext {
@@ -1112,15 +1118,19 @@ nav {
 
     /* Section Adjustment */
     .section {
-        padding: 5rem 6% !important;
+        padding: 3.5rem 5% !important; /* Unified density */
     }
 
-    .section-identity, .section-categories, .section-featured, .section-about {
-        padding: 6rem 8% !important;
+    .section-identity, .section-categories, .section-featured, .section-about, .section-gallery {
+        padding: 4rem 5% !important;
+    }
+
+    .section-title {
+        margin-bottom: 2.5rem;
     }
 
     .section-title h2 {
-        font-size: 2rem !important;
+        font-size: 1.8rem !important;
     }
 
     /* Cart Sidebar Mobile Fix */
@@ -1705,19 +1715,31 @@ nav {
 .gallery-nav.prev { left: -25px; }
 .gallery-nav.next { right: -25px; }
 
-/* Mobile Optimizations for Gallery */
+/* URGENT Mobile Gallery Fix */
 @media (max-width: 768px) {
     .gallery-nav {
-        display: none !important; /* Hide arrows on mobile, swipe is better */
-    }
-    
-    .gallery-item {
-        flex: 0 0 85%; /* Larger cards on mobile */
-        height: 380px;
+        display: none !important;
     }
     
     .action-gallery-container {
-        padding: 0 0 2rem 0;
-        gap: 1rem;
+        display: flex !important;
+        flex-direction: row !important; /* Force horizontal */
+        flex-wrap: nowrap !important; /* Prevent stacking */
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important; /* Smooth iOS */
+        scroll-snap-type: x mandatory !important;
+        gap: 1rem !important;
+        padding: 1rem 0 2rem 0 !important;
+        width: 100vw;
+        margin-left: -5%; /* Counteract section padding for full-width swipe */
+        padding-left: 5% !important;
+        padding-right: 5% !important;
+    }
+    
+    .gallery-item {
+        flex: 0 0 280px !important; /* Force fixed width for sliding */
+        height: 380px !important;
+        scroll-snap-align: center !important;
     }
 }
+
