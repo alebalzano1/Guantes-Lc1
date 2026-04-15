@@ -107,8 +107,8 @@ function renderShop(category) {
         shopContainer.innerHTML = `
             <div style="grid-column: 1/-1; text-align: center; padding: 5rem 2rem; border: 1px dashed var(--glass-border); border-radius: 20px;">
                 <i class="fas fa-search" style="font-size: 3rem; color: var(--glass-border); margin-bottom: 1.5rem;"></i>
-                <h3 class="sport-font" style="color: #fff; margin-bottom: 0.5rem;">No encontramos coincidencias</h3>
-                <p style="color: var(--text-muted);">Probá con otra categoría o restablecé los filtros.</p>
+                <h3 class="sport-font" style="color: #000; margin-bottom: 0.5rem;">No encontramos coincidencias</h3>
+                <p style="color: #444;">Probá con otra categoría o restablecé los filtros.</p>
                 <button onclick="app_filter('all')" class="btn-buy" style="max-width: 250px; margin: 2rem auto 0;">Ver todos los productos</button>
             </div>
         `;

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
     <title>Dashboard Admin | LC1 Goalkeeper</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,9 +16,10 @@
         :root {
             --sidebar-width: 260px;
             --header-height: 70px;
-            --glass-bg: rgba(20, 20, 20, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --accent-glow: rgba(204, 255, 0, 0.2);
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --accent-glow: rgba(204, 255, 0, 0.1);
+            color-scheme: light;
         }
 
         html, body {
@@ -27,10 +29,11 @@
         }
 
         body {
-            background: radial-gradient(circle at top right, #1a1a1a, #050505);
+            background: var(--bg-color);
             display: flex;
             overflow: hidden;
             font-family: 'Inter', sans-serif;
+            color: var(--text-color);
         }
 
         /* --- Login Screen --- */

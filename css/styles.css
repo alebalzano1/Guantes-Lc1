@@ -1,15 +1,16 @@
 :root {
     --bg-color: #ffffff;
     --card-bg: #fdfdfd;
-    --primary-color: #ffcc00; /* Yellow */
-    --primary-hover: #e6b800;
+    --primary-color: #ffffff; /* White is Primary */
+    --accent-color: #F9FF20;  /* Neon Yellow for Details */
+    --primary-hover: #f4f4f4;
     --text-color: #000000;
     --text-muted: #444444;
-    --accent-color: #ffcc00;
     --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.08);
     --glass-bg: rgba(255, 255, 255, 0.8);
     --glass-border: rgba(0, 0, 0, 0.08);
     --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    color-scheme: light;
 }
 
 * {
@@ -39,14 +40,14 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 5%;
-    background: #ffffff;
+    padding: 1rem 5%;
+    background: #ffffff !important; /* BACK TO WHITE PRIMARY */
     backdrop-filter: blur(10px);
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 1000;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
 }
 
 .logo {
@@ -55,8 +56,12 @@ nav {
     gap: 10px;
     font-size: 1.5rem;
     font-weight: 900;
-    color: var(--primary-color);
+    color: #000000 !important; /* BLACK LOGO ON WHITE NAV */
     text-decoration: none;
+}
+
+.logo i {
+    color: var(--accent-color); /* Yellow icon detail */
 }
 
 .nav-links {
@@ -66,7 +71,7 @@ nav {
 }
 
 .nav-links a {
-    color: #000000;
+    color: #000000; /* BLACK LINKS ON WHITE NAV */
     text-decoration: none;
     font-weight: 700;
     font-size: 0.9rem;
@@ -76,7 +81,7 @@ nav {
 }
 
 .nav-links a:hover {
-    color: var(--primary-color);
+    color: var(--accent-color);
 }
 
 .cart-icon {
@@ -89,8 +94,8 @@ nav {
     position: absolute;
     top: -8px;
     right: -12px;
-    background: var(--primary-color);
-    color: black;
+    background: var(--accent-color);
+    color: #000000;
     font-size: 0.7rem;
     padding: 2px 6px;
     border-radius: 50%;
@@ -104,11 +109,10 @@ nav {
     align-items: center;
     justify-content: center;
     position: relative;
-    background: #fdfdfd;
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), 
+                url('../assets/hero-stadium.png') center/cover no-repeat;
     overflow: hidden;
     padding-top: 80px;
-    background: linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.9)), 
-                url('../assets/hero-stadium.png') center/cover no-repeat;
 }
 
 .hero-container {
@@ -178,75 +182,109 @@ nav {
     100% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0); }
 }
 
-.hero-tagline {
-    font-size: 1.1rem;
-    color: white;
+.hero-tagline.boxed {
+    display: inline-block;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 0.5rem 1.5rem;
+    font-size: 1rem;
+    color: #ffffff;
     text-transform: uppercase;
     font-weight: 300;
-    letter-spacing: 6px;
-    margin-bottom: 1rem;
-    opacity: 0.8;
+    letter-spacing: 2px;
+    margin-bottom: 2rem;
+    opacity: 0.9;
 }
 
-.pro-hero h1 {
-    font-size: clamp(3.5rem, 10vw, 6.5rem);
-    line-height: 0.9;
+.pro-hero .elite-title {
+    font-size: clamp(3.5rem, 10vw, 8rem);
+    line-height: 0.85;
     margin-bottom: 2rem;
     font-weight: 900;
     font-style: italic;
-    color: #000;
+    color: var(--accent-color); /* Use accent yellow */
     text-transform: uppercase;
+    text-shadow: none;
+}
+
+.pro-hero .elite-title span {
+    color: #ffffff;
+    display: block;
 }
 
 .hero-subtext {
     font-size: 1.25rem;
-    color: var(--text-muted);
-    margin-bottom: 3.5rem;
-    max-width: 500px;
-    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 0;
+    max-width: 600px;
+    line-height: 1.4;
+}
+
+.hero-actions-container {
+    width: 100%;
+    background: transparent; /* Removed yellow strip as requested */
+    padding: 0;
+    margin-top: 3.5rem;
+    display: flex;
+    justify-content: center;
 }
 
 .hero-btns {
     display: flex;
     gap: 1.5rem;
-    margin-bottom: 2rem;
+    width: 100%;
+    max-width: 1200px;
+    justify-content: center;
+}
+
+/* --- Hero Actions Elite Redesign (FORCED VISIBILITY) --- */
+.pro-hero .hero-btns .btn-primary.main-cta {
+    padding: 1.5rem 4rem !important;
+    background: #F9FF20 !important; /* FORCED NEON YELLOW */
+    color: #000000 !important;
+    font-size: 1.2rem !important;
+    font-weight: 950 !important;
+    border-radius: 0 !important;
+    box-shadow: 0 10px 40px rgba(249, 255, 32, 0.4) !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: none !important;
+    transition: all 0.4s ease;
+}
+
+.pro-hero .hero-btns .btn-primary.main-cta:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 50px rgba(249, 255, 32, 0.6) !important;
+    filter: brightness(1.1);
+}
+
+.pro-hero .hero-btns .btn-secondary.ghost-cta {
+    padding: 1.5rem 4rem !important;
+    background: #ffffff !important; /* FORCED SOLID WHITE */
+    color: #000000 !important;
+    font-size: 1.2rem !important;
+    font-weight: 950 !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: none !important;
+    transition: all 0.4s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.pro-hero .hero-btns .btn-secondary.ghost-cta:hover {
+    background: #f0f0f0 !important;
+    transform: translateY(-5px);
 }
 
 /* Primary Button Upgrade */
-.btn-primary.main-cta {
-    padding: 1.4rem 3.5rem;
-    background: var(--primary-color);
-    color: #000;
-    font-size: 1.1rem;
-    font-weight: 900;
-    border-radius: 4px;
-    box-shadow: 0 10px 30px rgba(204, 255, 0, 0.3);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.btn-primary.main-cta:hover {
-    transform: scale(1.05) translateY(-5px);
-    box-shadow: 0 15px 40px rgba(204, 255, 0, 0.5);
-    background: #e6ff00;
-}
+/* REMOVED DUPLICATE */
 
 /* Secondary Button Upgrade */
-.btn-secondary.ghost-cta {
-    padding: 1.4rem 3rem;
-    background: transparent;
-    color: #000;
-    border: 2px solid rgba(0, 0, 0, 0.2);
-    font-size: 0.9rem;
-    font-weight: 800;
-    border-radius: 4px;
-    transition: var(--transition);
-}
-
-.btn-secondary.ghost-cta:hover {
-    border-color: #000;
-    background: rgba(0, 0, 0, 0.05);
-    color: #000;
-}
+/* REMOVED DUPLICATE */
 
 .hero-social-proof {
     font-size: 0.9rem;
@@ -295,18 +333,17 @@ nav {
     }
 }
 
-/* --- Identity Section --- */
+/* --- Identity Section (Dark Impact Edition) --- */
 .section-identity {
     padding: 12rem 10%;
     text-align: center;
     position: relative;
-    background: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), 
+    background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), 
                 url('../assets/identity-bg.png') center/cover no-repeat fixed;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-top: 1px solid rgba(0,0,0,0.05);
-    border-bottom: 1px solid rgba(0,0,0,0.05);
+    border-top: 1px solid rgba(255,255,255,0.1);
 }
 
 .identity-container {
@@ -316,31 +353,84 @@ nav {
 }
 
 .identity-container h2 {
-    font-size: 1.2rem;
-    letter-spacing: 5px;
+    font-size: 3.5rem;
+    letter-spacing: 0;
     text-transform: uppercase;
-    color: var(--primary-color);
-    margin-bottom: 2rem;
-    opacity: 0.9;
+    color: #ffffff; /* WHITE TITLE ON DARK BG */
+    margin-bottom: 3rem;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 10px;
+}
+
+.identity-container h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: var(--accent-color); /* Yellow underline pops here! */
 }
 
 .identity-text {
     font-size: clamp(1.8rem, 4vw, 2.8rem);
-    color: #000;
-    line-height: 1.2;
-    font-weight: 700;
-    font-style: italic;
-    text-transform: uppercase;
+    color: #ffffff; /* BRILLIANT WHITE TEXT */
+    font-weight: 400;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
+/* --- Categories Section (Dark Impact Edition) --- */
 .section-categories {
-    background: var(--bg-color);
-    border-top: 1px solid rgba(0,0,0,0.05);
+    background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), 
+                url('../assets/cat-locker-bg.png') center/cover no-repeat fixed;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+    padding: 8rem 10%;
 }
 
+.section-categories .section-title h2 {
+    color: #ffffff; /* White title for contrast */
+}
+
+.section-categories .section-title h2 span {
+    color: var(--accent-color); /* Neon yellow details */
+}
+
+/* --- Reusable Dark Footer (REVERTED TO WHITE) --- */
+.dark-footer {
+    padding: 5rem 5% !important;
+    background: #ffffff !important;
+    border-top: 1px solid rgba(0,0,0,0.05) !important;
+    text-align: center;
+    color: var(--text-muted) !important;
+    font-size: 0.9rem;
+}
+
+.dark-footer p {
+    margin-bottom: 10px;
+}
+
+.dark-footer a {
+    color: var(--accent-color) !important;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.dark-footer a:hover {
+    text-decoration: underline;
+}
+
+/* --- Featured Section (Dark Impact Edition) --- */
 .section-featured {
-    background: #fdfdfd;
-    border-top: 1px solid rgba(0,0,0,0.05);
+    background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
+                url('../assets/featured-turf-bg.png') center/cover no-repeat fixed;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+}
+
+.section-featured .section-title h2 {
+    color: #ffffff;
 }
 
 /* --- Categories --- */
@@ -358,7 +448,7 @@ nav {
 }
 
 .section-title h2 span {
-    color: var(--primary-color);
+    color: var(--accent-color);
 }
 
 .categories-grid {
@@ -497,8 +587,8 @@ nav {
 
 /* Common Product Card Styles (Enhanced) */
 .product-card, .admin-product-card {
-    background: #fff;
-    border: 1px solid rgba(0,0,0,0.08);
+    background: rgba(255, 255, 255, 0.03); /* ULTRA TRANSPARENT WHITE */
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 1.25rem;
     position: relative;
@@ -506,7 +596,8 @@ nav {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.04);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
 .product-card:hover, .admin-product-card:hover {
@@ -519,13 +610,13 @@ nav {
 
 .product-img, .card-img-container {
     width: 100%;
-    height: 240px;
+    height: 190px; /* SHRUNK AS REQUESTED */
     border-radius: 14px;
-    background: #fdfdfd;
+    background: rgba(255, 255, 255, 0.05); /* TRANSPARENT AS REQUESTED */
     margin-bottom: 1.2rem;
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -636,17 +727,22 @@ nav {
 /* Specific overrides for dark sections where white text is needed */
 .section-featured .card-title,
 .section-categories .card-title,
+.section-identity .card-title,
 .admin-section .card-title {
-    color: #000;
+    color: #ffffff !important; /* FORCED WHITE ON DARK BG */
+}
+
+.section-featured .card-category {
+    color: rgba(255,255,255,0.7);
 }
 
 .card-price {
     font-size: 1.6rem;
     font-weight: 900;
-    color: var(--primary-color);
+    color: var(--accent-color);
     margin-bottom: 1.5rem;
     display: block;
-    text-shadow: 0 0 15px rgba(204, 255, 0, 0.2);
+    text-shadow: 0 0 15px rgba(249, 255, 32, 0.2);
 }
 
 .card-actions {
@@ -704,13 +800,13 @@ nav {
 /* --- Buy Button (Premium Upgrade) --- */
 .btn-buy {
     width: 100%;
-    background: var(--primary-color);
+    background: #F9FF20; /* NEON YELLOW */
     color: #000;
     border: none;
     padding: 1.25rem;
     border-radius: 8px;
     font-size: 1.1rem;
-    font-weight: 900;
+    font-weight: 950;
     text-transform: uppercase;
     letter-spacing: 1px;
     cursor: pointer;
@@ -811,9 +907,10 @@ nav {
 }
 
 .info-item i {
-    font-size: 2.5rem;
-    color: var(--primary-color);
+    font-size: 3rem;
+    color: var(--accent-color); /* YELLOW FOR WHITE THEME VISIBILITY */
     margin-bottom: 1.5rem;
+    display: block;
 }
 
 .info-item h4 {
@@ -847,8 +944,7 @@ nav {
     }
     
     .hero-bg-overlay {
-        background: linear-gradient(#000 40%, transparent 100%), 
-                    url('../assets/hero-stadium.png') center/cover no-repeat;
+        background: #000000; /* Solid black for Elite theme */
     }
     
     .identity-text {
@@ -1054,7 +1150,7 @@ nav {
         top: 40px !important;
         left: 10px !important;
         background: #333;
-        color: var(--primary-color);
+        color: var(--accent-color);
         padding: 4px 10px;
         border-radius: 4px;
         font-size: 0.7rem;
@@ -1443,4 +1539,81 @@ nav {
     margin-top: 8px;
     font-size: 0.85rem;
     font-weight: 600;
+}
+
+/* --- About Section (Dark Impact Edition) --- */
+.section-about {
+    background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.9)), 
+                url('../assets/identity-bg.png') center/cover no-repeat fixed;
+    color: #ffffff;
+    padding: 8rem 10%;
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.about-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.about-container h2 {
+    font-size: 3rem;
+    color: #ffffff;
+    margin-bottom: 3.5rem;
+    position: relative;
+    display: inline-block;
+}
+
+/* Decorative Divider (BLACK FOR WHITE THEME) */
+.about-container h2::before {
+    content: '\25c6'; /* Diamond symbol */
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    color: var(--accent-color); /* Keep diamond yellow as detail */
+    opacity: 1;
+}
+
+.about-container h2::after {
+    content: '';
+    position: absolute;
+    top: -35px;
+    left: -80%;
+    right: -80%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #000000, transparent);
+    opacity: 0.2;
+}
+
+.about-content {
+    font-size: 1.2rem;
+    line-height: 1.9;
+    text-align: left;
+    color: #ffffff;
+}
+
+.about-content p {
+    margin-bottom: 2rem;
+}
+
+.about-content strong {
+    font-weight: 950;
+    color: #ffffff; /* Text inside about is now white */
+    text-decoration: underline;
+    text-decoration-color: var(--accent-color); /* Yellow underline as detail */
+    text-underline-offset: 4px;
+}
+
+@media (max-width: 768px) {
+    .section-about {
+        padding: 4rem 8%;
+    }
+    .about-container h2 {
+        font-size: 2.2rem;
+    }
+    .about-content {
+        font-size: 1.1rem;
+    }
 }
