@@ -1,6 +1,6 @@
 // Lógica del Panel de Administración LC1 Goalkeeper
 // Persistencia: LocalStorage
-console.log("%c[LC1 Admin] Iniciando sistema...", "color: #ccff00; font-weight: bold; font-size: 16px;");
+console.log("%c[LC1 Admin] Iniciando sistema...", "color: #F9FF20; font-weight: bold; font-size: 16px;");
 
 // PRUEBA DE CARGA: Eliminada para producción.
 
@@ -712,8 +712,8 @@ function renderAnalyticsCharts(logs) {
             datasets: [{
                 label: 'Visitas',
                 data: visitData,
-                borderColor: '#ccff00',
-                backgroundColor: 'rgba(204,255,0,0.1)',
+                borderColor: '#F9FF20',
+                backgroundColor: 'rgba(249, 255, 32, 0.1)',
                 fill: true,
                 tension: 0.4,
                 borderWidth: 3
@@ -736,7 +736,7 @@ function renderAnalyticsCharts(logs) {
             labels: Object.keys(mix),
             datasets: [{
                 data: Object.values(mix),
-                backgroundColor: ['#ccff00', '#25d366', '#00c8ff', '#ff6b00'],
+                backgroundColor: ['#F9FF20', '#25d366', '#00c8ff', '#ff6b00'],
                 borderWidth: 0,
                 hoverOffset: 10
             }]
