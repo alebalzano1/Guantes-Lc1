@@ -11,15 +11,15 @@ const getSafeJSON = (key, defaultValue) => {
     }
 };
 
-const productsListSource = getSafeJSON('lc1-products-db', staticProducts);
-// Si por alguna razón la lista está vacía pero tenemos datos estáticos, restauramos
-const productsList = (productsListSource.length === 0 && staticProducts.length > 0) ? staticProducts : productsListSource;
-const categoriesList = getSafeJSON('lc1-categories-db', staticCategories);
-const galleryList = getSafeJSON('lc1-gallery-db', [
-    { id: 1, type: 'image', data: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=600&q=80' },
-    { id: 2, type: 'image', data: 'https://images.unsplash.com/photo-1518605368461-1ee1252326a3?auto=format&fit=crop&w=600&q=80' },
-    { id: 3, type: 'image', data: 'https://images.unsplash.com/photo-1628173499426-11f8e9196b05?auto=format&fit=crop&w=600&q=80' }
-]);
+const productsListLocal = localStorage.getItem('lc1-products-db');
+const productsList = productsListLocal !== null ? JSON.parse(productsListLocal) : staticProducts;
+
+const categoriesListLocal = localStorage.getItem('lc1-categories-db');
+const categoriesList = categoriesListLocal !== null ? JSON.parse(categoriesListLocal) : staticCategories;
+
+const staticGallery = window.LC1_Data ? window.LC1_Data.gallery : [];
+const galleryListLocal = localStorage.getItem('lc1-gallery-db');
+const galleryList = galleryListLocal !== null ? JSON.parse(galleryListLocal) : staticGallery;
 
 // Elementos del DOM
 const featuredContainer = document.getElementById('featured-products');
@@ -103,12 +103,23 @@ function renderActionGallery() {
     const nextBtn = document.getElementById('gallery-next');
 
     if (prevBtn && nextBtn && actionGalleryContainer) {
-        prevBtn.onclick = () => {
-            actionGalleryContainer.scrollBy({ left: -340, behavior: 'smooth' });
-        };
-        nextBtn.onclick = () => {
-            actionGalleryContainer.scrollBy({ left: 340, behavior: 'smooth' });
-        };
+        // Only hide if literally 0 items
+        if (galleryList.length <= 1) {
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+        } else {
+            prevBtn.style.display = 'flex';
+            nextBtn.style.display = 'flex';
+            
+            prevBtn.onclick = () => {
+                const step = actionGalleryContainer.offsetWidth;
+                actionGalleryContainer.scrollBy({ left: -step, behavior: 'smooth' });
+            };
+            nextBtn.onclick = () => {
+                const step = actionGalleryContainer.offsetWidth;
+                actionGalleryContainer.scrollBy({ left: step, behavior: 'smooth' });
+            };
+        }
     }
 }
 

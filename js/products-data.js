@@ -182,9 +182,18 @@ const initialSettings = {
     featuredSectionTitle: 'Equipamiento <span>Elite</span>'
 };
 
+const initialGallery = [
+    { id: 1001, type: 'image', data: 'assets/gallery/arquero-accion-1.jpg' },
+    { id: 1002, type: 'image', data: 'assets/gallery/arquero-accion-2.jpg' },
+    { id: 1003, type: 'image', data: 'assets/gallery/media__1776307286367.jpg' },
+    { id: 1004, type: 'image', data: 'assets/gallery/media__1776307286474.jpg' },
+    { id: 1005, type: 'image', data: 'assets/gallery/media__1776307286628.jpg' }
+];
+
 // Exportar para uso global
 window.LC1_Data = {
     products: initialProducts,
     categories: initialCategories,
-    settings: initialSettings
+    settings: initialSettings,
+    gallery: initialGallery
 };

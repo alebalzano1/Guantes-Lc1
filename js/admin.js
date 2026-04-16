@@ -28,14 +28,17 @@ const getSafeJSON = (key, defaultValue) => {
     }
 };
 
-let adminProducts = getSafeJSON('lc1-products-db', adminInitialProducts);
-let adminCategories = getSafeJSON('lc1-categories-db', adminInitialCategories);
+const productsLocal = localStorage.getItem('lc1-products-db');
+let adminProducts = productsLocal !== null ? JSON.parse(productsLocal) : adminInitialProducts;
+
+const categoriesLocal = localStorage.getItem('lc1-categories-db');
+let adminCategories = categoriesLocal !== null ? JSON.parse(categoriesLocal) : adminInitialCategories;
+
 let adminOrders = getSafeJSON('lc1-orders-db', []);
-let adminGallery = getSafeJSON('lc1-gallery-db', [
-    { id: 1, type: 'image', data: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=600&q=80' },
-    { id: 2, type: 'image', data: 'https://images.unsplash.com/photo-1518605368461-1ee1252326a3?auto=format&fit=crop&w=600&q=80' },
-    { id: 3, type: 'image', data: 'https://images.unsplash.com/photo-1628173499426-11f8e9196b05?auto=format&fit=crop&w=600&q=80' }
-]);
+
+const adminInitialGallery = window.LC1_Data ? window.LC1_Data.gallery : [];
+const galleryLocal = localStorage.getItem('lc1-gallery-db');
+let adminGallery = galleryLocal !== null ? JSON.parse(galleryLocal) : adminInitialGallery;
 
 // Listas negras para evitar que la sincronización restaure items eliminados
 let adminDeletedProducts = getSafeJSON('lc1-deleted-products', []);
@@ -105,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
         syncRomaProducts();
         syncCategories();
+        syncGallery();
         checkAuth();
         loadSettings();
     } catch (err) {
@@ -344,6 +348,25 @@ function syncCategories() {
     }
 }
 
+// Sincronizar galería si hay nuevos elementos iniciales
+function syncGallery() {
+    let currentDB = getSafeJSON('lc1-gallery-db', adminInitialGallery);
+    let updated = false;
+
+    adminInitialGallery.forEach(ig => {
+        if (!currentDB.find(item => item.id === ig.id)) {
+            currentDB.push(ig);
+            updated = true;
+        }
+    });
+
+    if (updated) {
+        localStorage.setItem('lc1-gallery-db', JSON.stringify(currentDB));
+        adminGallery = currentDB;
+        console.log("Gallery Synced!");
+    }
+}
+
 window.switchSection = (sectionId, element = null) => {
     document.querySelectorAll('.admin-section').forEach(s => s.style.display = 'none');
     const target = document.getElementById(`section-${sectionId}`);
@@ -555,7 +578,7 @@ function renderAdminOrders() {
             <td><span style="font-weight:600;">#ORD-${String(o.id).slice(-5)}</span></td>
             <td><span style="font-weight:700; color:#ff6b00;">${adminSettings.currency}${o.total.toLocaleString('es-AR')}</span></td>
             <td>
-                <select onchange="updateOrderStatus(${o.id}, this.value)" style="background:#fff; color:#333; border:1px solid #ddd; padding:4px; border-radius:4px; font-size:0.7rem;">
+                <select class="admin-select" onchange="updateOrderStatus(${o.id}, this.value)" style="padding: 6px 10px; font-size: 0.75rem; border-radius: 8px;">
                     <option value="Pendiente" ${o.status === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
                     <option value="Enviado" ${o.status === 'Enviado' ? 'selected' : ''}>Enviado</option>
                     <option value="Completado" ${o.status === 'Completado' ? 'selected' : ''}>Completado</option>
@@ -1093,7 +1116,7 @@ window.renderAdminGallery = () => {
             </div>
             ${item.type === 'video' ? '<div style="position:absolute; top:10px; right:10px; background:var(--primary-color); color:#000; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:0.7rem;"><i class="fas fa-video"></i> VIDEO</div>' : '<div style="position:absolute; top:10px; right:10px; background:#fff; color:#000; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:0.7rem;"><i class="fas fa-image"></i> FOTO</div>'}
             <div class="card-actions" style="margin-top:0; border-top:1px solid rgba(0,0,0,0.1);">
-                <button class="btn-editor" style="width:100%; color:red !important;" onclick="deleteGalleryItem(${item.id})">
+                <button class="btn-save" style="width:100%; font-size: 0.75rem; padding: 0.8rem;" onclick="deleteGalleryItem(${item.id})">
                     <i class="fas fa-trash"></i> Eliminar
                 </button>
             </div>

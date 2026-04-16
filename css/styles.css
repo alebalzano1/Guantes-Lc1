@@ -41,13 +41,29 @@ nav {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 5%;
-    background: #ffffff !important; /* BACK TO WHITE PRIMARY */
+    background: #ffffff !important;
     backdrop-filter: blur(10px);
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 1000;
     border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); /* Added shadow for depth */
+    transition: var(--transition);
+}
+
+.menu-toggle {
+    display: none;
+    font-size: 1.5rem;
+    color: #000000;
+    cursor: pointer;
+    z-index: 2500;
+    padding: 0.5rem;
+    transition: var(--transition);
+}
+
+.menu-toggle:hover {
+    color: var(--accent-color);
 }
 
 .logo {
@@ -1096,9 +1112,10 @@ nav {
     }
 
     .pro-hero .elite-title {
-        font-size: clamp(2rem, 15vw, 4rem) !important;
-        margin-bottom: 2rem;
-        line-height: 1.1;
+        font-size: clamp(2.5rem, 12vw, 4.5rem) !important;
+        margin-bottom: 1.5rem;
+        line-height: 1.05;
+        word-break: break-word; /* Prevent overflow on long words */
     }
 
     .hero-subtext {
@@ -1640,6 +1657,7 @@ nav {
 .gallery-slider-wrapper {
     position: relative;
     width: 100%;
+    max-width: 600px; /* Singleton view width */
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -1662,21 +1680,21 @@ nav {
 }
 
 .gallery-item {
-    flex: 0 0 320px; /* Fixed width for carousel items */
-    height: 420px;
+    flex: 0 0 100%; /* Force one item at a time */
+    height: 480px; /* Slightly taller for singleton focus */
     scroll-snap-align: center;
-    border-radius: 12px;
+    border-radius: 20px;
     overflow: hidden;
     position: relative;
     cursor: pointer;
     transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), filter 0.4s ease;
-    filter: grayscale(80%);
+    filter: none; /* Keep color for singleton slider */
+    border: 1px solid var(--glass-border);
 }
 
 .gallery-item:hover {
-    transform: scale(1.03);
-    filter: grayscale(0%);
-    box-shadow: 0 20px 40px rgba(249, 255, 32, 0.2);
+    transform: scale(1.02);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.15);
 }
 
 .gallery-item video, 
@@ -1691,29 +1709,36 @@ nav {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 50px;
-    height: 50px;
-    background: rgba(0, 0, 0, 0.6);
-    color: var(--accent-color);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 60px;
+    height: 60px;
+    background: #ffffff;
+    color: #000000;
+    border: 1px solid rgba(0,0,0,0.1);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 10;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(5px);
+    z-index: 2000;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: 2px solid #000000; /* Force border visibility */
 }
 
 .gallery-nav:hover {
     background: var(--accent-color);
-    color: #000;
-    box-shadow: 0 0 20px rgba(249, 255, 32, 0.5);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 15px 40px rgba(249, 255, 32, 0.4);
+    border-color: var(--accent-color);
 }
 
-.gallery-nav.prev { left: -25px; }
-.gallery-nav.next { right: -25px; }
+.gallery-nav.prev { left: 15px; }
+.gallery-nav.next { right: 15px; }
+
+@media (max-width: 800px) {
+    .gallery-nav.prev { left: 10px; }
+    .gallery-nav.next { right: 10px; }
+}
 
 /* URGENT Mobile Gallery Fix */
 @media (max-width: 768px) {
@@ -1723,22 +1748,22 @@ nav {
     
     .action-gallery-container {
         display: flex !important;
-        flex-direction: row !important; /* Force horizontal */
-        flex-wrap: nowrap !important; /* Prevent stacking */
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
         overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important; /* Smooth iOS */
+        -webkit-overflow-scrolling: touch !important;
         scroll-snap-type: x mandatory !important;
         gap: 1rem !important;
         padding: 1rem 0 2rem 0 !important;
         width: 100vw;
-        margin-left: -5%; /* Counteract section padding for full-width swipe */
-        padding-left: 5% !important;
-        padding-right: 5% !important;
+        margin-left: -5vw; /* Fixed margin for full-width feel */
+        padding-left: 5vw !important;
+        padding-right: 5vw !important;
     }
     
     .gallery-item {
-        flex: 0 0 280px !important; /* Force fixed width for sliding */
-        height: 380px !important;
+        flex: 0 0 100% !important; /* Singleton on mobile too */
+        height: 450px !important;
         scroll-snap-align: center !important;
     }
 }
