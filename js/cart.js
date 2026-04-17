@@ -202,17 +202,23 @@ window.submitOrder = () => {
 
     emailjs.send("service_1dhc5d5", "template_rthco6k", templateParams)
         .then(() => {
-            // Guardar en la base local (admin view)
-            const orders = JSON.parse(localStorage.getItem('lc1-orders-db')) || [];
-            orders.push({
+            // Guardar en Firebase (Orden Global)
+            const newOrder = {
                 id: orderId,
                 customer: { name, email, phone },
                 date: new Date().toLocaleString(),
                 items: cart,
                 total: total,
                 status: 'Pendiente'
-            });
-            localStorage.setItem('lc1-orders-db', JSON.stringify(orders));
+            };
+
+            if (window.FirebaseService) {
+                FirebaseService.saveOrder(newOrder).then(() => {
+                    console.log("[Cart] Orden guardada en la nube con éxito.");
+                }).catch(err => {
+                    console.error("[Cart] Error guardando orden en la nube:", err);
+                });
+            }
 
             // Vaciar y mostrar exito
             localStorage.removeItem('lc1-cart');

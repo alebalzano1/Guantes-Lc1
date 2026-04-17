@@ -28,17 +28,37 @@ const getSafeJSON = (key, defaultValue) => {
     }
 };
 
-const productsLocal = localStorage.getItem('lc1-products-db');
-let adminProducts = productsLocal !== null ? JSON.parse(productsLocal) : adminInitialProducts;
+// REEMPLAZO Firebase: Las variables ahora se poblarán desde Firestore
+let adminProducts = [];
+let adminCategories = [];
+let adminGallery = [];
+let adminOrders = [];
+let adminSettings = {};
 
-const categoriesLocal = localStorage.getItem('lc1-categories-db');
-let adminCategories = categoriesLocal !== null ? JSON.parse(categoriesLocal) : adminInitialCategories;
+// Obtener datos iniciales de Firebase
+async function loadInitialData() {
+    console.log("[LC1 Admin] Cargando datos desde Firebase...");
+    try {
+        adminProducts = await FirebaseService.getProducts();
+        adminCategories = await FirebaseService.getCategories();
+        adminGallery = await FirebaseService.getGallery();
+        adminSettings = await FirebaseService.getSettings() || window.LC1_Data.settings;
+        adminOrders = await FirebaseService.getOrders();
+        
+        console.log("[LC1 Admin] Datos cargados:", {
+            products: adminProducts.length,
+            categories: adminCategories.length,
+            orders: adminOrders.length
+        });
 
-let adminOrders = getSafeJSON('lc1-orders-db', []);
-
-const adminInitialGallery = window.LC1_Data ? window.LC1_Data.gallery : [];
-const galleryLocal = localStorage.getItem('lc1-gallery-db');
-let adminGallery = galleryLocal !== null ? JSON.parse(galleryLocal) : adminInitialGallery;
+        // Sincronizar UI
+        checkAuth();
+        loadSettings();
+    } catch (error) {
+        console.error("[LC1 Admin] Error fatal cargando Firebase:", error);
+        showToast('Error de conexión con la base de datos', 'error');
+    }
+}
 
 // Listas negras para evitar que la sincronización restaure items eliminados
 let adminDeletedProducts = getSafeJSON('lc1-deleted-products', []);
@@ -104,15 +124,11 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("[LC1 Admin] Sistema de login vinculado.");
     }
 
-    // 2. CARGAR EL RESTO (Con protección ante fallos)
+    // 2. CARGAR EL RESTO (Desde Firebase)
     try {
-        syncRomaProducts();
-        syncCategories();
-        syncGallery();
-        checkAuth();
-        loadSettings();
+        loadInitialData();
     } catch (err) {
-        console.warn("[LC1 Admin] Aviso: Algunos módulos secundarios fallaron al cargar, pero el sistema base sigue activo.", err);
+        console.warn("[LC1 Admin] Aviso: Fallo crítico al iniciar datos.", err);
     }
 
 
@@ -432,22 +448,30 @@ function renderAdminProducts() {
     if (counter) counter.textContent = adminProducts.length;
 }
 
-window.toggleFeatured = (id) => {
+window.toggleFeatured = async (id) => {
     const p = adminProducts.find(p => p.id === id);
     if (p) {
         p.featured = !p.featured;
-        localStorage.setItem('lc1-products-db', JSON.stringify(adminProducts));
-        renderAdminProducts();
-        renderAdminHomeFeatured(); // Sincronizar con Mi Portada si está abierta
+        try {
+            await FirebaseService.saveProduct(p);
+            renderAdminProducts();
+            renderAdminHomeFeatured();
+        } catch (error) {
+            showToast('Error al actualizar destaque', 'error');
+        }
     }
 };
 
-window.toggleAvailability = (id) => {
+window.toggleAvailability = async (id) => {
     const p = adminProducts.find(p => p.id === id);
     if (p) {
         p.available = !p.available;
-        localStorage.setItem('lc1-products-db', JSON.stringify(adminProducts));
-        renderAdminProducts();
+        try {
+            await FirebaseService.saveProduct(p);
+            renderAdminProducts();
+        } catch (error) {
+            showToast('Error al actualizar disponibilidad', 'error');
+        }
     }
 };
 
@@ -477,66 +501,86 @@ function renderAdminHomeFeatured() {
     `).join('');
 }
 
-window.saveProduct = () => {
+window.saveProduct = async () => {
     const idToEdit = document.getElementById('product-form').dataset.editId;
+    const saveBtn = document.querySelector('#product-form .btn-save');
     
     if (!currentImageBase64 && !idToEdit) {
         return alert('Por favor, selecciona una imagen');
     }
 
-    const newProduct = {
-        id: idToEdit ? parseInt(idToEdit) : Date.now(),
-        name: document.getElementById('p-name').value,
-        sku: document.getElementById('p-sku').value,
-        price: parseFloat(document.getElementById('p-price').value),
-        category: document.getElementById('p-category').value,
-        desc: document.getElementById('p-desc').value,
-        label: document.getElementById('p-label').value,
-        available: document.getElementById('p-available').checked,
-        featured: document.getElementById('p-featured').checked,
-        customizable: document.getElementById('p-customizable').checked,
-        image: currentImagesArray.length > 0 ? currentImagesArray[0] : (idToEdit ? adminProducts.find(p => p.id === parseInt(idToEdit)).image : ''),
-        images: currentImagesArray.length > 0 ? currentImagesArray : (idToEdit ? (adminProducts.find(p => p.id === parseInt(idToEdit)).images || []) : [])
-    };
+    // Feedback visual de carga
+    const originalBtnText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo...';
+    saveBtn.disabled = true;
 
-    if (idToEdit) {
-        const index = adminProducts.findIndex(p => p.id === parseInt(idToEdit));
-        if (index !== -1) {
-            adminProducts[index] = newProduct;
+    try {
+        const finalImages = [];
+        // Subir cada imagen a Firebase Storage si es Base64
+        for (let i = 0; i < currentImagesArray.length; i++) {
+            const img = currentImagesArray[i];
+            if (img.startsWith('data:image')) {
+                const blob = FirebaseService.base64ToBlob(img);
+                const fileName = `products/${Date.now()}_${i}.jpg`;
+                const url = await FirebaseService.uploadImage(blob, fileName);
+                finalImages.push(url);
+            } else {
+                finalImages.push(img); // Ya es una URL o ruta local
+            }
         }
-    } else {
-        adminProducts.push(newProduct);
-        // Si el ID estaba en la lista negra (ej: borrado y recreado con mismo ID manual), lo quitamos
-        adminDeletedProducts = adminDeletedProducts.filter(id => id !== newProduct.id);
-        localStorage.setItem('lc1-deleted-products', JSON.stringify(adminDeletedProducts));
-    }
 
-    // Persistencia Atómica
-    localStorage.setItem('lc1-products-db', JSON.stringify(adminProducts));
-    
-    // Sincronización Global de Vistas
-    renderAdminProducts();
-    renderAdminHomeFeatured();
-    calculateStats(); 
-    
-    closeModal();
-    showToast('Producto actualizado y guardado correctamente', 'success');
+        const newProduct = {
+            id: idToEdit ? parseInt(idToEdit) : Date.now(),
+            name: document.getElementById('p-name').value,
+            sku: document.getElementById('p-sku').value,
+            price: parseFloat(document.getElementById('p-price').value),
+            category: document.getElementById('p-category').value,
+            desc: document.getElementById('p-desc').value,
+            label: document.getElementById('p-label').value,
+            available: document.getElementById('p-available').checked,
+            featured: document.getElementById('p-featured').checked,
+            customizable: document.getElementById('p-customizable').checked,
+            image: finalImages.length > 0 ? finalImages[0] : (idToEdit ? adminProducts.find(p => p.id === parseInt(idToEdit)).image : ''),
+            images: finalImages
+        };
+
+        // Guardar en Firestore
+        await FirebaseService.saveProduct(newProduct);
+
+        // Actualizar estado local
+        if (idToEdit) {
+            const index = adminProducts.findIndex(p => p.id === parseInt(idToEdit));
+            if (index !== -1) adminProducts[index] = newProduct;
+        } else {
+            adminProducts.push(newProduct);
+        }
+
+        renderAdminProducts();
+        renderAdminHomeFeatured();
+        calculateStats(); 
+        
+        closeModal();
+        showToast('Producto sincronizado con éxito', 'success');
+
+    } catch (error) {
+        console.error("Error guardando producto:", error);
+        showToast('Error al subir imágenes o guardar datos', 'error');
+    } finally {
+        saveBtn.innerHTML = originalBtnText;
+        saveBtn.disabled = false;
+    }
 };
 
 window.deleteProduct = (id) => {
-    showConfirm('¿Estás seguro de que quieres eliminar este producto?', () => {
-        // 1. Añadir a lista negra de eliminados
-        if (!adminDeletedProducts.includes(id)) {
-            adminDeletedProducts.push(id);
-            localStorage.setItem('lc1-deleted-products', JSON.stringify(adminDeletedProducts));
+    showConfirm('¿Estás seguro de que quieres eliminar este producto?', async () => {
+        try {
+            await FirebaseService.deleteProduct(id);
+            adminProducts = adminProducts.filter(p => p.id !== id);
+            renderAdminProducts();
+            showToast('Producto eliminado de la nube', 'info');
+        } catch (error) {
+            showToast('Error al eliminar producto', 'error');
         }
-
-        // 2. Eliminar del array actual y guardar
-        adminProducts = adminProducts.filter(p => p.id !== id);
-        localStorage.setItem('lc1-products-db', JSON.stringify(adminProducts));
-        
-        renderAdminProducts();
-        showToast('Producto eliminado', 'info');
     });
 };
 
@@ -774,27 +818,32 @@ function renderAnalyticsCharts(logs) {
     });
 }
 
-window.updateOrderStatus = (id, newStatus) => {
+window.updateOrderStatus = async (id, newStatus) => {
     const order = adminOrders.find(o => o.id === id);
     if (order) {
         order.status = newStatus;
-        localStorage.setItem('lc1-orders-db', JSON.stringify(adminOrders));
-        
-        // Sync UI
-        renderAdminOrders();
-        calculateStats(); // Recalculate revenue if canceled
-        
-        showToast(`Pedido #${String(id).slice(-5)} actualizado a ${newStatus}`, 'success');
+        try {
+            await FirebaseService.saveOrder(order);
+            renderAdminOrders();
+            calculateStats(); 
+            showToast(`Pedido #${String(id).slice(-5)} actualizado a ${newStatus}`, 'success');
+        } catch (error) {
+            showToast('Error al actualizar pedido', 'error');
+        }
     }
 };
 
 window.deleteOrder = (id) => {
-    showConfirm('¿Eliminar registro de este pedido permanentemente?', () => {
-        adminOrders = adminOrders.filter(o => o.id !== id);
-        localStorage.setItem('lc1-orders-db', JSON.stringify(adminOrders));
-        renderAdminOrders();
-        calculateStats();
-        showToast('Registro eliminado', 'info');
+    showConfirm('¿Eliminar registro de este pedido permanentemente?', async () => {
+        try {
+            await FirebaseService.deleteOrder(id);
+            adminOrders = adminOrders.filter(o => o.id !== id);
+            renderAdminOrders();
+            calculateStats();
+            showToast('Registro eliminado de la nube', 'info');
+        } catch (error) {
+            showToast('Error al eliminar pedido', 'error');
+        }
     });
 };
 
@@ -858,14 +907,17 @@ function loadSettings() {
 }
 
 // Nueva función de guardado automático para títulos
-window.updateDynamicTitle = (key, value) => {
+window.updateDynamicTitle = async (key, value) => {
     adminSettings[key] = value;
-    localStorage.setItem('lc1-settings', JSON.stringify(adminSettings));
-    // Opcional: Mostrar un micro-toast o solo feedback visual sutil
-    console.log(`Setting updated: ${key} = ${value}`);
+    try {
+        await FirebaseService.saveSettings(adminSettings);
+        console.log(`Firebase updated: ${key} = ${value}`);
+    } catch (error) {
+        console.error("Error updating dynamic title:", error);
+    }
 };
 
-function saveSettings() {
+async function saveSettings() {
     adminSettings = {
         storeName: document.getElementById('set-store-name').value,
         whatsapp: document.getElementById('set-whatsapp').value,
@@ -873,9 +925,13 @@ function saveSettings() {
         catSectionTitle: document.getElementById('set-cat-title').value,
         featuredSectionTitle: document.getElementById('set-featured-title').value
     };
-    localStorage.setItem('lc1-settings', JSON.stringify(adminSettings));
-    showToast('Ajustes guardados correctamente', 'success');
-    setTimeout(() => location.reload(), 1000);
+    try {
+        await FirebaseService.saveSettings(adminSettings);
+        showToast('Ajustes sincronizados en la nube', 'success');
+        setTimeout(() => location.reload(), 1000);
+    } catch (error) {
+        showToast('Error al guardar ajustes', 'error');
+    }
 }
 
 function saveAuthSettings() {
@@ -1052,51 +1108,66 @@ window.closeCatModal = () => {
     currentImageBase64 = '';
 };
 
-window.saveCategory = () => {
-    const idToEdit = document.getElementById('category-modal').dataset.editId;
+window.saveCategory = async () => {
+    const modal = document.getElementById('category-modal');
+    const idToEdit = modal.dataset.editId;
+    const saveBtn = document.querySelector('#category-modal .btn-save');
     
-    const categoryData = {
-        id: idToEdit ? parseInt(idToEdit) : Date.now(),
-        name: document.getElementById('cat-name').value,
-        slug: document.getElementById('cat-name').value.toLowerCase().replace(/ /g, '-'),
-        desc: document.getElementById('cat-desc').value,
-        image: currentImageBase64
-    };
-
-    if (!categoryData.image) {
+    if (!currentImageBase64) {
         return showToast('Por favor, selecciona una foto para la categoría', 'error');
     }
 
-    if (idToEdit) {
-        const index = adminCategories.findIndex(c => c.id === parseInt(idToEdit));
-        if (index !== -1) adminCategories[index] = categoryData;
-    } else {
-        adminCategories.push(categoryData);
-        // Quitar de lista negra si se recrea
-        adminDeletedCategories = adminDeletedCategories.filter(id => id !== categoryData.id);
-        localStorage.setItem('lc1-deleted-categories', JSON.stringify(adminDeletedCategories));
-    }
+    const originalBtnText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    saveBtn.disabled = true;
 
-    localStorage.setItem('lc1-categories-db', JSON.stringify(adminCategories));
-    renderAdminCategories();
-    closeCatModal();
-    showToast(idToEdit ? 'Categoría actualizada correctamente' : 'Categoría creada', 'success');
+    try {
+        let finalImageUrl = currentImageBase64;
+        
+        // Subir si es nueva imagen
+        if (currentImageBase64.startsWith('data:image')) {
+            const blob = FirebaseService.base64ToBlob(currentImageBase64);
+            finalImageUrl = await FirebaseService.uploadImage(blob, `categories/${Date.now()}.jpg`);
+        }
+
+        const categoryData = {
+            id: idToEdit ? parseInt(idToEdit) : Date.now(),
+            name: document.getElementById('cat-name').value,
+            slug: document.getElementById('cat-name').value.toLowerCase().replace(/ /g, '-'),
+            desc: document.getElementById('cat-desc').value,
+            image: finalImageUrl
+        };
+
+        await FirebaseService.saveCategory(categoryData);
+
+        if (idToEdit) {
+            const index = adminCategories.findIndex(c => c.id === parseInt(idToEdit));
+            if (index !== -1) adminCategories[index] = categoryData;
+        } else {
+            adminCategories.push(categoryData);
+        }
+
+        renderAdminCategories();
+        closeCatModal();
+        showToast(idToEdit ? 'Categoría actualizada' : 'Categoría creada', 'success');
+    } catch (error) {
+        showToast('Error al guardar categoría', 'error');
+    } finally {
+        saveBtn.innerHTML = originalBtnText;
+        saveBtn.disabled = false;
+    }
 };
 
 window.deleteCategory = (id) => {
-    showConfirm('¿Estás seguro de que quieres eliminar esta categoría?', () => {
-        // 1. Añadir a lista negra
-        if (!adminDeletedCategories.includes(id)) {
-            adminDeletedCategories.push(id);
-            localStorage.setItem('lc1-deleted-categories', JSON.stringify(adminDeletedCategories));
+    showConfirm('¿Estás seguro de que quieres eliminar esta categoría?', async () => {
+        try {
+            await FirebaseService.deleteCategory(id);
+            adminCategories = adminCategories.filter(c => c.id !== id);
+            renderAdminCategories();
+            showToast('Categoría eliminada de la nube', 'info');
+        } catch (error) {
+            showToast('Error al eliminar categoría', 'error');
         }
-
-        // 2. Eliminar y guardar
-        adminCategories = adminCategories.filter(c => c.id !== id);
-        localStorage.setItem('lc1-categories-db', JSON.stringify(adminCategories));
-        
-        renderAdminCategories();
-        showToast('Categoría eliminada', 'info');
     });
 };
 
@@ -1149,37 +1220,58 @@ window.toggleGalleryType = (type) => {
     }
 };
 
-window.saveGalleryItem = () => {
+window.saveGalleryItem = async () => {
     const type = document.getElementById('gal-type').value;
-    let dataUrl = '';
+    const saveBtn = document.querySelector('#gallery-form .btn-save');
+    
+    const originalBtnText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo...';
+    saveBtn.disabled = true;
 
-    if (type === 'video') {
-        const inputUrl = document.getElementById('gal-video-url').value.trim();
-        if (!inputUrl) return showToast('Pega el enlace del video', 'error');
-        dataUrl = inputUrl;
-    } else {
-        if (!currentImageBase64) return showToast('Sube una imagen primero', 'error');
-        dataUrl = currentImageBase64;
+    try {
+        let data = '';
+        if (type === 'image') {
+            if (!currentImageBase64) return alert('Selecciona una imagen');
+            if (currentImageBase64.startsWith('data:image')) {
+                const blob = FirebaseService.base64ToBlob(currentImageBase64);
+                data = await FirebaseService.uploadImage(blob, `gallery/${Date.now()}.jpg`);
+            } else {
+                data = currentImageBase64;
+            }
+        } else {
+            data = document.getElementById('gal-video-url').value;
+            if (!data) return alert('Ingresa la URL del video');
+        }
+
+        const newItem = {
+            id: Date.now(),
+            type: type,
+            data: data
+        };
+
+        await FirebaseService.saveGalleryItem(newItem);
+        adminGallery.push(newItem);
+        renderAdminGallery();
+        closeGalleryModal();
+        showToast('Galería actualizada', 'success');
+    } catch (error) {
+        showToast('Error al guardar en galería', 'error');
+    } finally {
+        saveBtn.innerHTML = originalBtnText;
+        saveBtn.disabled = false;
     }
-
-    adminGallery.push({
-        id: Date.now(),
-        type: type,
-        data: dataUrl
-    });
-
-    localStorage.setItem('lc1-gallery-db', JSON.stringify(adminGallery));
-    renderAdminGallery();
-    closeGalleryModal();
-    showToast('Elemento añadido a la galería', 'success');
 };
 
 window.deleteGalleryItem = (id) => {
-    showConfirm('¿Eliminar este elemento de la galería?', () => {
-        adminGallery = adminGallery.filter(i => i.id !== id);
-        localStorage.setItem('lc1-gallery-db', JSON.stringify(adminGallery));
-        renderAdminGallery();
-        showToast('Elemento eliminado', 'info');
+    showConfirm('¿Eliminar este elemento de la galería?', async () => {
+        try {
+            await FirebaseService.deleteGalleryItem(id);
+            adminGallery = adminGallery.filter(item => item.id !== id);
+            renderAdminGallery();
+            showToast('Elemento eliminado', 'info');
+        } catch (error) {
+            showToast('Error al eliminar', 'error');
+        }
     });
 };
 

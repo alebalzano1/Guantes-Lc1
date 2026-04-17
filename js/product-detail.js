@@ -1,5 +1,5 @@
 // Lógica de la Página de Detalle de Producto
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const productId = parseInt(urlParams.get('id'));
 
@@ -8,28 +8,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const getSafeJSON = (key, defaultValue) => {
-        try {
-            const item = localStorage.getItem(key);
-            return item ? JSON.parse(item) : defaultValue;
-        } catch (e) {
-            console.error(`Error parsing LocalStorage key "${key}":`, e);
-            return defaultValue;
+    console.log("[LC1 Detail] Obteniendo producto de la nube...");
+    try {
+        const productsList = await FirebaseService.getProducts();
+        const product = productsList.find(p => p.id === productId);
+
+        if (!product) {
+            document.body.innerHTML = `<div style="text-align:center; padding:5rem; color:white;"><h1>Producto no encontrado</h1><a href="shop.html" style="color:var(--primary-color);">Volver a la tienda</a></div>`;
+            return;
         }
-    };
 
-    const staticProducts = window.LC1_Data ? window.LC1_Data.products : [];
-    const productsList = getSafeJSON('lc1-products-db', staticProducts);
-
-    // Buscar el producto en los datos sincronizados
-    const product = productsList.find(p => p.id === productId);
-
-    if (!product) {
-        document.body.innerHTML = `<div style="text-align:center; padding:5rem; color:white;"><h1>Producto no encontrado</h1><a href="shop.html" style="color:var(--primary-color);">Volver a la tienda</a></div>`;
-        return;
+        renderProductDetail(product);
+    } catch (error) {
+        console.error("Error al cargar detalle:", error);
+        // Fallback a static
+        const product = (window.LC1_Data ? window.LC1_Data.products : []).find(p => p.id === productId);
+        if (product) renderProductDetail(product);
     }
-
-    renderProductDetail(product);
 });
 
 function renderProductDetail(product) {
@@ -137,11 +132,12 @@ function renderProductDetail(product) {
     // 4. Botón WhatsApp
     const btnWA = document.getElementById('btn-wa-direct');
     if (btnWA) {
-        btnWA.onclick = () => {
+        btnWA.onclick = async () => {
             const size = validateSize();
             if (!size) return;
             const msg = `Hola LC1! 👋 Quiero comprar el producto: *${product.name}* (Talle: ${size}) que tiene un precio de *$${product.price.toLocaleString('es-AR')}*. ¿Tienen stock?`;
-            const settings = JSON.parse(localStorage.getItem('lc1-settings')) || (window.LC1_Data ? window.LC1_Data.settings : { whatsapp: '541140236384' });
+            
+            const settings = await FirebaseService.getSettings() || (window.LC1_Data ? window.LC1_Data.settings : { whatsapp: '541140236384' });
             window.open(`https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
         };
     }

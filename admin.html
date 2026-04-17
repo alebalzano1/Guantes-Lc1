@@ -734,11 +734,9 @@
                 <div class="admin-section-header">
                     <h1 class="sport-font" style="color: #000; font-size: 2.5rem;">Inventario <span style="color: var(--primary-color);">Total</span></h1>
                     <div style="display:flex; gap:1.5rem; align-items:center;">
-                        <div id="admin-user-info" style="color: #666; font-size: 0.8rem;">
-                            <i class="fas fa-user-circle"></i> Admin LC1
-                        </div>
                         <button class="btn-primary" onclick="openModal()">+ Nuevo Producto</button>
                     </div>
+                </div>
                 </div>
 
                 <!-- Grid instead of table -->
@@ -1148,6 +1146,14 @@
     <!-- Toast Component Container -->
     <div id="toast-container"></div>
 
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
+    <!-- LC1 Firebase Config & Service -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
     <script src="js/products-data.js"></script>
     <script src="js/admin.js"></script>
 </body>

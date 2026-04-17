@@ -1,25 +1,33 @@
-const staticProducts = window.LC1_Data ? window.LC1_Data.products : [];
-const staticCategories = window.LC1_Data ? window.LC1_Data.categories : [];
+let productsList = [];
+let categoriesList = [];
+let galleryList = [];
+let siteSettings = {};
 
-const getSafeJSON = (key, defaultValue) => {
+async function loadSiteData() {
+    console.log("[LC1 App] Cargando datos desde la nube...");
     try {
-        const item = localStorage.getItem(key);
-        return item ? JSON.parse(item) : defaultValue;
-    } catch (e) {
-        console.error(`Error parsing LocalStorage key "${key}":`, e);
-        return defaultValue;
+        productsList = await FirebaseService.getProducts();
+        categoriesList = await FirebaseService.getCategories();
+        galleryList = await FirebaseService.getGallery();
+        siteSettings = await FirebaseService.getSettings() || window.LC1_Data.settings;
+
+        // Fallback a locales si la nube está vacía (solo primer arranque)
+        if (productsList.length === 0) productsList = window.LC1_Data.products;
+        if (categoriesList.length === 0) categoriesList = window.LC1_Data.categories;
+        if (galleryList.length === 0) galleryList = window.LC1_Data.gallery;
+
+        renderPage();
+        syncBranding();
+    } catch (error) {
+        console.error("[LC1 App] Error cargando base de datos:", error);
+        // Fallback de emergencia
+        productsList = window.LC1_Data.products;
+        categoriesList = window.LC1_Data.categories;
+        galleryList = window.LC1_Data.gallery;
+        siteSettings = window.LC1_Data.settings;
+        renderPage();
     }
-};
-
-const productsListLocal = localStorage.getItem('lc1-products-db');
-const productsList = productsListLocal !== null ? JSON.parse(productsListLocal) : staticProducts;
-
-const categoriesListLocal = localStorage.getItem('lc1-categories-db');
-const categoriesList = categoriesListLocal !== null ? JSON.parse(categoriesListLocal) : staticCategories;
-
-const staticGallery = window.LC1_Data ? window.LC1_Data.gallery : [];
-const galleryListLocal = localStorage.getItem('lc1-gallery-db');
-const galleryList = galleryListLocal !== null ? JSON.parse(galleryListLocal) : staticGallery;
+}
 
 // Elementos del DOM
 const featuredContainer = document.getElementById('featured-products');
@@ -32,15 +40,12 @@ const cartCountElement = document.querySelector('.cart-count');
 let currentCategory = 'all';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Sync Branding
-    syncBranding();
-
-    // Detectar categoría desde URL
+    // Detectar talle en URL si aplica
     const urlParams = new URLSearchParams(window.location.search);
     const catParam = urlParams.get('cat');
     if (catParam) currentCategory = catParam;
 
-    renderPage();
+    loadSiteData();
     updateCartCount();
 });
 
@@ -247,7 +252,7 @@ window.buyWhatsappWithSize = (productId) => {
     const product = productsList.find(p => p.id === productId);
     
     const msg = `Hola LC1! 👋 Quiero comprar el producto: *${product.name}* (Talle: ${size}) que tiene un precio de *$${product.price.toLocaleString('es-AR')}*. ¿Tienen stock?`;
-    const whatsappNumber = (window.LC1_Data && window.LC1_Data.settings) ? window.LC1_Data.settings.whatsapp : '541140236384';
+    const whatsappNumber = siteSettings.whatsapp || '541140236384';
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
 };
 
@@ -294,10 +299,7 @@ style.textContent = `
 document.head.appendChild(style);
 // Sync Branding from Admin
 function syncBranding() {
-    const settings = getSafeJSON('lc1-settings', window.LC1_Data ? window.LC1_Data.settings : {
-        catSectionTitle: 'Explora <span>Categorías</span>',
-        featuredSectionTitle: 'Lanzamientos <span>Elite</span>'
-    });
+    const settings = siteSettings;
 
     const catTitleEl = document.getElementById('cat-section-title');
     const featuredTitleEl = document.getElementById('featured-section-title');
