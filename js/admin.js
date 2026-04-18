@@ -1,6 +1,7 @@
 // Lógica del Panel de Administración LC1 Goalkeeper
 // Persistencia: LocalStorage
-console.log("%c[LC1 Admin] Iniciando sistema...", "color: #F9FF20; font-weight: bold; font-size: 16px;");
+const ADMIN_VERSION = "2.2.1";
+console.log(`%c[LC1 Admin v${ADMIN_VERSION}] Iniciando sistema...`, "color: #F9FF20; font-weight: bold; font-size: 16px;");
 
 // PRUEBA DE CARGA: Eliminada para producción.
 
@@ -110,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isValid) {
                 console.log("[LC1 Admin] Acceso concedido.");
                 sessionStorage.setItem('lc1-admin-token', 'true');
+                console.log("[LC1 Admin] Token de sesión guardado. Verificando...");
                 checkAuth();
             } else {
                 console.warn("[LC1 Admin] Acceso Denegado.");
