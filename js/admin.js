@@ -18,15 +18,8 @@ let currentImagesArray = [];
 const adminInitialProducts = window.LC1_Data ? window.LC1_Data.products : [];
 const adminInitialCategories = window.LC1_Data ? window.LC1_Data.categories : [];
 
-const getSafeJSON = (key, defaultValue) => {
-    try {
-        const item = localStorage.getItem(key);
-        return item ? JSON.parse(item) : defaultValue;
-    } catch (e) {
-        console.error(`Error parsing LocalStorage key "${key}":`, e);
-        return defaultValue;
-    }
-};
+// getSafeJSON ahora se carga desde utils.js
+
 
 // REEMPLAZO Firebase: Las variables ahora se poblarán desde Firestore
 let adminProducts = [];
@@ -57,6 +50,8 @@ async function loadInitialData() {
             renderAdminProducts();
             renderAdminOrders();
             renderAdminCategories();
+            renderAdminGallery();
+            renderAdminHomeFeatured();
             calculateStats();
         }
     } catch (error) {
@@ -219,31 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-window.showToast = (msg, type = 'success') => {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
+// showToast ahora se carga desde utils.js
 
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    
-    let icon = 'fa-check-circle';
-    if (type === 'error') icon = 'fa-exclamation-circle';
-    if (type === 'info') icon = 'fa-info-circle';
-
-    toast.innerHTML = `
-        <i class="fas ${icon}"></i>
-        <div class="toast-content">
-            <p style="margin:0; font-weight:600; font-size:0.9rem;">${msg}</p>
-        </div>
-    `;
-
-    container.appendChild(toast);
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(-20px)';
-        setTimeout(() => toast.remove(), 500);
-    }, 3000);
-};
 
 window.showConfirm = (text, callback) => {
     const modal = document.getElementById('confirm-modal');

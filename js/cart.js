@@ -103,7 +103,7 @@ function closeCartMenu() {
 }
 
 window.renderCart = () => {
-    const cart = JSON.parse(localStorage.getItem('lc1-cart')) || [];
+    const cart = getSafeJSON('lc1-cart', []);
     const container = document.getElementById('cart-items');
     const totalElement = document.getElementById('cart-total');
     
@@ -138,7 +138,7 @@ window.renderCart = () => {
 };
 
 window.changeQty = (index, delta) => {
-    let cart = JSON.parse(localStorage.getItem('lc1-cart')) || [];
+    let cart = getSafeJSON('lc1-cart', []);
     if (cart[index]) {
         cart[index].quantity += delta;
         if (cart[index].quantity <= 0) cart.splice(index, 1);
@@ -149,7 +149,7 @@ window.changeQty = (index, delta) => {
 };
 
 window.removeFromCart = (index) => {
-    let cart = JSON.parse(localStorage.getItem('lc1-cart')) || [];
+    let cart = getSafeJSON('lc1-cart', []);
     cart.splice(index, 1);
     localStorage.setItem('lc1-cart', JSON.stringify(cart));
     renderCart();
@@ -157,7 +157,7 @@ window.removeFromCart = (index) => {
 };
 
 window.showCheckoutForm = () => {
-    const cart = JSON.parse(localStorage.getItem('lc1-cart')) || [];
+    const cart = getSafeJSON('lc1-cart', []);
     if (cart.length === 0) return alert("El carrito está vacío");
     document.getElementById('cart-content').style.display = 'none';
     document.getElementById('checkout-form-container').style.display = 'flex';
@@ -182,7 +182,7 @@ window.submitOrder = () => {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROCESANDO...';
     btn.disabled = true;
 
-    const cart = JSON.parse(localStorage.getItem('lc1-cart')) || [];
+    const cart = getSafeJSON('lc1-cart', []);
     const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     const orderId = Math.floor(Math.random() * 90000) + 10000; // Random 5 digit
 

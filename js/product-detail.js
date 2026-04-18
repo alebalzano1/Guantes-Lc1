@@ -144,7 +144,7 @@ function renderProductDetail(product) {
 }
 
 function addToCart(product, size) {
-    let cart = JSON.parse(localStorage.getItem('lc1-cart')) || [];
+    let cart = getSafeJSON('lc1-cart', []);
     const existing = cart.find(item => item.id === product.id && item.size === size);
     
     if (existing) {

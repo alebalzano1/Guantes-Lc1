@@ -264,31 +264,8 @@ function updateCartCount() {
     }
 }
 
-function showToast(msg, type = 'success') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
+// La función showToast se movió a utils.js para ser compartida.
 
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    
-    let icon = 'fa-check-circle';
-    if (type === 'error') icon = 'fa-exclamation-circle';
-    if (type === 'info') icon = 'fa-info-circle';
-
-    toast.innerHTML = `
-        <i class="fas ${icon}"></i>
-        <div class="toast-content">
-            <p style="margin:0; font-weight:600; font-size:0.9rem;">${msg}</p>
-        </div>
-    `;
-
-    container.appendChild(toast);
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(-20px)';
-        setTimeout(() => toast.remove(), 500);
-    }, 3000);
-}
 
 // Estilos de animación para el toast
 const style = document.createElement('style');
