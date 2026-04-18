@@ -52,8 +52,13 @@ async function loadInitialData() {
         });
 
         // Sincronizar UI
-        checkAuth();
         loadSettings();
+        if (sessionStorage.getItem('lc1-admin-token')) {
+            renderAdminProducts();
+            renderAdminOrders();
+            renderAdminCategories();
+            calculateStats();
+        }
     } catch (error) {
         console.error("[LC1 Admin] Error fatal cargando Firebase:", error);
         showToast('Error de conexión con la base de datos', 'error');
@@ -64,7 +69,7 @@ async function loadInitialData() {
 let adminDeletedProducts = getSafeJSON('lc1-deleted-products', []);
 let adminDeletedCategories = getSafeJSON('lc1-deleted-categories', []);
 
-let adminSettings = getSafeJSON('lc1-settings', window.LC1_Data ? window.LC1_Data.settings : {
+adminSettings = getSafeJSON('lc1-settings', window.LC1_Data ? window.LC1_Data.settings : {
     storeName: 'LC1 GOALKEEPER',
     whatsapp: '541140236384',
     currency: '$',
@@ -124,7 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("[LC1 Admin] Sistema de login vinculado.");
     }
 
-    // 2. CARGAR EL RESTO (Desde Firebase)
+    // 2. VERIFICAR AUTH INICIAL (Inmediato)
+    checkAuth();
+
+    // 3. CARGAR EL RESTO (Desde Firebase)
     try {
         loadInitialData();
     } catch (err) {
