@@ -11,26 +11,29 @@ const Tracker = {
         this.trackUnload();
     },
 
-    logEvent(type, data = {}) {
-        let logs = JSON.parse(localStorage.getItem('lc1-event-logs')) || [];
-        
+    async logEvent(type, data = {}) {
         const event = {
             id: Date.now() + Math.random().toString(36).substr(2, 5),
             type: type,
             path: window.location.pathname.split('/').pop() || 'home',
             data: data,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString() // Fallback local, Firebase usará serverTimestamp
         };
 
-        logs.push(event);
+        // 1. Guardar en LocalStorage (para compatibilidad o caché rápida)
+        try {
+            let logs = JSON.parse(localStorage.getItem('lc1-event-logs')) || [];
+            logs.push(event);
+            if (logs.length > this.MAX_LOGS) logs = logs.slice(-this.MAX_LOGS);
+            localStorage.setItem('lc1-event-logs', JSON.stringify(logs));
+        } catch (e) {}
 
-        // Rotating logs if too many
-        if (logs.length > this.MAX_LOGS) {
-            logs = logs.slice(-this.MAX_LOGS);
+        // 2. Sincronizar con Firebase (Global)
+        if (window.FirebaseService && window.FirebaseService.logEvent) {
+            await window.FirebaseService.logEvent(event);
         }
 
-        localStorage.setItem('lc1-event-logs', JSON.stringify(logs));
-        console.log(`[LC1-Tracker] Event: ${type}`, data);
+        console.log(`[LC1-Tracker] Event tracked globally: ${type}`, data);
     },
 
     trackVisit() {

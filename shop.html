@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
     <style>
         .shop-container {
             display: grid;
@@ -105,13 +106,22 @@
     <div class="shop-container">
         <!-- Sidebar Filters -->
         <aside class="filters">
+            <div class="filter-group" style="margin-bottom: 2.5rem;">
+                <h4 class="sport-font" style="margin-bottom: 1rem;">Buscar</h4>
+                <div class="search-wrap" style="position: relative;">
+                    <input type="text" id="shop-search" 
+                           placeholder="Nombre del producto..." 
+                           oninput="window.searchProducts(this.value)"
+                           style="width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--glass-border); background: #fff; font-family: inherit; font-size: 0.9rem; outline: none; transition: var(--transition);">
+                    <i class="fas fa-search" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; opacity: 0.5;"></i>
+                </div>
+            </div>
+
             <div class="filter-group">
                 <h4 class="sport-font">Categorías</h4>
                 <div class="filter-options" id="category-filters">
-                    <button class="filter-btn active" onclick="filterByCategory('all', this)">Todos</button>
-                    <button class="filter-btn" onclick="filterByCategory('guantes', this)">Guantes</button>
-                    <button class="filter-btn" onclick="filterByCategory('indumentaria', this)">Indumentaria</button>
-                    <button class="filter-btn" onclick="filterByCategory('reparacion', this)">Reparación</button>
+                    <!-- Dinámico: Inyectado por JS -->
+                    <button class="filter-btn active" onclick="filterByCategory('all', this)">Cargando...</button>
                 </div>
             </div>
             
@@ -134,7 +144,7 @@
 
     <!-- Footer -->
     <footer class="dark-footer">
-        <p>&copy; 2024 LC1 Goalkeeper. Todos los derechos reservados.</p>
+        <p>&copy; 2026 LC1 Goalkeeper. Todos los derechos reservados.</p>
         <p>
             Sitio web desarrollado por <a href="https://www.instagram.com/alebalzano1" target="_blank">Alejandro Balzano <i class="fab fa-instagram"></i></a>
         </p>
@@ -168,6 +178,13 @@
     <script src="js/utils.js"></script>
     <script src="js/products-data.js" defer></script>
     <script src="js/app.js" defer></script>
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        (function() {
+            emailjs.init({ publicKey: "J4gkoDsXKglIVQM4m" });
+        })();
+    </script>
     <script src="js/cart.js" defer></script>
     <script>
         // Lógica específica de la página de tienda

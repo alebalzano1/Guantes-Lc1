@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+# Sitemap location
+Sitemap: https://lc1goalkeeper.com/sitemap.xml

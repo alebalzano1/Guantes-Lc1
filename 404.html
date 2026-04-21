@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <title>404 - ¡Fuera de Juego! | LC1 Goalkeeper</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <style>
+        .error-container {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 80px;
+        }
+
+        .error-code {
+            font-size: clamp(6rem, 15vw, 12rem);
+            font-weight: 950;
+            font-style: italic;
+            color: var(--accent-color);
+            line-height: 1;
+            margin-bottom: 1rem;
+            font-family: 'Oswald', sans-serif;
+            text-shadow: 10px 10px 0px rgba(0,0,0,0.05);
+        }
+
+        .error-message {
+            font-size: 2rem;
+            color: var(--text-color);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .error-subtext {
+            color: var(--text-muted);
+            max-width: 500px;
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .error-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html" class="logo sport-font">
+            <i class="fas fa-shield-halved"></i> LC1 GOALKEEPER
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="shop.html">Tienda</a></li>
+        </ul>
+        <div class="menu-toggle" id="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="cart-icon" id="cart-toggle">
+            <i class="fas fa-shopping-cart fa-lg"></i>
+            <span class="cart-count">0</span>
+        </div>
+    </nav>
+
+    <main class="error-container">
+        <div class="error-code reveal">404</div>
+        <h1 class="error-message sport-font reveal">¡Fuera de Juego!</h1>
+        <p class="error-subtext reveal">Parece que te saliste de la cancha. La página que buscás no existe o ha sido movida a otro sector del campo.</p>
+        
+        <div class="error-actions reveal">
+            <a href="shop.html" class="btn-primary main-cta" style="text-decoration:none; padding: 1rem 3rem;">VOLVER A LA TIENDA</a>
+            <a href="index.html" class="btn-secondary ghost-cta" style="text-decoration:none; padding: 1rem 3rem;">IR AL INICIO</a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="dark-footer">
+        <p>&copy; 2026 LC1 Goalkeeper. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/scroll-reveal.js" defer></script>
+    <script src="js/utils.js"></script>
+    <script src="js/cart.js" defer></script>
+</body>
+</html>

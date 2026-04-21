@@ -13,7 +13,73 @@
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Styles -->
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css?v=1.1">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    
+    <!-- FAQ Styles Inlined for Guaranteed Application -->
+    <style>
+        #faq.section {
+            background: #000000 !important;
+            padding: 8rem 5% !important;
+            color: #ffffff !important;
+        }
+        .faq-container {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        #faq .faq-item {
+            background: #1a1a1a !important;
+            border: 1px solid #2e2e2e !important;
+            border-radius: 8px !important;
+            overflow: hidden !important;
+            transition: all 0.3s ease;
+            margin-bottom: 0 !important;
+        }
+        #faq .faq-item:hover {
+            border-color: #F5C518 !important;
+        }
+        .faq-header {
+            padding: 16px 20px !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            cursor: pointer !important;
+            user-select: none !important;
+        }
+        .faq-question {
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            color: #ffffff !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        .faq-icon {
+            font-size: 20px !important;
+            color: #F5C518 !important;
+            font-weight: 400 !important;
+        }
+        .faq-body {
+            max-height: 0 !important;
+            overflow: hidden !important;
+            transition: max-height 0.4s cubic-bezier(0, 1, 0, 1) !important;
+        }
+        .faq-item.active .faq-body {
+            max-height: 1000px !important;
+            transition: max-height 0.4s cubic-bezier(1, 0, 1, 0) !important;
+        }
+        .faq-content {
+            padding: 0 20px 16px !important;
+            color: #cccccc !important;
+            font-size: 14px !important;
+            line-height: 1.7 !important;
+        }
+        @media (max-width: 600px) {
+            .faq-header { padding: 14px 16px !important; }
+            .faq-question { font-size: 15px !important; }
+        }
+    </style>
 </head>
 <body>
 
@@ -43,7 +109,7 @@
             <div class="hero-content">
                 <p class="hero-tagline boxed">Comprobalo vos mismo</p>
                 <h1 class="sport-font elite-title">NO SON PARA <span>CUALQUIERA</span></h1>
-                <p class="hero-subtext">Guantes profesionales e indumentaria para arqueros que entrenan en serio.</p>
+                <p class="hero-subtext">Guantes profesionales e indumentaria de alto impacto para el máximo nivel.</p>
                 
                 <div class="hero-actions-container">
                     <div class="hero-btns">
@@ -83,32 +149,8 @@
         </div>
     </section>
 
-    <!-- Action Gallery Section -->
-    <section class="section section-gallery reveal" style="padding: 4rem 5%; text-align: center;">
-        <h2 class="sport-font" style="margin-bottom: 2rem;">ARQUEROS EN <span>ACCIÓN</span></h2>
-        <div class="gallery-slider-wrapper">
-            <button class="gallery-nav prev" id="gallery-prev"><i class="fas fa-chevron-left"></i></button>
-            <div id="action-gallery-container" class="action-gallery-container">
-                <!-- Gallery items injected by JS -->
-            </div>
-            <button class="gallery-nav next" id="gallery-next"><i class="fas fa-chevron-right"></i></button>
-        </div>
-    </section>
 
-    <!-- Acerca de LC1 Section -->
-    <section class="section section-about reveal">
-        <div class="about-container">
-            <h2 class="sport-font">Acerca de <span>LC1</span></h2>
-            <div class="about-content">
-                <p><strong>LC1</strong> es una marca de guantes e indumentaria para arqueros, creada desde la experiencia real del puesto.</p>
-                <p>Nace de <strong>Lautaro Cueli</strong>, arquero en formación, que entrena día a día con un objetivo claro: alcanzar su mejor nivel y llegar al máximo rendimiento competitivo.</p>
-                <p>Esa búsqueda constante es la base de <strong>LC1</strong>.</p>
-                <p>Cada producto está pensado y probado en cancha, priorizando lo que realmente importa: rendimiento, agarre, comodidad y respuesta en cada acción.</p>
-                <p><strong>LC1 no es solo una marca.</strong></p>
-                <p>Representa identidad, compromiso, personalidad, presencia y esfuerzo.</p>
-            </div>
-        </div>
-    </section>
+
 
 
     <!-- Purchase Info Section -->
@@ -132,9 +174,126 @@
         </div>
     </section>
 
+
+    <!-- FAQ Section -->
+    <section id="faq" class="section reveal">
+        <div class="section-title">
+            <h2 class="sport-font" style="color: #fff;">Preguntas <span>Frecuentes</span></h2>
+        </div>
+        <div class="faq-container" style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px;">
+            <div class="faq-item">
+                <div class="faq-header">
+                    <span class="faq-question">¿Qué diferencia tiene LC1 con otras marcas?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-body">
+                    <div class="faq-content">
+                        LC1 es 100% Industria Argentina, desarrollada por un arquero para la competencia real y el entrenamiento exhaustivo. Cada guante está probado en cancha y pensado para el mejor rendimiento.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-header">
+                    <span class="faq-question">¿Los usan arqueros reales?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-body">
+                    <div class="faq-content">
+                        Sí. Los guantes LC1 son utilizados en entrenamientos y partidos por arqueros en actividad. Arqueros sponsors: @lauticueli_ · @sebabrandan_ · @fede_0216 · @franncogomez_01
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-header">
+                    <span class="faq-question">¿Qué agarre tienen?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-body">
+                    <div class="faq-content">
+                        Nuestros guantes priorizan el grip para cada condición de juego, brindando seguridad en cada intervención.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-header">
+                    <span class="faq-question">¿Cómo sé cuál es mi talle?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-body">
+                    <div class="faq-content">
+                        Medí tu mano desde la palma hasta la punta del dedo medio. T4=14cm · T5=15cm · T6=16.5cm · T7=18cm · T8=19cm · T9=20.5cm · T10=21.5cm · T11=22cm. Si estás entre dos talles, elegí el más grande.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-header">
+                    <span class="faq-question">¿Cómo puedo comprar?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-body">
+                    <div class="faq-content">
+                        Vía WhatsApp o Instagram. Te asesoramos personalmente.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-header">
+                    <span class="faq-question">¿Cuáles son los métodos de pago?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-body">
+                    <div class="faq-content">
+                        Transferencia bancaria y efectivo.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-header">
+                    <span class="faq-question">¿Cuáles son los métodos de entrega?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-body">
+                    <div class="faq-content">
+                        Correo Argentino a todo el país, o retiro en estaciones de la Línea Tren Sarmiento - Microcentro.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-header">
+                    <span class="faq-question">¿Se pueden cambiar los productos?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-body">
+                    <div class="faq-content">
+                        Sí, solo por talle o desperfecto de fábrica. El producto debe estar sin uso y en condiciones originales.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-header">
+                    <span class="faq-question">¿De dónde son?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-body">
+                    <div class="faq-content">
+                        Somos de San Antonio de Padua, Merlo, Buenos Aires.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="dark-footer">
-        <p>&copy; 2024 LC1 Goalkeeper. Todos los derechos reservados.</p>
+        <p>&copy; 2026 LC1 Goalkeeper. Todos los derechos reservados.</p>
         <p>
             Sitio web desarrollado por <a href="https://www.instagram.com/alebalzano1" target="_blank">Alejandro Balzano <i class="fab fa-instagram"></i></a>
         </p>
@@ -167,7 +326,39 @@
 
     <script src="js/utils.js"></script>
     <script src="js/products-data.js" defer></script>
-    <script src="js/app.js" defer></script>
+    <script src="js/app.js?v=1.1" defer></script>
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        (function() {
+            emailjs.init({ publicKey: "J4gkoDsXKglIVQM4m" });
+        })();
+    </script>
     <script src="js/cart.js" defer></script>
+
+    <!-- FAQ Accordion Logic Inlined -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                const header = item.querySelector('.faq-header');
+                const icon = item.querySelector('.faq-icon');
+                if (!header || !icon) return;
+
+                header.onclick = () => {
+                    const isActive = item.classList.contains('active');
+                    faqItems.forEach(i => {
+                        i.classList.remove('active');
+                        const otherIcon = i.querySelector('.faq-icon');
+                        if (otherIcon) otherIcon.textContent = '+';
+                    });
+                    if (!isActive) {
+                        item.classList.add('active');
+                        icon.textContent = '−';
+                    }
+                };
+            });
+        });
+    </script>
 </body>
 </html>

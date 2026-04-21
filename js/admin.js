@@ -1,6 +1,7 @@
 // Lógica del Panel de Administración LC1 Goalkeeper
-// Persistencia: LocalStorage
-const ADMIN_VERSION = "2.2.1";
+// Autenticación: Firebase Auth
+// Persistencia: Firestore & Storage
+const ADMIN_VERSION = "2.3.0";
 console.log(`%c[LC1 Admin v${ADMIN_VERSION}] Iniciando sistema...`, "color: #F9FF20; font-weight: bold; font-size: 16px;");
 
 // PRUEBA DE CARGA: Eliminada para producción.
@@ -8,12 +9,12 @@ console.log(`%c[LC1 Admin v${ADMIN_VERSION}] Iniciando sistema...`, "color: #F9F
 // --- Diagnóstico de Carga ---
 window.onerror = function(msg, url, lineNo, columnNo, error) {
     console.error("%c[CRITICAL ERROR] Fallo en el script: ", "background: red; color: white; padding: 5px;", {msg, url, lineNo, error});
-    alert("Error detectado: " + msg);
     return false;
 };
 
 let currentImageBase64 = '';
 let currentImagesArray = [];
+let isProcessingImage = false;
 
 // Productos y Categorías de Respaldo (para evitar colisión global)
 const adminInitialProducts = window.LC1_Data ? window.LC1_Data.products : [];
@@ -25,8 +26,8 @@ const adminInitialCategories = window.LC1_Data ? window.LC1_Data.categories : []
 // REEMPLAZO Firebase: Las variables ahora se poblarán desde Firestore
 let adminProducts = [];
 let adminCategories = [];
-let adminGallery = [];
 let adminOrders = [];
+let adminLogs = []; // Global Analytics Logs
 let adminSettings = {};
 
 // Obtener datos iniciales de Firebase
@@ -35,30 +36,38 @@ async function loadInitialData() {
     try {
         adminProducts = await FirebaseService.getProducts();
         adminCategories = await FirebaseService.getCategories();
-        adminGallery = await FirebaseService.getGallery();
-        adminSettings = await FirebaseService.getSettings() || window.LC1_Data.settings;
+        adminSettings = await FirebaseService.getSettings() || (window.LC1_Data ? window.LC1_Data.settings : {});
         adminOrders = await FirebaseService.getOrders();
+        adminLogs = await FirebaseService.getEvents(2000); // Cargar últimos eventos
         
         console.log("[LC1 Admin] Datos cargados:", {
             products: adminProducts.length,
             categories: adminCategories.length,
-            orders: adminOrders.length
+            orders: adminOrders.length,
+            logs: adminLogs.length
         });
 
         // Sincronizar UI
         loadSettings();
-        if (sessionStorage.getItem('lc1-admin-token')) {
-            renderAdminProducts();
-            renderAdminOrders();
-            renderAdminCategories();
-            renderAdminGallery();
-            renderAdminHomeFeatured();
-            calculateStats();
-        }
+        renderAdminProducts();
+        renderAdminOrders();
+        renderAdminCategories();
+        renderAdminHomeFeatured();
+        renderCategorySelect(); // Inyectar categorías en formulario de producto
+        calculateStats();
     } catch (error) {
         console.error("[LC1 Admin] Error fatal cargando Firebase:", error);
         showToast('Error de conexión con la base de datos', 'error');
     }
+}
+
+function renderCategorySelect() {
+    const select = document.getElementById('p-category');
+    if (!select) return;
+    
+    select.innerHTML = adminCategories.map(cat => `
+        <option value="${cat.slug}">${cat.name}</option>
+    `).join('');
 }
 
 // Listas negras para evitar que la sincronización restaure items eliminados
@@ -73,21 +82,6 @@ adminSettings = getSafeJSON('lc1-settings', window.LC1_Data ? window.LC1_Data.se
     featuredSectionTitle: 'Lanzamientos <span>Elite</span>'
 });
 
-let adminAuth = getSafeJSON('lc1-admin-auth', {
-    user: 'administrador',
-    pass: 'admin12345'
-});
-
-// Verificación de integridad del objeto adminAuth
-if (!adminAuth || typeof adminAuth !== 'object' || !adminAuth.user || !adminAuth.pass) {
-    console.warn("[LC1 Admin] Datos de autenticación corruptos o antiguos. Reseteando a valores de fábrica...");
-    adminAuth = { user: 'administrador', pass: 'admin12345' };
-    localStorage.setItem('lc1-admin-auth', JSON.stringify(adminAuth));
-} else {
-    console.log("[LC1 Admin] Credenciales cargadas: ", { user: adminAuth.user, passLength: adminAuth.pass.length });
-    // console.table(adminAuth); // Solo activar para debugging extremo
-}
-
 // Instancias de Chart.js para limpieza
 let chartVisits = null;
 let chartMix = null;
@@ -95,46 +89,74 @@ let chartMix = null;
 document.addEventListener('DOMContentLoaded', () => {
     console.log("[LC1 Admin] Iniciando procesos base...");
     
-    // 1. VINCULAR LOGIN (Prioridad Absoluta)
+    // 1. VINCULAR LOGIN CON FIREBASE AUTH
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
-        loginForm.onsubmit = (e) => {
+        loginForm.onsubmit = async (e) => {
             e.preventDefault();
-            const userInput = document.getElementById('login-email').value.trim();
+            const emailInput = document.getElementById('login-email').value.trim();
             const passInput = document.getElementById('login-pass').value.trim();
-            
-            console.log("[LC1 Admin] Intento de login con usuario:", userInput);
+            const loginBtn = loginForm.querySelector('.btn-primary');
+            const originalText = loginBtn.innerHTML;
 
-            // Validación contra credenciales guardadas (adminAuth)
-            const isValid = (userInput.toLowerCase() === adminAuth.user.toLowerCase() && passInput === adminAuth.pass);
+            console.log("[LC1 Admin] Intento de login Firebase:", emailInput);
 
-            if (isValid) {
-                console.log("[LC1 Admin] Acceso concedido.");
-                sessionStorage.setItem('lc1-admin-token', 'true');
-                console.log("[LC1 Admin] Token de sesión guardado. Verificando...");
-                checkAuth();
-            } else {
-                console.warn("[LC1 Admin] Acceso Denegado.");
+            try {
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+                loginBtn.disabled = true;
+                
+                await FirebaseService.login(emailInput, passInput);
+                // El observador onAuth se encargará del resto
+            } catch (error) {
+                console.warn("[LC1 Admin] Accesso Denegado:", error.code);
                 const errorEl = document.getElementById('login-error');
                 if (errorEl) {
-                    errorEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> Usuario o contraseña incorrectos.`;
+                    let msg = "Credenciales incorrectas.";
+                    if (error.code === 'auth/invalid-email') msg = "Email inválido.";
+                    if (error.code === 'auth/user-not-found') msg = "Usuario no registrado.";
+                    
+                    errorEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${msg}`;
                     errorEl.style.display = 'block';
                 }
-                showToast('Credenciales incorrectas', 'error');
+                showToast('Error de autenticación', 'error');
+            } finally {
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
             }
         };
-        console.log("[LC1 Admin] Sistema de login vinculado.");
     }
 
-    // 2. VERIFICAR AUTH INICIAL (Inmediato)
-    checkAuth();
+    // 2. ESCUCHAR CAMBIOS DE AUTENTICACION (Fuente de Verdad)
+    FirebaseService.onAuth((user) => {
+        const loginSection = document.getElementById('login-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        
+        if (user) {
+            console.log("[LC1 Admin] Sesión activa:", user.email);
+            if (loginSection) loginSection.style.display = 'none';
+            if (dashboardSection) {
+                dashboardSection.style.display = 'flex';
+                dashboardSection.classList.add('fade-in');
+            }
+            
+            const adminNameDisplay = document.querySelector('#admin-user-info');
+            if (adminNameDisplay) {
+                adminNameDisplay.innerHTML = `<i class="fas fa-user-circle"></i> ${user.email.split('@')[0]}`;
+            }
 
-    // 3. CARGAR EL RESTO (Desde Firebase)
-    try {
-        loadInitialData();
-    } catch (err) {
-        console.warn("[LC1 Admin] Aviso: Fallo crítico al iniciar datos.", err);
-    }
+            // Cargar datos solo cuando hay sesión
+            loadInitialData();
+            
+            if (!document.body.dataset.loaded) {
+                showToast('Bienvenido, Administrador', 'success');
+                document.body.dataset.loaded = "true";
+            }
+        } else {
+            console.log("[LC1 Admin] Sin sesión activa.");
+            if (loginSection) loginSection.style.display = 'flex';
+            if (dashboardSection) dashboardSection.style.display = 'none';
+        }
+    });
 
 
     // Image Upload Event (Products)
@@ -161,14 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // Image Upload Event (Gallery)
-    const galFileInput = document.getElementById('gal-file');
-    if (galFileInput) {
-        galFileInput.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) processImage(file, 'gallery');
-        };
-    }
 
     // Product Form Event
     const productForm = document.getElementById('product-form');
@@ -188,14 +202,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // Gallery Form Event
-    const galleryForm = document.getElementById('gallery-form');
-    if (galleryForm) {
-        galleryForm.onsubmit = (e) => {
-            e.preventDefault();
-            saveGalleryItem();
-        };
-    }
 
     // Settings Form Event
     const settingsForm = document.getElementById('settings-form');
@@ -206,14 +212,19 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // Auth Settings Form Event
-    const authForm = document.getElementById('auth-settings-form');
-    if (authForm) {
-        authForm.onsubmit = (e) => {
-            e.preventDefault();
-            saveAuthSettings();
-        };
-    }
+
+    // 4. Mejorar Previsualizaciones (Click to Upload)
+    const setupPreviewClick = (previewId, fileId) => {
+        const preview = document.getElementById(previewId);
+        if (preview) {
+            preview.style.cursor = 'pointer';
+            preview.onclick = () => document.getElementById(fileId).click();
+            preview.title = "Haz click para cambiar la imagen";
+        }
+    };
+
+    setupPreviewClick('p-preview', 'p-file');
+    setupPreviewClick('cat-preview', 'cat-file');
 });
 
 // showToast ahora se carga desde utils.js
@@ -239,7 +250,7 @@ window.closeConfirm = () => {
     document.getElementById('confirm-modal').style.display = 'none';
 };
 
-// --- Security & Auth ---
+// --- Seguridad & Auth (Consolidado en Firebase) ---
 
 window.togglePassVisibility = (id, el) => {
     const input = document.getElementById(id);
@@ -258,114 +269,20 @@ window.togglePassVisibility = (id, el) => {
     }
 };
 
-function checkAuth() {
-    console.log("[LC1 Admin] Verificando estado de autenticación...");
-    const isAuth = sessionStorage.getItem('lc1-admin-token');
-    const loginSection = document.getElementById('login-section');
-    const dashboardSection = document.getElementById('dashboard-section');
-
-    if (isAuth) {
-        console.log("[LC1 Admin] Sesión activa.");
-        
-        // 1. CAMBIO VISUAL INMEDIATO (Prioridad 1)
-        if (loginSection) loginSection.style.display = 'none';
-        if (dashboardSection) {
-            dashboardSection.style.display = 'flex';
-            dashboardSection.classList.add('fade-in');
-        }
-        
-        // 2. CARGA DE MÓDULOS (Protegidos por try-catch para no romper la UI)
-        try {
-            const adminNameDisplay = document.querySelector('#admin-user-info');
-            if (adminNameDisplay) {
-                adminNameDisplay.innerHTML = `<i class="fas fa-user-circle"></i> ${adminAuth.user}`;
-            }
-
-            renderAdminProducts();
-            renderAdminOrders();
-            renderAdminCategories();
-            calculateStats();
-
-            if (!document.body.dataset.loaded) {
-                showToast('Bienvenido, Administrador', 'success');
-                document.body.dataset.loaded = "true";
-            }
-        } catch (error) {
-            console.error("[LC1 Admin] Error al cargar módulos del dashboard:", error);
-            showToast('Error al cargar algunos datos del tablero', 'info');
-        }
-    } else {
-        console.log("[LC1 Admin] Sesión no iniciada.");
-        if (loginSection) loginSection.style.display = 'flex';
-        if (dashboardSection) dashboardSection.style.display = 'none';
+window.logout = async () => {
+    try {
+        await FirebaseService.logout();
+        location.reload();
+    } catch (error) {
+        showToast('Error al cerrar sesión', 'error');
     }
-}
-
-window.logout = () => {
-    sessionStorage.removeItem('lc1-admin-token');
-    location.reload();
 };
 
-// Sincronizar productos de la carpeta Roma si no existen en DB
-function syncRomaProducts() {
-    let currentDB = getSafeJSON('lc1-products-db', adminInitialProducts);
-    let updated = false;
 
-    adminInitialProducts.forEach(ip => {
-        const isDeleted = adminDeletedProducts.includes(ip.id);
-        if (!currentDB.find(p => p.id === ip.id) && !isDeleted) {
-            currentDB.push(ip);
-            updated = true;
-        }
-    });
 
-    if (updated) {
-        localStorage.setItem('lc1-products-db', JSON.stringify(currentDB));
-        adminProducts = currentDB;
-        console.log("Roma Catalog Synced!");
-    }
-}
 
-// Sincronizar categorías si no existen
-function syncCategories() {
-    let currentDB = getSafeJSON('lc1-categories-db', adminInitialCategories);
-    let updated = false;
 
-    adminInitialCategories.forEach(ic => {
-        const isDeleted = adminDeletedCategories.includes(ic.id);
-        if (!currentDB.find(c => c.id === ic.id) && !isDeleted) {
-            currentDB.push(ic);
-            updated = true;
-        }
-    });
-
-    if (updated) {
-        localStorage.setItem('lc1-categories-db', JSON.stringify(currentDB));
-        adminCategories = currentDB;
-        console.log("Categories Synced!");
-    }
-}
-
-// Sincronizar galería si hay nuevos elementos iniciales
-function syncGallery() {
-    let currentDB = getSafeJSON('lc1-gallery-db', adminInitialGallery);
-    let updated = false;
-
-    adminInitialGallery.forEach(ig => {
-        if (!currentDB.find(item => item.id === ig.id)) {
-            currentDB.push(ig);
-            updated = true;
-        }
-    });
-
-    if (updated) {
-        localStorage.setItem('lc1-gallery-db', JSON.stringify(currentDB));
-        adminGallery = currentDB;
-        console.log("Gallery Synced!");
-    }
-}
-
-window.switchSection = (sectionId, element = null) => {
+window.switchSection = async (sectionId, element = null) => {
     document.querySelectorAll('.admin-section').forEach(s => s.style.display = 'none');
     const target = document.getElementById(`section-${sectionId}`);
     if (target) target.style.display = 'block';
@@ -385,9 +302,8 @@ window.switchSection = (sectionId, element = null) => {
         renderAdminCategories();
         renderAdminHomeFeatured();
     }
-    if (sectionId === 'gallery') renderAdminGallery();
     if (sectionId === 'orders') renderAdminOrders();
-    if (sectionId === 'stats') calculateStats();
+    if (sectionId === 'stats') await calculateStats();
 };
 
 // --- Products Management ---
@@ -403,7 +319,7 @@ function renderAdminProducts() {
             ${!p.available ? '<div class="badge-status no-stock">SIN STOCK</div>' : ''}
             ${p.label ? `<div class="badge-status promo" style="top: ${p.available ? '1rem' : '3.5rem'}">${p.label}</div>` : ''}
             <div class="card-img-container">
-                <img src="${p.image}" alt="${p.name}">
+                <img src="${p.image}" alt="${p.name}" width="300" height="300">
             </div>
             <span class="card-id">${p.sku || '#' + p.id.toString().slice(-4)}</span>
             <span class="card-category">${p.category}</span>
@@ -411,16 +327,16 @@ function renderAdminProducts() {
             <span class="card-price">${adminSettings.currency}${p.price.toLocaleString('es-AR')}</span>
             
             <div class="card-actions">
-                <button class="btn-editor" onclick="editProduct(${p.id})">
+                <button class="btn-editor" onclick="editProduct('${p.id}')">
                     <i class="fas fa-pencil-alt"></i> Editor
                 </button>
-                <button class="card-btn-icon btn-star ${p.featured ? 'active' : ''}" onclick="toggleFeatured(${p.id})" title="Destacar">
+                <button class="card-btn-icon btn-star ${p.featured ? 'active' : ''}" onclick="toggleFeatured('${p.id}')" title="Destacar">
                     <i class="fas fa-star"></i>
                 </button>
-                <button class="card-btn-icon btn-view ${!p.available ? 'active' : ''}" onclick="toggleAvailability(${p.id})" title="Alternar Stock">
+                <button class="card-btn-icon btn-view ${!p.available ? 'active' : ''}" onclick="toggleAvailability('${p.id}')" title="Alternar Stock">
                     <i class="fas ${p.available ? 'fa-eye' : 'fa-eye-slash'}"></i>
                 </button>
-                <button class="card-btn-icon btn-delete" onclick="deleteProduct(${p.id})" title="Eliminar">
+                <button class="card-btn-icon btn-delete" onclick="deleteProduct('${p.id}')" title="Eliminar">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -431,7 +347,7 @@ function renderAdminProducts() {
 }
 
 window.toggleFeatured = async (id) => {
-    const p = adminProducts.find(p => p.id === id);
+    const p = adminProducts.find(p => String(p.id) === String(id));
     if (p) {
         p.featured = !p.featured;
         try {
@@ -445,7 +361,7 @@ window.toggleFeatured = async (id) => {
 };
 
 window.toggleAvailability = async (id) => {
-    const p = adminProducts.find(p => p.id === id);
+    const p = adminProducts.find(p => String(p.id) === String(id));
     if (p) {
         p.available = !p.available;
         try {
@@ -467,15 +383,18 @@ function renderAdminHomeFeatured() {
     grid.innerHTML = featuredItems.map(p => `
         <div class="admin-product-card">
             <div class="badge-featured">Destacado</div>
-            <div class="card-img-container">
-                <img src="${p.image}" alt="${p.name}">
+            <div class="card-img-container" style="height: 180px; background: #f8f9fa;">
+                <img src="${p.image}" alt="${p.name}" style="width:100%; height:100%; object-fit:contain;" width="300" height="300">
             </div>
+            <span class="card-category">${p.category}</span>
             <h3 class="card-title">${p.name}</h3>
-            <div class="card-actions">
-                <button class="btn-editor" onclick="editProduct(${p.id})" style="width: auto; flex: 1;">
+            <span class="card-price" style="font-size: 1.1rem;">${adminSettings.currency}${p.price.toLocaleString('es-AR')}</span>
+            
+            <div class="card-actions" style="margin-top: 1rem;">
+                <button class="btn-editor" onclick="editProduct('${p.id}')" style="width: auto; flex: 1;">
                     <i class="fas fa-pencil-alt"></i> Editar
                 </button>
-                <button class="card-btn-icon btn-star active" onclick="toggleFeatured(${p.id})" title="Quitar de Portada">
+                <button class="card-btn-icon btn-star active" onclick="toggleFeatured('${p.id}')" title="Quitar de Portada">
                     <i class="fas fa-trash-alt"></i>
                 </button>
             </div>
@@ -484,54 +403,70 @@ function renderAdminHomeFeatured() {
 }
 
 window.saveProduct = async () => {
-    const idToEdit = document.getElementById('product-form').dataset.editId;
-    const saveBtn = document.querySelector('#product-form .btn-save');
+    const form = document.getElementById('product-form');
+    const idToEdit = form.dataset.editId;
+    const saveBtn = form.querySelector('.btn-save');
     
-    if (!currentImageBase64 && !idToEdit) {
-        return alert('Por favor, selecciona una imagen');
+    // 1. Validaciones Críticas
+    if (isProcessingImage) {
+        return showToast('Las imágenes se están procesando. Espera un momento...', 'info');
     }
 
-    // Feedback visual de carga
+    if (!currentImagesArray || currentImagesArray.length === 0) {
+        return showToast('El producto debe tener al menos una imagen', 'error');
+    }
+
+    const name = document.getElementById('p-name').value.trim();
+    const price = parseFloat(document.getElementById('p-price').value);
+
+    if (!name || isNaN(price)) {
+        return showToast('Nombre y precio son obligatorios', 'error');
+    }
+
+    // 2. Feedback Visual de Carga
     const originalBtnText = saveBtn.innerHTML;
-    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo...';
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
     saveBtn.disabled = true;
 
     try {
-        const finalImages = [];
-        // Subir cada imagen a Firebase Storage si es Base64
-        for (let i = 0; i < currentImagesArray.length; i++) {
-            const img = currentImagesArray[i];
+        console.log("[LC1 Admin] Iniciando ciclo de guardado de producto...");
+
+        // 3. Procesar Subida de Imágenes
+        // Solo las que empiezan con 'data:image' son nuevas y requieren upload
+        const uploadPromises = currentImagesArray.map(async (img, i) => {
             if (img.startsWith('data:image')) {
+                console.log(`[LC1 Admin] Subiendo nueva imagen [${i}] a Firebase...`);
                 const blob = FirebaseService.base64ToBlob(img);
                 const fileName = `products/${Date.now()}_${i}.jpg`;
-                const url = await FirebaseService.uploadImage(blob, fileName);
-                finalImages.push(url);
-            } else {
-                finalImages.push(img); // Ya es una URL o ruta local
+                return await FirebaseService.uploadImage(blob, fileName);
             }
-        }
+            return img; // Ya es una URL de Firebase
+        });
+
+        const finalImages = await Promise.all(uploadPromises);
+        console.log("[LC1 Admin] Imágenes procesadas:", finalImages.length);
 
         const newProduct = {
-            id: idToEdit ? parseInt(idToEdit) : Date.now(),
-            name: document.getElementById('p-name').value,
-            sku: document.getElementById('p-sku').value,
-            price: parseFloat(document.getElementById('p-price').value),
+            id: idToEdit ? String(idToEdit) : String(Date.now()),
+            name: name,
+            sku: document.getElementById('p-sku').value.trim(),
+            price: price,
             category: document.getElementById('p-category').value,
-            desc: document.getElementById('p-desc').value,
-            label: document.getElementById('p-label').value,
+            desc: document.getElementById('p-desc').value.trim(),
+            label: document.getElementById('p-label').value.trim(),
             available: document.getElementById('p-available').checked,
             featured: document.getElementById('p-featured').checked,
             customizable: document.getElementById('p-customizable').checked,
-            image: finalImages.length > 0 ? finalImages[0] : (idToEdit ? adminProducts.find(p => p.id === parseInt(idToEdit)).image : ''),
-            images: finalImages
+            image: finalImages[0], // Imagen principal
+            images: finalImages   // Galería completa
         };
 
-        // Guardar en Firestore
+        // 4. Guardar en Firestore
         await FirebaseService.saveProduct(newProduct);
 
-        // Actualizar estado local
+        // 5. Actualizar estado local
         if (idToEdit) {
-            const index = adminProducts.findIndex(p => p.id === parseInt(idToEdit));
+            const index = adminProducts.findIndex(p => String(p.id) === String(idToEdit));
             if (index !== -1) adminProducts[index] = newProduct;
         } else {
             adminProducts.push(newProduct);
@@ -542,14 +477,15 @@ window.saveProduct = async () => {
         calculateStats(); 
         
         closeModal();
-        showToast('Producto sincronizado con éxito', 'success');
+        showToast('Producto guardado y sincronizado con éxito', 'success');
 
     } catch (error) {
-        console.error("Error guardando producto:", error);
-        showToast('Error al subir imágenes o guardar datos', 'error');
+        console.error("[LC1 Admin] Error fatal al guardar producto:", error);
+        showToast('Error crítico al guardar. Reintenta o revisa la consola.', 'error');
     } finally {
         saveBtn.innerHTML = originalBtnText;
         saveBtn.disabled = false;
+        isProcessingImage = false; // Reset de seguridad
     }
 };
 
@@ -557,7 +493,7 @@ window.deleteProduct = (id) => {
     showConfirm('¿Estás seguro de que quieres eliminar este producto?', async () => {
         try {
             await FirebaseService.deleteProduct(id);
-            adminProducts = adminProducts.filter(p => p.id !== id);
+            adminProducts = adminProducts.filter(p => String(p.id) !== String(id));
             renderAdminProducts();
             showToast('Producto eliminado de la nube', 'info');
         } catch (error) {
@@ -567,7 +503,7 @@ window.deleteProduct = (id) => {
 };
 
 window.editProduct = (id) => {
-    const p = adminProducts.find(p => p.id === id);
+    const p = adminProducts.find(p => String(p.id) === String(id));
     if (!p) return;
 
     document.getElementById('p-name').value = p.name;
@@ -604,7 +540,7 @@ function renderAdminOrders() {
             <td><span style="font-weight:600;">#ORD-${String(o.id).slice(-5)}</span></td>
             <td><span style="font-weight:700; color:#ff6b00;">${adminSettings.currency}${o.total.toLocaleString('es-AR')}</span></td>
             <td>
-                <select class="admin-select" onchange="updateOrderStatus(${o.id}, this.value)" style="padding: 6px 10px; font-size: 0.75rem; border-radius: 8px;">
+                <select class="admin-select" onchange="updateOrderStatus('${o.id}', this.value)" style="padding: 6px 10px; font-size: 0.75rem; border-radius: 8px;">
                     <option value="Pendiente" ${o.status === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
                     <option value="Enviado" ${o.status === 'Enviado' ? 'selected' : ''}>Enviado</option>
                     <option value="Completado" ${o.status === 'Completado' ? 'selected' : ''}>Completado</option>
@@ -612,10 +548,10 @@ function renderAdminOrders() {
                 </select>
             </td>
             <td>
-                <button class="btn-icon" onclick="viewOrderDetails(${o.id})" title="Ver Detalles"><i class="fas fa-eye"></i></button>
+                <button class="btn-icon" onclick="viewOrderDetails('${o.id}')" title="Ver Detalles"><i class="fas fa-eye"></i></button>
             </td>
             <td>
-                <button class="btn-icon delete" onclick="deleteOrder(${o.id})"><i class="fas fa-trash"></i></button>
+                <button class="btn-icon delete" onclick="deleteOrder('${o.id}')"><i class="fas fa-trash"></i></button>
             </td>
         </tr>
     `).reverse().join('');
@@ -624,184 +560,152 @@ function renderAdminOrders() {
     if (statTotalOrders) statTotalOrders.textContent = `${adminOrders.length} Pedidos Registrados`;
 }
 
-function calculateStats() {
-    if (adminOrders.length === 0) {
-        document.getElementById('stat-total-revenue').textContent = adminSettings.currency + '0';
-        document.getElementById('stat-avg-order').textContent = adminSettings.currency + '0';
-        document.getElementById('stat-total-orders').textContent = '0 Pedidos Registrados';
-        return;
-    }
+async function calculateStats() {
+    console.log("[LC1 Admin] Calculando métricas en tiempo real...");
+    try {
+        // 1. Obtener eventos de Firebase
+        const logs = await FirebaseService.getEvents(1000);
+        
+        // 2. Métricas Financieras (Basadas en pedidos)
+        const activeOrders = adminOrders.filter(o => o.status !== 'Cancelado');
+        const revenue = activeOrders.reduce((acc, o) => acc + (o.total || 0), 0);
+        const avgOrder = activeOrders.length > 0 ? revenue / activeOrders.length : 0;
 
-    const total = adminOrders.reduce((acc, o) => acc + (o.status !== 'Cancelado' ? o.total : 0), 0);
-    const avg = total / adminOrders.length;
+        const elRev = document.getElementById('stat-total-revenue');
+        const elAvg = document.getElementById('stat-avg-order');
+        if (elRev) elRev.textContent = `${adminSettings.currency}${revenue.toLocaleString('es-AR')}`;
+        if (elAvg) elAvg.textContent = `${adminSettings.currency}${avgOrder.toLocaleString('es-AR', { maximumFractionDigits: 0 })}`;
 
-    const statRevenue = document.getElementById('stat-total-revenue');
-    const statAvg = document.getElementById('stat-avg-order');
-    const statTotalOrders = document.getElementById('stat-total-orders');
+        // 3. Métricas de Tráfico (Basadas en eventos)
+        const visits = logs.filter(l => l.type === 'page_view').length;
+        const waClicks = logs.filter(l => l.type === 'whatsapp_click').length;
+        const cartAdds = logs.filter(l => l.type === 'add_to_cart').length;
+        
+        const sessionLogs = logs.filter(l => l.type === 'session_time');
+        const avgTimeSec = sessionLogs.length > 0 
+            ? sessionLogs.reduce((acc, l) => acc + (l.data?.seconds || 0), 0) / sessionLogs.length 
+            : 0;
 
-    if (statRevenue) statRevenue.textContent = adminSettings.currency + total.toLocaleString('es-AR');
-    if (statAvg) statAvg.textContent = adminSettings.currency + avg.toLocaleString('es-AR');
-    if (statTotalOrders) statTotalOrders.textContent = `${adminOrders.length} Pedidos Registrados`;
+        const elVisits = document.getElementById('ana-total-visits');
+        const elWA = document.getElementById('ana-wa-clicks');
+        const elAdds = document.getElementById('ana-cart-adds');
+        const elTime = document.getElementById('ana-avg-time');
 
-    renderTopSellingChart();
-    processAnalytics();
-}
+        if (elVisits) elVisits.textContent = visits.toLocaleString();
+        if (elWA) elWA.textContent = waClicks.toLocaleString();
+        if (elAdds) elAdds.textContent = cartAdds.toLocaleString();
+        if (elTime) elTime.textContent = (avgTimeSec / 60).toFixed(1) + 'm';
 
-function renderTopSellingChart() {
-    const chartContainer = document.getElementById('top-products-chart');
-    if (!chartContainer) return;
-
-    const productCounts = {};
-    adminOrders.forEach(order => {
-        if (order.status !== 'Cancelado') {
-            order.items.forEach(item => {
-                productCounts[item.name] = (productCounts[item.name] || 0) + item.quantity;
+        // 4. Ranking de Productos Más Vendidos
+        const prodStats = {};
+        activeOrders.forEach(o => {
+            o.items?.forEach(item => {
+                prodStats[item.name] = (prodStats[item.name] || 0) + (item.quantity || 0);
             });
-        }
-    });
+        });
 
-    const sortedProducts = Object.entries(productCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
+        const topProducts = Object.entries(prodStats)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
 
-    if (sortedProducts.length === 0) {
-        chartContainer.innerHTML = '<p style="color:#666; text-align:center; padding:2rem;">Sin datos de ventas suficientes.</p>';
-        return;
-    }
-
-    const maxVal = sortedProducts[0][1];
-
-    chartContainer.innerHTML = sortedProducts.map(([name, count]) => {
-        const percentage = (count / maxVal) * 100;
-        return `
-            <div class="chart-bar-row">
-                <div class="chart-bar-label">
-                    <span>${name}</span>
-                    <span style="font-weight:700;">${count} vendidos</span>
-                </div>
-                <div class="chart-bar-wrap">
-                    <div class="chart-bar-fill" style="width: ${percentage}%"></div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-// --- Analytics Pro Engine ---
-
-function processAnalytics() {
-    const logs = getSafeJSON('lc1-event-logs', []);
-    
-    // KPIs
-    const totalVisits = logs.filter(l => l.type === 'page_view').length;
-    const waClicks = logs.filter(l => l.type === 'whatsapp_click').length;
-    const cartAdds = logs.filter(l => l.type === 'add_to_cart').length;
-    
-    const sessionLogs = logs.filter(l => l.type === 'session_time');
-    const avgTimeSec = sessionLogs.length > 0 
-        ? sessionLogs.reduce((acc, l) => acc + (l.data.seconds || 0), 0) / sessionLogs.length 
-        : 0;
-
-    // Inyectar en UI
-    const elVisits = document.getElementById('ana-total-visits');
-    const elWA = document.getElementById('ana-wa-clicks');
-    const elCart = document.getElementById('ana-cart-adds');
-    const elTime = document.getElementById('ana-avg-time');
-
-    if (elVisits) elVisits.textContent = totalVisits.toLocaleString();
-    if (elWA) elWA.textContent = waClicks.toLocaleString();
-    if (elCart) elCart.textContent = cartAdds.toLocaleString();
-    if (elTime) elTime.textContent = (avgTimeSec / 60).toFixed(1) + 'm';
-
-    // Preparar Gráficos
-    renderAnalyticsCharts(logs);
-}
-
-function renderAnalyticsCharts(logs) {
-    if (!document.getElementById('chart-visits-daily')) return;
-
-    // 1. Data para Visitas diarias (Last 7 days)
-    const days = {};
-    for (let i = 0; i < 7; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        days[d.toISOString().split('T')[0]] = 0;
-    }
-
-    logs.filter(l => l.type === 'page_view').forEach(l => {
-        const dateKey = l.timestamp.split('T')[0];
-        if (days[dateKey] !== undefined) days[dateKey]++;
-    });
-
-    const visitLabels = Object.keys(days).reverse();
-    const visitData = Object.values(days).reverse();
-
-    // 2. Data para Mix de Eventos
-    const mix = {
-        'Páginas': logs.filter(l => l.type === 'page_view').length,
-        'WhatsApp': logs.filter(l => l.type === 'whatsapp_click').length,
-        'Carrito': logs.filter(l => l.type === 'add_to_cart').length,
-        'Otros': logs.filter(l => !['page_view','whatsapp_click','add_to_cart','session_time'].includes(l.type)).length
-    };
-
-    // Renderizado Chart.js (Solo si la librería cargó)
-    if (typeof Chart === 'undefined') {
-        console.warn("[LC1 Admin] Chart.js no detectado. Saltando renderizado de gráficos.");
-        return;
-    }
-
-    if (chartVisits) chartVisits.destroy();
-    if (chartMix) chartMix.destroy();
-
-    const ctxVisits = document.getElementById('chart-visits-daily').getContext('2d');
-    chartVisits = new Chart(ctxVisits, {
-        type: 'line',
-        data: {
-            labels: visitLabels,
-            datasets: [{
-                label: 'Visitas',
-                data: visitData,
-                borderColor: '#F9FF20',
-                backgroundColor: 'rgba(249, 255, 32, 0.1)',
-                fill: true,
-                tension: 0.4,
-                borderWidth: 3
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-                x: { grid: { display: false } }
+        const prodContainer = document.getElementById('top-products-chart');
+        if (prodContainer) {
+            if (topProducts.length === 0) {
+                prodContainer.innerHTML = '<p style="text-align:center; color:#666; padding:1.5rem;">Sin datos de ventas</p>';
+            } else {
+                const maxVal = topProducts[0][1];
+                prodContainer.innerHTML = topProducts.map(([name, count]) => {
+                    const width = (count / maxVal) * 100;
+                    return `
+                        <div class="bar-item">
+                            <div class="bar-label"><span>${name}</span><span>${count} vendidos</span></div>
+                            <div class="bar-bg"><div class="bar-fill" style="width: ${width}%"></div></div>
+                        </div>
+                    `;
+                }).join('');
             }
         }
-    });
 
-    const ctxMix = document.getElementById('chart-events-mix').getContext('2d');
-    chartMix = new Chart(ctxMix, {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(mix),
-            datasets: [{
-                data: Object.values(mix),
-                backgroundColor: ['#F9FF20', '#25d366', '#00c8ff', '#ff6b00'],
-                borderWidth: 0,
-                hoverOffset: 10
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'bottom', labels: { color: '#ccc', font: { size: 10 } } }
-            },
-            cutout: '70%'
+        // 5. Gráficos Chart.js
+        if (typeof Chart !== 'undefined') {
+            // Destruir instancias previas
+            if (chartVisits) chartVisits.destroy();
+            if (chartMix) chartMix.destroy();
+
+            // Gráfico de Visitas (7 días)
+            const daysMap = {};
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                daysMap[d.toISOString().split('T')[0]] = 0;
+            }
+
+            logs.filter(l => l.type === 'page_view').forEach(l => {
+                const dateKey = l.clientTimestamp?.split('T')[0] || (l.timestamp?.toDate ? l.timestamp.toDate().toISOString().split('T')[0] : null);
+                if (dateKey && daysMap[dateKey] !== undefined) daysMap[dateKey]++;
+            });
+
+            const canvasVisits = document.getElementById('chart-visits-daily');
+            if (canvasVisits) {
+                chartVisits = new Chart(canvasVisits.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: Object.keys(daysMap).map(k => k.split('-').slice(1).reverse().join('/')),
+                        datasets: [{
+                            label: 'Visitas',
+                            data: Object.values(daysMap),
+                            borderColor: '#F9FF20',
+                            backgroundColor: 'rgba(249, 255, 32, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }
+                    }
+                });
+            }
+
+            // Gráfico Mix de Eventos
+            const mixMeta = {
+                'Páginas': visits,
+                'WhatsApp': waClicks,
+                'Carrito': cartAdds,
+                'Otros': logs.length - (visits + waClicks + cartAdds + sessionLogs.length)
+            };
+
+            const canvasMix = document.getElementById('chart-events-mix');
+            if (canvasMix) {
+                chartMix = new Chart(canvasMix.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(mixMeta),
+                        datasets: [{
+                            data: Object.values(mixMeta),
+                            backgroundColor: ['#F9FF20', '#25d366', '#00c8ff', '#ff6b00'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        cutout: '75%',
+                        plugins: { legend: { position: 'bottom', labels: { color: '#ccc', font: { size: 10 } } } }
+                    }
+                });
+            }
         }
-    });
+
+    } catch (error) {
+        console.error("[LC1 Admin] Fallo en calculateStats:", error);
+        showToast('Error cargando estadísticas', 'error');
+    }
 }
 
 window.updateOrderStatus = async (id, newStatus) => {
-    const order = adminOrders.find(o => o.id === id);
+    const order = adminOrders.find(o => String(o.id) === String(id));
     if (order) {
         order.status = newStatus;
         try {
@@ -819,7 +723,7 @@ window.deleteOrder = (id) => {
     showConfirm('¿Eliminar registro de este pedido permanentemente?', async () => {
         try {
             await FirebaseService.deleteOrder(id);
-            adminOrders = adminOrders.filter(o => o.id !== id);
+            adminOrders = adminOrders.filter(o => String(o.id) !== String(id));
             renderAdminOrders();
             calculateStats();
             showToast('Registro eliminado de la nube', 'info');
@@ -830,7 +734,7 @@ window.deleteOrder = (id) => {
 };
 
 window.viewOrderDetails = (id) => {
-    const o = adminOrders.find(o => o.id === id);
+    const o = adminOrders.find(o => String(o.id) === String(id));
     if (!o) return;
 
     const modal = document.getElementById('order-modal');
@@ -883,9 +787,7 @@ function loadSettings() {
     if (sCatTitle) sCatTitle.value = adminSettings.catSectionTitle;
     if (sFeatTitle) sFeatTitle.value = adminSettings.featuredSectionTitle;
 
-    // Campos de Seguridad
-    const sUser = document.getElementById('set-admin-user');
-    if (sUser) sUser.value = adminAuth.user;
+    // Campos de Seguridad (Omitidos: Gestionado por Firebase)
 }
 
 // Nueva función de guardado automático para títulos
@@ -916,33 +818,6 @@ async function saveSettings() {
     }
 }
 
-function saveAuthSettings() {
-    const newUser = document.getElementById('set-admin-user').value.trim();
-    const newPass = document.getElementById('set-admin-pass').value.trim();
-    const confirmPass = document.getElementById('set-admin-pass-confirm').value.trim();
-
-    if (!newUser) {
-        return showToast('El usuario no puede estar vacío', 'error');
-    }
-
-    if (newPass && newPass !== confirmPass) {
-        return showToast('Las contraseñas no coinciden', 'error');
-    }
-
-    adminAuth.user = newUser;
-    if (newPass) {
-        adminAuth.pass = newPass;
-    }
-
-    localStorage.setItem('lc1-admin-auth', JSON.stringify(adminAuth));
-    showToast('Credenciales actualizadas correctamente', 'success');
-    
-    // Reset pass fields y forzar recarga para consolidar seguridad
-    document.getElementById('set-admin-pass').value = '';
-    document.getElementById('set-admin-pass-confirm').value = '';
-    
-    setTimeout(() => location.reload(), 1500);
-}
 
 // --- Image Processing ---
 
@@ -970,13 +845,30 @@ window.removeProductImage = (idx) => {
 };
 
 function processImage(file, target = 'product', isMultiple = false) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
+    if (!file) return;
+    isProcessingImage = true;
+    
+    let previewId = 'p-preview';
+    if (target === 'category') previewId = 'cat-preview';
+    
+    const preview = document.getElementById(previewId);
+    const originalPreviewContent = preview ? preview.innerHTML : '';
+    
+    if (preview) {
+        preview.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; height:100%;">
+            <i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--primary-color);"></i>
+            <span style="font-size:0.7rem; margin-top:10px; color:var(--text-muted);">Procesando...</span>
+        </div>`;
+    }
+
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    img.onload = () => {
+        try {
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 800;
-            const MAX_HEIGHT = 800;
+            const MAX_WIDTH = 1000; 
+            const MAX_HEIGHT = 1000;
             let width = img.width;
             let height = img.height;
 
@@ -997,27 +889,34 @@ function processImage(file, target = 'product', isMultiple = false) {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            const finalBase64 = canvas.toDataURL('image/jpeg', 0.8);
+            const finalBase64 = canvas.toDataURL('image/jpeg', 0.8); 
             
             if (target === 'product' && isMultiple) {
                 currentImagesArray.push(finalBase64);
                 window.renderProductImagesPreview();
             } else {
                 currentImageBase64 = finalBase64;
-                
-                let previewId = 'p-preview';
-                if (target === 'category') previewId = 'cat-preview';
-                if (target === 'gallery') previewId = 'gal-preview';
-                
-                const preview = document.getElementById(previewId);
                 if (preview) {
                     preview.innerHTML = `<img src="${currentImageBase64}" style="width:100%; height:100%; object-fit:${target === 'product' ? 'contain' : 'cover'};">`;
                 }
             }
-        };
-        img.src = e.target.result;
+        } catch (err) {
+            console.error("[LC1 Admin] Error al procesar canvas:", err);
+            showToast('Error cargando la foto', 'error');
+        } finally {
+            isProcessingImage = false;
+            URL.revokeObjectURL(objectUrl);
+        }
     };
-    reader.readAsDataURL(file);
+    
+    img.onerror = () => {
+        isProcessingImage = false;
+        URL.revokeObjectURL(objectUrl);
+        showToast('Error al abrir la imagen', 'error');
+        if (preview) preview.innerHTML = originalPreviewContent;
+    };
+
+    img.src = objectUrl;
 }
 
 // Modal Helpers
@@ -1046,16 +945,16 @@ function renderAdminCategories() {
 
     grid.innerHTML = adminCategories.map(cat => `
         <div class="admin-product-card">
-            <div class="card-img-container" style="height: 200px;">
-                <img src="${cat.image}" alt="${cat.name}" style="object-fit: cover;">
+            <div class="card-img-container" style="height: 180px; background: #f8f9fa;">
+                <img src="${cat.image}" alt="${cat.name}" style="width:100%; height:100%; object-fit:contain;" width="400" height="400">
             </div>
-            <h3 class="card-title" style="color: var(--primary-color); font-size: 1.4rem;">${cat.name}</h3>
-            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.5rem;">${cat.desc}</p>
+            <h3 class="card-title" style="color: #000; font-size: 1.2rem; margin-top: 0.5rem;">${cat.name}</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.5rem; height: 2.4rem; overflow: hidden;">${cat.desc}</p>
             <div class="card-actions">
-                <button class="btn-editor" onclick="openCategoryModal(${cat.id})" style="flex: 1;">
+                <button class="btn-editor" onclick="openCategoryModal('${cat.id}')" style="flex: 1;">
                     <i class="fas fa-pencil-alt"></i> Editar
                 </button>
-                <button class="card-btn-icon btn-delete" onclick="deleteCategory(${cat.id})" title="Eliminar Categoría">
+                <button class="card-btn-icon btn-delete" onclick="deleteCategory('${cat.id}')" title="Eliminar Categoría">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -1068,7 +967,7 @@ window.openCategoryModal = (id = null) => {
     modal.style.display = 'flex';
     
     if (id) {
-        const cat = adminCategories.find(c => c.id === id);
+        const cat = adminCategories.find(c => String(c.id) === String(id));
         if (!cat) return;
         modal.dataset.editId = id;
         document.getElementById('cat-modal-title').textContent = 'Editar Categoría';
@@ -1095,6 +994,10 @@ window.saveCategory = async () => {
     const idToEdit = modal.dataset.editId;
     const saveBtn = document.querySelector('#category-modal .btn-save');
     
+    if (isProcessingImage) {
+        return showToast('Espera a que termine de procesarse la imagen...', 'info');
+    }
+
     if (!currentImageBase64) {
         return showToast('Por favor, selecciona una foto para la categoría', 'error');
     }
@@ -1113,7 +1016,7 @@ window.saveCategory = async () => {
         }
 
         const categoryData = {
-            id: idToEdit ? parseInt(idToEdit) : Date.now(),
+            id: idToEdit ? String(idToEdit) : String(Date.now()),
             name: document.getElementById('cat-name').value,
             slug: document.getElementById('cat-name').value.toLowerCase().replace(/ /g, '-'),
             desc: document.getElementById('cat-desc').value,
@@ -1123,7 +1026,7 @@ window.saveCategory = async () => {
         await FirebaseService.saveCategory(categoryData);
 
         if (idToEdit) {
-            const index = adminCategories.findIndex(c => c.id === parseInt(idToEdit));
+            const index = adminCategories.findIndex(c => String(c.id) === String(idToEdit));
             if (index !== -1) adminCategories[index] = categoryData;
         } else {
             adminCategories.push(categoryData);
@@ -1133,6 +1036,7 @@ window.saveCategory = async () => {
         closeCatModal();
         showToast(idToEdit ? 'Categoría actualizada' : 'Categoría creada', 'success');
     } catch (error) {
+        console.error("Error guardando categoría:", error);
         showToast('Error al guardar categoría', 'error');
     } finally {
         saveBtn.innerHTML = originalBtnText;
@@ -1144,7 +1048,7 @@ window.deleteCategory = (id) => {
     showConfirm('¿Estás seguro de que quieres eliminar esta categoría?', async () => {
         try {
             await FirebaseService.deleteCategory(id);
-            adminCategories = adminCategories.filter(c => c.id !== id);
+            adminCategories = adminCategories.filter(c => String(c.id) !== String(id));
             renderAdminCategories();
             showToast('Categoría eliminada de la nube', 'info');
         } catch (error) {
@@ -1153,109 +1057,8 @@ window.deleteCategory = (id) => {
     });
 };
 
-// --- Action Gallery Management ---
 
-window.renderAdminGallery = () => {
-    const grid = document.getElementById('admin-gallery-grid');
-    if (!grid) return;
 
-    grid.innerHTML = adminGallery.map(item => `
-        <div class="admin-product-card" style="position:relative;">
-            <div class="card-img-container" style="height: 250px;">
-                ${item.type === 'video' 
-                    ? `<iframe src="${item.data}" style="width:100%; height:100%; object-fit:cover; pointer-events:none;" frameborder="0"></iframe>` 
-                    : `<img src="${item.data}" style="object-fit:cover; width:100%; height:100%;">`
-                }
-            </div>
-            ${item.type === 'video' ? '<div style="position:absolute; top:10px; right:10px; background:var(--primary-color); color:#000; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:0.7rem;"><i class="fas fa-video"></i> VIDEO</div>' : '<div style="position:absolute; top:10px; right:10px; background:#fff; color:#000; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:0.7rem;"><i class="fas fa-image"></i> FOTO</div>'}
-            <div class="card-actions" style="margin-top:0; border-top:1px solid rgba(0,0,0,0.1);">
-                <button class="btn-save" style="width:100%; font-size: 0.75rem; padding: 0.8rem;" onclick="deleteGalleryItem(${item.id})">
-                    <i class="fas fa-trash"></i> Eliminar
-                </button>
-            </div>
-        </div>
-    `).join('');
-};
-
-window.openGalleryModal = () => {
-    document.getElementById('gallery-form').reset();
-    document.getElementById('gal-preview').innerHTML = `<i class="fas fa-image" style="color:#ccc; font-size:3rem;"></i>`;
-    currentImageBase64 = '';
-    toggleGalleryType('image'); // default
-    document.getElementById('gallery-modal').style.display = 'flex';
-};
-
-window.closeGalleryModal = () => {
-    document.getElementById('gallery-modal').style.display = 'none';
-};
-
-window.toggleGalleryType = (type) => {
-    const videoCont = document.getElementById('gal-video-container');
-    const imgCont = document.getElementById('gal-image-container');
-    if (type === 'video') {
-        videoCont.style.display = 'block';
-        imgCont.style.display = 'none';
-        currentImageBase64 = '';
-    } else {
-        videoCont.style.display = 'none';
-        imgCont.style.display = 'block';
-    }
-};
-
-window.saveGalleryItem = async () => {
-    const type = document.getElementById('gal-type').value;
-    const saveBtn = document.querySelector('#gallery-form .btn-save');
-    
-    const originalBtnText = saveBtn.innerHTML;
-    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo...';
-    saveBtn.disabled = true;
-
-    try {
-        let data = '';
-        if (type === 'image') {
-            if (!currentImageBase64) return alert('Selecciona una imagen');
-            if (currentImageBase64.startsWith('data:image')) {
-                const blob = FirebaseService.base64ToBlob(currentImageBase64);
-                data = await FirebaseService.uploadImage(blob, `gallery/${Date.now()}.jpg`);
-            } else {
-                data = currentImageBase64;
-            }
-        } else {
-            data = document.getElementById('gal-video-url').value;
-            if (!data) return alert('Ingresa la URL del video');
-        }
-
-        const newItem = {
-            id: Date.now(),
-            type: type,
-            data: data
-        };
-
-        await FirebaseService.saveGalleryItem(newItem);
-        adminGallery.push(newItem);
-        renderAdminGallery();
-        closeGalleryModal();
-        showToast('Galería actualizada', 'success');
-    } catch (error) {
-        showToast('Error al guardar en galería', 'error');
-    } finally {
-        saveBtn.innerHTML = originalBtnText;
-        saveBtn.disabled = false;
-    }
-};
-
-window.deleteGalleryItem = (id) => {
-    showConfirm('¿Eliminar este elemento de la galería?', async () => {
-        try {
-            await FirebaseService.deleteGalleryItem(id);
-            adminGallery = adminGallery.filter(item => item.id !== id);
-            renderAdminGallery();
-            showToast('Elemento eliminado', 'info');
-        } catch (error) {
-            showToast('Error al eliminar', 'error');
-        }
-    });
-};
 
 // --- Mobile Sidebar Logic ---
 document.addEventListener('DOMContentLoaded', () => {

@@ -1,20 +1,23 @@
 let productsList = [];
 let categoriesList = [];
-let galleryList = [];
 let siteSettings = {};
 
 async function loadSiteData() {
     console.log("[LC1 App] Cargando datos desde la nube...");
+
+    // Mostrar Skeletons inmediatamente para evitar pantalla vacía
+    if (shopContainer) renderLoadingSkeletons(shopContainer, 6);
+    if (featuredContainer) renderLoadingSkeletons(featuredContainer, 3);
+    if (categoriesContainer) renderLoadingSkeletons(categoriesContainer, 3, 'category');
+
     try {
         productsList = await FirebaseService.getProducts();
         categoriesList = await FirebaseService.getCategories();
-        galleryList = await FirebaseService.getGallery();
         siteSettings = await FirebaseService.getSettings() || window.LC1_Data.settings;
 
-        // Fallback a locales si la nube está vacía (solo primer arranque)
-        if (productsList.length === 0) productsList = window.LC1_Data.products;
-        if (categoriesList.length === 0) categoriesList = window.LC1_Data.categories;
-        if (galleryList.length === 0) galleryList = window.LC1_Data.gallery;
+        // Fallback a locales si la nube está vacía (solo primer arranque o error)
+        if (!productsList || productsList.length === 0) productsList = window.LC1_Data.products;
+        if (!categoriesList || categoriesList.length === 0) categoriesList = window.LC1_Data.categories;
 
         renderPage();
         syncBranding();
@@ -23,21 +26,43 @@ async function loadSiteData() {
         // Fallback de emergencia
         productsList = window.LC1_Data.products;
         categoriesList = window.LC1_Data.categories;
-        galleryList = window.LC1_Data.gallery;
         siteSettings = window.LC1_Data.settings;
         renderPage();
     }
+}
+
+function renderLoadingSkeletons(container, count = 4, type = 'product') {
+    if (!container) return;
+    
+    let skeletonMarkup = "";
+    if (type === 'product') {
+        skeletonMarkup = Array(count).fill(`
+            <div class="skeleton-card">
+                <div class="skeleton-img skeleton"></div>
+                <div class="skeleton-title skeleton"></div>
+                <div class="skeleton-price skeleton"></div>
+                <div class="skeleton-btn skeleton" style="height: 45px; margin-top: auto;"></div>
+            </div>
+        `).join('');
+    } else {
+        skeletonMarkup = Array(count).fill(`
+            <div class="skeleton-cat skeleton" style="height: 450px;"></div>
+        `).join('');
+    }
+    
+    container.innerHTML = skeletonMarkup;
 }
 
 // Elementos del DOM
 const featuredContainer = document.getElementById('featured-products');
 const shopContainer = document.getElementById('shop-products');
 const categoriesContainer = document.getElementById('categories-container');
-const actionGalleryContainer = document.getElementById('action-gallery-container');
 const cartCountElement = document.querySelector('.cart-count');
 
 // Variables de Estado
 let currentCategory = 'all';
+let currentSortOrder = 'none';
+let currentSearchTerm = '';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Detectar talle en URL si aplica
@@ -52,8 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
 function renderPage() {
     if (categoriesContainer) renderCategories();
     if (featuredContainer) renderFeatured();
-    if (shopContainer) renderShop(currentCategory);
-    if (actionGalleryContainer) renderActionGallery();
+    if (shopContainer) updateShopDisplay();
+    
+    // Inyectar filtros en la sidebar si estamos en la tienda
+    renderSidebarFilters();
     
     // IMPORTANTE: Registrar nuevos elementos para la animación de aparición
     if (window.reobserveReveal) {
@@ -61,10 +88,45 @@ function renderPage() {
     }
 }
 
+function renderSidebarFilters() {
+    const filterContainer = document.getElementById('category-filters');
+    const priceFiltersContainer = document.getElementById('price-filters'); // Nuevo ID recomendado
+    if (!filterContainer) return;
+
+    // 1. Renderizar Categorías
+    const categoriesMarkup = categoriesList.map(cat => `
+        <button class="filter-btn ${currentCategory === cat.slug ? 'active' : ''}" 
+                onclick="filterByCategory('${cat.slug}')">
+            ${cat.name}
+        </button>
+    `).join('');
+
+    filterContainer.innerHTML = `
+        <button class="filter-btn ${currentCategory === 'all' ? 'active' : ''}" 
+                onclick="filterByCategory('all')">
+            Todos
+        </button>
+        ${categoriesMarkup}
+    `;
+
+    // 2. Actualizar estados de Ordenamiento (Precio)
+    // Buscamos los botones de precio por su onclick
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        const onclick = btn.getAttribute('onclick');
+        if (!onclick) return;
+        
+        if (onclick.includes("'low'")) {
+            currentSortOrder === 'low' ? btn.classList.add('active') : btn.classList.remove('active');
+        } else if (onclick.includes("'high'")) {
+            currentSortOrder === 'high' ? btn.classList.add('active') : btn.classList.remove('active');
+        }
+    });
+}
+
 function renderCategories() {
     categoriesContainer.innerHTML = categoriesList.map(cat => `
         <a href="shop.html?cat=${cat.slug}" class="category-card">
-            <img src="${cat.image}" alt="${cat.name}">
+            <img src="${cat.image}" alt="${cat.name}" width="600" height="800">
             <div class="category-overlay">
                 <h3 class="sport-font">${cat.name}</h3>
                 <p>${cat.desc}</p>
@@ -74,102 +136,76 @@ function renderCategories() {
 }
 
 function renderFeatured() {
-    const featuredItems = productsList.filter(p => p.featured);
+    const featuredItems = productsList.filter(p => p.featured && p.available !== false);
     featuredContainer.innerHTML = featuredItems.map(p => productCard(p)).join('');
 }
 
-function renderActionGallery() {
-    if (!actionGalleryContainer) return;
+
+function updateShopDisplay() {
+    if (!shopContainer) return;
+
+    console.log(`[LC1 App] Actualizando tienda: Cat=${currentCategory}, Sort=${currentSortOrder}`);
+
+    // 1. Filtrar por Disponibilidad, Categoría y Búsqueda
+    let filtered = productsList.filter(p => p.available !== false);
     
-    if (galleryList.length === 0) {
-        actionGalleryContainer.parentElement.parentElement.style.display = 'none';
-        return;
+    if (currentCategory !== 'all') {
+        filtered = filtered.filter(p => p.category === currentCategory);
     }
-    actionGalleryContainer.parentElement.parentElement.style.display = 'block';
-    
-    actionGalleryContainer.innerHTML = galleryList.map(item => {
-        if (item.type === 'video') {
-            return `
-                <div class="gallery-item">
-                    <iframe src="${item.data}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
-                </div>
-            `;
-        } else {
-            return `
-                <div class="gallery-item">
-                    <div style="background: url('${item.data}') center/cover;"></div>
-                </div>
-            `;
-        }
-    }).join('');
 
-    // Logic for navigation arrows
-    const prevBtn = document.getElementById('gallery-prev');
-    const nextBtn = document.getElementById('gallery-next');
-
-    if (prevBtn && nextBtn && actionGalleryContainer) {
-        // Only hide if literally 0 items
-        if (galleryList.length <= 1) {
-            prevBtn.style.display = 'none';
-            nextBtn.style.display = 'none';
-        } else {
-            prevBtn.style.display = 'flex';
-            nextBtn.style.display = 'flex';
-            
-            prevBtn.onclick = () => {
-                const step = actionGalleryContainer.offsetWidth;
-                actionGalleryContainer.scrollBy({ left: -step, behavior: 'smooth' });
-            };
-            nextBtn.onclick = () => {
-                const step = actionGalleryContainer.offsetWidth;
-                actionGalleryContainer.scrollBy({ left: step, behavior: 'smooth' });
-            };
-        }
+    if (currentSearchTerm) {
+        filtered = filtered.filter(p => p.name.toLowerCase().includes(currentSearchTerm.toLowerCase()));
     }
-}
-
-function renderShop(category) {
-    const filtered = category === 'all' 
-        ? productsList 
-        : productsList.filter(p => p.category === category);
     
+    // 2. Aplicar Ordenamiento
+    if (currentSortOrder === 'low') {
+        filtered.sort((a,b) => a.price - b.price);
+    } else if (currentSortOrder === 'high') {
+        filtered.sort((a,b) => b.price - a.price);
+    }
+    
+    // 3. Renderizar
     if (filtered.length === 0) {
         shopContainer.innerHTML = `
             <div style="grid-column: 1/-1; text-align: center; padding: 5rem 2rem; border: 1px dashed var(--glass-border); border-radius: 20px;">
                 <i class="fas fa-search" style="font-size: 3rem; color: var(--glass-border); margin-bottom: 1.5rem;"></i>
                 <h3 class="sport-font" style="color: #000; margin-bottom: 0.5rem;">No encontramos coincidencias</h3>
                 <p style="color: #444;">Probá con otra categoría o restablecé los filtros.</p>
-                <button onclick="app_filter('all')" class="btn-buy" style="max-width: 250px; margin: 2rem auto 0;">Ver todos los productos</button>
+                <button onclick="filterByCategory('all')" class="btn-buy" style="max-width: 250px; margin: 2rem auto 0;">Ver todos los productos</button>
             </div>
         `;
-        return;
+    } else {
+        shopContainer.innerHTML = filtered.map(p => productCard(p)).join('');
     }
-
-    shopContainer.innerHTML = filtered.map(p => productCard(p)).join('');
     
     // Registrar nuevos elementos inyectados
     if (window.reobserveReveal) window.reobserveReveal();
+
+    // Actualizar estados visuales de los filtros
+    renderSidebarFilters();
 }
 
 function productCard(product) {
-    const isIndumentaria = product.category === 'indumentaria';
+    const category = product.category.toLowerCase();
+    const showSize = ['guantes', 'indumentaria'].includes(category) && !['accesorios', 'reparacion'].includes(category);
+    const isIndumentaria = product.category.toLowerCase() === 'indumentaria';
     const sizeOptions = isIndumentaria 
         ? `<option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option>`
         : `<option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option>`;
 
-    let sizeHTML = `
+    let sizeHTML = showSize ? `
         <div style="margin-bottom: 15px;">
             <select id="shop-size-${product.id}" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--glass-border); background: var(--bg-color); color: var(--text-color); font-size: 0.9rem;">
                 <option value="" disabled selected>Seleccioná tu talle</option>
                 ${sizeOptions}
             </select>
         </div>
-    `;
+    ` : '';
 
     return `
         <div class="product-card reveal">
             <div class="product-img" onclick="window.location.href='product.html?id=${product.id}'" style="cursor:pointer;">
-                <img src="${product.image}" alt="${product.name}" loading="lazy">
+                <img src="${product.image}" alt="${product.name}" loading="lazy" width="400" height="400">
             </div>
             <div class="product-info" style="padding-top: 0.5rem; display: flex; flex-direction: column; flex: 1;">
                 <span class="card-category">${product.category}</span>
@@ -179,10 +215,10 @@ function productCard(product) {
                 ${sizeHTML}
                 
                 <div class="product-actions" style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;">
-                    <button class="btn-buy" onclick="window.addToCartWithSize(${product.id})">
+                    <button class="btn-buy" onclick="window.addToCartWithSize('${product.id}')">
                         <i class="fas fa-shopping-bag"></i> AGREGAR AL CARRITO
                     </button>
-                    <button class="btn-whatsapp" onclick="window.buyWhatsappWithSize(${product.id})" style="width: 100%;">
+                    <button class="btn-whatsapp" onclick="window.buyWhatsappWithSize('${product.id}')" style="width: 100%;">
                         <i class="fab fa-whatsapp"></i> COMPRAR POR WHATSAPP
                     </button>
                 </div>
@@ -192,35 +228,42 @@ function productCard(product) {
 }
 
 // Global Filters for Shop Page
-window.app_filter = (cat) => {
+window.filterByCategory = (cat) => {
     currentCategory = cat;
-    renderShop(cat);
+    // Limpiar búsqueda al cambiar de categoría si se desea, por ahora mantenemos ambas
+    updateShopDisplay();
     
     // Scroll suave hacia arriba al filtrar
     window.scrollTo({ top: 300, behavior: 'smooth' });
 };
 
+window.searchProducts = (term) => {
+    currentSearchTerm = term.trim();
+    updateShopDisplay();
+};
+
 // Global Sort for Shop Page
 window.filterByPrice = (order) => {
-    const sorted = [...productsList].filter(p => currentCategory === 'all' || p.category === currentCategory);
-    if (order === 'low') sorted.sort((a,b) => a.price - b.price);
-    if (order === 'high') sorted.sort((a,b) => b.price - a.price);
-    shopContainer.innerHTML = sorted.map(p => productCard(p)).join('');
+    // Si ya está activo, lo desactivamos al hacer click de nuevo (Toggle)
+    currentSortOrder = (currentSortOrder === order) ? 'none' : order;
+    updateShopDisplay();
 };
 
 window.addToCartWithSize = (productId) => {
     const sizeSelect = document.getElementById(`shop-size-${productId}`);
-    if (sizeSelect && !sizeSelect.value) {
+    const product = productsList.find(p => String(p.id) === String(productId));
+    const category = product.category.toLowerCase();
+    const requiresSize = ['guantes', 'indumentaria'].includes(category) && !['accesorios', 'reparacion'].includes(category);
+
+    if (requiresSize && sizeSelect && !sizeSelect.value) {
         showToast('Por favor seleccioná un talle para continuar', 'error');
         return;
     }
-    const size = sizeSelect ? sizeSelect.value : null;
-
+    const size = sizeSelect ? sizeSelect.value : 'N/A';
     let cart = getSafeJSON('lc1-cart', []);
-    const product = productsList.find(p => p.id === productId);
     
     // Check if same product with same size exists
-    const existing = cart.find(item => item.id === productId && item.size === size);
+    const existing = cart.find(item => String(item.id) === String(productId) && item.size === size);
     if (existing) {
         existing.quantity += 1;
     } else {
@@ -244,12 +287,15 @@ window.addToCartWithSize = (productId) => {
 
 window.buyWhatsappWithSize = (productId) => {
     const sizeSelect = document.getElementById(`shop-size-${productId}`);
-    if (sizeSelect && !sizeSelect.value) {
+    const product = productsList.find(p => String(p.id) === String(productId));
+    const category = product.category.toLowerCase();
+    const requiresSize = ['guantes', 'indumentaria'].includes(category) && !['accesorios', 'reparacion'].includes(category);
+
+    if (requiresSize && sizeSelect && !sizeSelect.value) {
         showToast('Por favor seleccioná un talle para continuar', 'error');
         return;
     }
-    const size = sizeSelect ? sizeSelect.value : null;
-    const product = productsList.find(p => p.id === productId);
+    const size = sizeSelect ? sizeSelect.value : 'N/A';
     
     const msg = `Hola LC1! 👋 Quiero comprar el producto: *${product.name}* (Talle: ${size}) que tiene un precio de *$${product.price.toLocaleString('es-AR')}*. ¿Tienen stock?`;
     const whatsappNumber = siteSettings.whatsapp || '541140236384';
@@ -264,9 +310,6 @@ function updateCartCount() {
     }
 }
 
-// La función showToast se movió a utils.js para ser compartida.
-
-
 // Estilos de animación para el toast
 const style = document.createElement('style');
 style.textContent = `
@@ -274,6 +317,7 @@ style.textContent = `
     @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-100%); opacity: 0; } }
 `;
 document.head.appendChild(style);
+
 // Sync Branding from Admin
 function syncBranding() {
     const settings = siteSettings;
@@ -288,6 +332,7 @@ function syncBranding() {
         featuredTitleEl.innerHTML = settings.featuredSectionTitle;
     }
 }
+
 // --- Mobile Menu Logic ---
 document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('menu-toggle');

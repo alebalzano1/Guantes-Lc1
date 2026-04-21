@@ -1,35 +1,78 @@
 // Lógica de la Página de Detalle de Producto
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const productId = parseInt(urlParams.get('id'));
+    const productId = urlParams.get('id');
+    
+    // UI Loading state
+    const title = document.getElementById('pd-title');
+    const desc = document.getElementById('pd-desc');
+    if (title) title.innerHTML = '<span class="skeleton" style="display:inline-block; width:100%; height:40px;"></span>';
+    if (desc) desc.innerHTML = '<span class="skeleton" style="display:inline-block; width:100%; height:20px; margin-bottom:10px;"></span><span class="skeleton" style="display:inline-block; width:80%; height:20px;"></span>';
 
     if (!productId) {
         window.location.href = 'shop.html';
         return;
     }
 
-    console.log("[LC1 Detail] Obteniendo producto de la nube...");
+    console.log("[LC1 Detail] Buscando producto...");
     try {
-        const productsList = await FirebaseService.getProducts();
-        const product = productsList.find(p => p.id === productId);
+        // 1. Intentar obtener desde Firebase
+        let productsList = await FirebaseService.getProducts();
+        
+        // Fallback inmediato si la lista de la nube está vacía
+        if (!productsList || productsList.length === 0) {
+            console.log("[LC1 Detail] Nube vacía, usando catálogo local.");
+            productsList = window.LC1_Data ? window.LC1_Data.products : [];
+        }
+
+        const product = productsList.find(p => String(p.id) === String(productId));
 
         if (!product) {
-            document.body.innerHTML = `<div style="text-align:center; padding:5rem; color:white;"><h1>Producto no encontrado</h1><a href="shop.html" style="color:var(--primary-color);">Volver a la tienda</a></div>`;
+            // Último intento: Buscar directamente en el objeto global si el find anterior falló
+            const fallbackProduct = (window.LC1_Data ? window.LC1_Data.products : []).find(p => String(p.id) === String(productId));
+            
+            if (fallbackProduct) {
+                renderProductDetail(fallbackProduct);
+            } else {
+                document.body.innerHTML = `<div style="text-align:center; padding:5rem; background:#fff; color:#000;"><h1>Producto no encontrado</h1><p>El código "${productId}" no coincide con ningún ítem activo.</p><br><a href="shop.html" style="color:var(--primary-color); font-weight:700;">Volver a la tienda</a></div>`;
+            }
             return;
         }
 
         renderProductDetail(product);
     } catch (error) {
-        console.error("Error al cargar detalle:", error);
-        // Fallback a static
-        const product = (window.LC1_Data ? window.LC1_Data.products : []).find(p => p.id === productId);
-        if (product) renderProductDetail(product);
+        console.error("Error crítico al cargar detalle:", error);
+        // Fallback de emergencia total
+        const product = (window.LC1_Data ? window.LC1_Data.products : []).find(p => String(p.id) === String(productId));
+        if (product) {
+            renderProductDetail(product);
+        } else {
+            document.body.innerHTML = `<div style="text-align:center; padding:5rem; background:#fff; color:#000;"><h1>Error de Conexión</h1><p>No pudimos recuperar la información del producto.</p><br><a href="shop.html" style="color:var(--primary-color);">Reintentar</a></div>`;
+        }
     }
 });
 
 function renderProductDetail(product) {
-    // 1. Set Title and Metadata
-    document.title = `${product.name} | LC1 Goalkeeper`;
+    // 1. Set Title and Metadata (SEO)
+    const productTitle = `${product.name} | LC1 Goalkeeper`;
+    document.title = productTitle;
+    
+    // Actualizar Meta Tags dinámicamente
+    const metaDesc = document.querySelector('meta[name="description"]') || document.getElementById('meta-desc');
+    const ogTitle = document.querySelector('meta[property="og:title"]') || document.getElementById('og-title');
+    const ogDesc = document.querySelector('meta[property="og:description"]') || document.getElementById('og-desc');
+    const ogImage = document.querySelector('meta[property="og:image"]') || document.getElementById('og-image');
+    const ogUrl = document.querySelector('meta[property="og:url"]') || document.getElementById('og-url');
+
+    const fullDesc = product.desc || "Experimenta el máximo nivel de control y protección con los guantes LC1. Diseñados para el alto rendimiento.";
+    
+    if (metaDesc) metaDesc.content = fullDesc;
+    if (ogTitle) ogTitle.content = productTitle;
+    if (ogDesc) ogDesc.content = fullDesc;
+    if (ogImage) ogImage.content = product.image;
+    if (ogUrl) ogUrl.content = window.location.href;
+
+    renderProductSchema(product);
     
     // 2. Fill the HTML
     const mainImg = document.getElementById('pd-image');
@@ -41,62 +84,97 @@ function renderProductDetail(product) {
     if (mainImg) mainImg.src = product.image;
     if (title) title.textContent = product.name;
     if (price) price.textContent = `$${product.price.toLocaleString('es-AR')}`;
-    if (desc) desc.textContent = product.desc || "Experimenta el máximo nivel de control y protección con los guantes LC1. Diseñados para arqueros de alto rendimiento.";
+    if (desc) desc.textContent = product.desc || "Experimenta el máximo nivel de control y protección con los guantes LC1. Diseñados para el alto rendimiento.";
 
     // Badges dinámicos (Solo categoría para ser 100% honestos)
     if (badgeContainer) {
-        badgeContainer.innerHTML = `<span class="pd-badge" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);">${product.category}</span>`;
+        badgeContainer.innerHTML = `<span class="pd-badge" style="background:#f4f4f4; color:#000; border:1px solid #ddd;">${product.category}</span>`;
     }
 
-    // 2.5 Galería de imágenes (Carrusel)
+    // 2.5 Galería de imágenes (Carrusel estilo Mercado Libre)
+    const sliderTrack = document.getElementById('pd-slider-track');
     const thumbnailsContainer = document.getElementById('pd-thumbnails');
     const btnPrev = document.getElementById('pd-prev');
     const btnNext = document.getElementById('pd-next');
     let currentImageIndex = 0;
 
-    if (thumbnailsContainer && product.images && product.images.length > 1) {
-        if (btnPrev) btnPrev.style.display = 'block';
-        if (btnNext) btnNext.style.display = 'block';
+    const allImages = product.images && product.images.length > 0 ? product.images : [product.image];
 
+    if (sliderTrack) {
+        sliderTrack.innerHTML = allImages.map(img => `<img src="${img}" class="slider-item" style="width:100%; height:auto; object-fit:contain;" width="600" height="600">`).join('');
+    }
+
+    if (allImages.length > 1) {
         const updateMainImage = (index) => {
             currentImageIndex = index;
-            if (mainImg) mainImg.src = product.images[index];
-            Array.from(thumbnailsContainer.children).forEach((c, idx) => {
-                c.style.borderColor = idx === index ? 'var(--primary-color)' : 'transparent';
-            });
+            if (sliderTrack) {
+                const scrollAmount = sliderTrack.offsetWidth * index;
+                sliderTrack.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+            }
+            
+            if (thumbnailsContainer) {
+                Array.from(thumbnailsContainer.children).forEach((c, idx) => {
+                    c.style.borderColor = idx === index ? 'var(--accent-color)' : 'transparent';
+                    c.style.opacity = idx === index ? '1' : '0.6';
+                });
+            }
         };
 
         if (btnPrev) {
+            btnPrev.style.display = 'flex';
             btnPrev.onclick = () => {
-                let newIdx = currentImageIndex - 1;
-                if (newIdx < 0) newIdx = product.images.length - 1;
-                updateMainImage(newIdx);
+                currentImageIndex = (currentImageIndex - 1 + allImages.length) % allImages.length;
+                updateMainImage(currentImageIndex);
             };
         }
 
         if (btnNext) {
+            btnNext.style.display = 'flex';
             btnNext.onclick = () => {
-                let newIdx = currentImageIndex + 1;
-                if (newIdx >= product.images.length) newIdx = 0;
-                updateMainImage(newIdx);
+                currentImageIndex = (currentImageIndex + 1) % allImages.length;
+                updateMainImage(currentImageIndex);
             };
         }
 
-        thumbnailsContainer.innerHTML = '';
-        product.images.forEach((imgSrc, idx) => {
-            const thumb = document.createElement('img');
-            thumb.src = imgSrc;
-            thumb.className = 'pd-thumb';
-            thumb.onclick = () => updateMainImage(idx);
-            thumbnailsContainer.appendChild(thumb);
-        });
-        // Select first automatically
-        if (thumbnailsContainer.firstChild) thumbnailsContainer.firstChild.style.borderColor = 'var(--primary-color)';
+        if (thumbnailsContainer) {
+            thumbnailsContainer.innerHTML = allImages.map((imgSrc, idx) => `
+                <img src="${imgSrc}" class="pd-thumb" onclick="window.pd_goToImage(${idx})" style="border-color: ${idx === 0 ? 'var(--accent-color)' : 'transparent'}; opacity: ${idx === 0 ? '1' : '0.6'};" width="80" height="80">
+            `).join('');
+            
+            // Expose globally for the onclick attribute
+            window.pd_goToImage = (idx) => updateMainImage(idx);
+        }
+
+        // Sync scroll back to index if user scrolls manually
+        sliderTrack.onscroll = () => {
+            const index = Math.round(sliderTrack.scrollLeft / sliderTrack.offsetWidth);
+            if (index !== currentImageIndex) {
+                currentImageIndex = index;
+                if (thumbnailsContainer) {
+                    Array.from(thumbnailsContainer.children).forEach((c, idx) => {
+                        c.style.borderColor = idx === index ? 'var(--accent-color)' : 'transparent';
+                        c.style.opacity = idx === index ? '1' : '0.6';
+                    });
+                }
+            }
+        };
+    } else {
+        if (btnPrev) btnPrev.style.display = 'none';
+        if (btnNext) btnNext.style.display = 'none';
+        if (thumbnailsContainer) thumbnailsContainer.style.display = 'none';
     }
 
     // 2.8 Configurar selector de talle dependiendo de la categoría
     const sizeSelect = document.getElementById('size-select');
-    if (sizeSelect && product.category === 'indumentaria') {
+    const sizeContainer = document.querySelector('.pd-size-selector');
+    const category = product.category.toLowerCase();
+    const requiresSize = ['guantes', 'indumentaria'].includes(category) && !['accesorios', 'reparacion'].includes(category);
+
+    if (sizeContainer) {
+        sizeContainer.style.display = requiresSize ? 'block' : 'none';
+    }
+
+    if (sizeSelect && product.category.toLowerCase() === 'indumentaria') {
         sizeSelect.innerHTML = `
             <option value="" disabled selected>Elegí un talle</option>
             <option value="S">S</option>
@@ -109,6 +187,8 @@ function renderProductDetail(product) {
 
     // Validación de Talle Helper
     const validateSize = () => {
+        if (!requiresSize) return 'N/A'; // No requiere talle
+        
         const errorMsg = document.getElementById('size-error');
         if (sizeSelect && !sizeSelect.value) {
             errorMsg.style.display = 'block';
@@ -118,8 +198,26 @@ function renderProductDetail(product) {
         return sizeSelect ? sizeSelect.value : null;
     };
 
-    // 3. Botón Comprar ahora (Carrito)
+    // 3. Botones de Acción y Validación de Stock
     const btnCart = document.getElementById('btn-add-cart');
+    const btnWA = document.getElementById('btn-wa-direct');
+    
+    if (product.available === false) {
+        if (btnCart) {
+            btnCart.innerHTML = '<i class="fas fa-times-circle"></i> PRODUCTO SIN STOCK';
+            btnCart.style.background = '#888';
+            btnCart.style.cursor = 'not-allowed';
+            btnCart.onclick = null;
+        }
+        if (btnWA) {
+            btnWA.style.display = 'none';
+        }
+        if (badgeContainer) {
+            badgeContainer.innerHTML += `<span class="pd-badge" style="background:#ff3e3e; color:#fff;">SIN STOCK</span>`;
+        }
+        return; // Detener configuración de eventos de compra
+    }
+
     if (btnCart) {
         btnCart.onclick = () => {
             const size = validateSize();
@@ -129,8 +227,6 @@ function renderProductDetail(product) {
         };
     }
 
-    // 4. Botón WhatsApp
-    const btnWA = document.getElementById('btn-wa-direct');
     if (btnWA) {
         btnWA.onclick = async () => {
             const size = validateSize();
@@ -163,4 +259,61 @@ function addToCart(product, size) {
     localStorage.setItem('lc1-cart', JSON.stringify(cart));
     if (window.renderCart) window.renderCart();
     if (window.updateCartCount) window.updateCartCount();
+}
+
+window.shareProduct = () => {
+    const title = document.title;
+    const url = window.location.href;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: title,
+            text: `¡Mirá este producto en LC1 Goalkeeper!`,
+            url: url
+        }).catch(err => {
+             console.log("Error sharing:", err);
+        });
+    } else {
+        // Fallback: Copy to clipboard
+        navigator.clipboard.writeText(url).then(() => {
+            showToast('Vínculo copiado al portapapeles', 'success');
+        }).catch(err => {
+            console.error('Error copying to clipboard:', err);
+            showToast('No se pudo copiar el vínculo', 'error');
+        });
+    }
+};
+
+function renderProductSchema(product) {
+    // Eliminar script previo si existe para evitar duplicados en navegación dinámica
+    const existingScript = document.getElementById('product-schema');
+    if (existingScript) existingScript.remove();
+
+    const schema = {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": product.name,
+        "image": [product.image],
+        "description": product.desc || "Equipamiento profesional para porteros.",
+        "sku": product.sku || product.id.toString(),
+        "brand": {
+            "@type": "Brand",
+            "name": "LC1 Goalkeeper"
+        },
+        "offers": {
+            "@type": "Offer",
+            "url": window.location.href,
+            "priceCurrency": "ARS",
+            "price": product.price,
+            "availability": product.available !== false ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            "itemCondition": "https://schema.org/NewCondition"
+        }
+    };
+
+    const script = document.createElement('script');
+    script.id = 'product-schema';
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify(schema);
+    document.head.appendChild(script);
+    console.log("[SEO] JSON-LD Product Schema Injected");
 }

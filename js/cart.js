@@ -1,14 +1,4 @@
-// Lógica del Carrito y Sidebar
-
-// Cargar EmailJS Dinámicamente para el Checkout
-if (!window.emailjs) {
-    const script = document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js";
-    script.onload = () => {
-        emailjs.init({ publicKey: "J4gkoDsXKglIVQM4m" });
-    };
-    document.head.appendChild(script);
-}
+// EmailJS se carga ahora directamente en el HTML para mayor confiabilidad.
 
 document.addEventListener('DOMContentLoaded', () => {
     // Inyectar el HTML del Carrito si no existe
@@ -64,9 +54,13 @@ function injectCartHTML() {
                     <label style="display:block; margin-bottom:0.5rem; font-size:0.9rem; color:var(--text-muted);">Email</label>
                     <input type="email" id="checkout-email" placeholder="tu@email.com" style="width:100%; padding:0.8rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:4px;" required>
                 </div>
-                <div style="margin-bottom: 1.5rem;">
+                <div style="margin-bottom: 1rem;">
                     <label style="display:block; margin-bottom:0.5rem; font-size:0.9rem; color:var(--text-muted);">Teléfono</label>
                     <input type="tel" id="checkout-phone" placeholder="Ej: 11 1234 5678" style="width:100%; padding:0.8rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:4px;" required>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-size:0.9rem; color:var(--text-muted);">Dirección de Envío</label>
+                    <input type="text" id="checkout-address" placeholder="Calle, Número, Localidad" style="width:100%; padding:0.8rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:4px;" required>
                 </div>
                 <button onclick="submitOrder()" id="btn-submit-order" class="btn-primary checkout-btn" style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px; padding: 1.2rem;">
                     <i class="fas fa-paper-plane"></i> CONFIRMAR PEDIDO
@@ -158,7 +152,10 @@ window.removeFromCart = (index) => {
 
 window.showCheckoutForm = () => {
     const cart = getSafeJSON('lc1-cart', []);
-    if (cart.length === 0) return alert("El carrito está vacío");
+    if (cart.length === 0) {
+        showToast("Tu carrito está vacío", "error");
+        return;
+    }
     document.getElementById('cart-content').style.display = 'none';
     document.getElementById('checkout-form-container').style.display = 'flex';
 };
@@ -172,9 +169,10 @@ window.submitOrder = () => {
     const name = document.getElementById('checkout-name').value.trim();
     const email = document.getElementById('checkout-email').value.trim();
     const phone = document.getElementById('checkout-phone').value.trim();
+    const address = document.getElementById('checkout-address').value.trim();
 
-    if (!name || !email || !phone) {
-        alert("Por favor completa tus datos.");
+    if (!name || !email || !phone || !address) {
+        showToast("Por favor completa todos tus datos.", "error");
         return;
     }
 
@@ -196,6 +194,7 @@ window.submitOrder = () => {
         order_id: orderId,
         order_total: total.toLocaleString('es-AR'),
         order_details: orderDetails,
+        customer_address: address, // Se añade la dirección a la plantilla
         bank_alias: "alebalzano1", 
         phone_contact: "+541127655884" 
     };
@@ -205,7 +204,7 @@ window.submitOrder = () => {
             // Guardar en Firebase (Orden Global)
             const newOrder = {
                 id: orderId,
-                customer: { name, email, phone },
+                customer: { name, email, phone, address }, // Dirección incluida en la DB
                 date: new Date().toLocaleString(),
                 items: cart,
                 total: total,
@@ -220,6 +219,16 @@ window.submitOrder = () => {
                 });
             }
 
+            // Construir mensaje detallado para WhatsApp antes de vaciar el carrito
+            const waMessage = `¡Nuevo Pedido Recibido! 🧤⚽\n\n` +
+                              `*Pedido:* #${orderId}\n` +
+                              `*Cliente:* ${name}\n` +
+                              `*Email:* ${email}\n` +
+                              `*Dirección:* ${address}\n` +
+                              `*Total:* $${total.toLocaleString('es-AR')}\n\n` +
+                              `*Detalle:* \n${orderDetails}\n\n` +
+                              `_Enviado desde el sitio web de LC1_`;
+
             // Vaciar y mostrar exito
             localStorage.removeItem('lc1-cart');
             if (window.updateCartCount) window.updateCartCount();
@@ -231,10 +240,15 @@ window.submitOrder = () => {
             
             btn.innerHTML = '<i class="fas fa-paper-plane"></i> CONFIRMAR PEDIDO';
             btn.disabled = false;
+
+            // Abrir WhatsApp en nueva pestaña
+            // El número 541140236384 es el de atención al cliente principal
+            const waUrl = `https://wa.me/541140236384?text=${encodeURIComponent(waMessage)}`;
+            window.open(waUrl, '_blank');
         })
         .catch((error) => {
             console.error("Error al enviar el email:", error);
-            alert("Hubo un error al procesar el pedido. Intenta nuevamente.");
+            showToast("Hubo un error al procesar el pedido. Intenta nuevamente.", "error");
             btn.innerHTML = '<i class="fas fa-paper-plane"></i> CONFIRMAR PEDIDO';
             btn.disabled = false;
         });

@@ -13,6 +13,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Styles -->
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    
+    <!-- SEO & Social Media (Dynamic) -->
+    <meta name="description" id="meta-desc" content="Equipamiento profesional para arqueros. Guantes, indumentaria y más.">
+    <meta property="og:title" id="og-title" content="LC1 Goalkeeper | Equipamiento Elite">
+    <meta property="og:description" id="og-desc" content="Descubrí el mejor equipamiento para el arco. Calidad profesional garantizada.">
+    <meta property="og:image" id="og-image" content="Roma/Photoroom_20260409_062835.png">
+    <meta property="og:url" id="og-url" content="">
+    <meta property="og:type" content="product">
 </head>
 <body class="product-detail-page">
 
@@ -35,9 +44,11 @@
     <main class="pd-container">
         <!-- Left Side: Image -->
         <section class="pd-image-section" style="display:flex; flex-direction:column; gap:15px; position:relative;">
-            <div class="pd-main-img-wrap reveal" style="border-radius: 12px; overflow: hidden; position:relative;">
+            <div class="pd-main-img-wrap reveal slider-container">
                 <button id="pd-prev" class="pd-nav-btn prev"><i class="fas fa-chevron-left"></i></button>
-                <img id="pd-image" src="" alt="Cargando producto..." style="width:100%; height:auto;">
+                <div id="pd-slider-track" class="slider-track">
+                    <img id="pd-image" src="" alt="Cargando producto..." class="slider-item" width="600" height="600">
+                </div>
                 <button id="pd-next" class="pd-nav-btn next"><i class="fas fa-chevron-right"></i></button>
             </div>
             <div class="pd-thumbnails" id="pd-thumbnails" style="display:flex; gap:10px; overflow-x:auto;">
@@ -47,6 +58,7 @@
 
         <!-- Right Side: Meta & Actions -->
         <section class="pd-info-section reveal">
+            <div id="pd-badges" class="pd-badge-list"></div>
             <h1 id="pd-title" class="pd-main-title sport-font">Cargando...</h1>
             <div id="pd-price" class="pd-price">$0</div>
             
@@ -69,9 +81,12 @@
             </div>
 
             <div class="pd-actions">
-                <button id="btn-add-cart" class="pd-btn-cart">Comprar ahora</button>
+                <button id="btn-add-cart" class="pd-btn-cart">Agregar al carrito</button>
                 <button id="btn-wa-direct" class="pd-btn-wa">
                     <i class="fab fa-whatsapp"></i> Comprar por WhatsApp
+                </button>
+                <button id="btn-share" onclick="window.shareProduct()" class="pd-btn-share" style="width: 100%; padding: 1rem; margin-top: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); border-radius: 12px; cursor: pointer; font-family: 'Oswald', sans-serif; font-weight: 700; text-transform: uppercase; color: var(--text-color); display: flex; align-items: center; justify-content: center; gap: 10px; transition: var(--transition);">
+                    <i class="fas fa-share-alt"></i> Compartir Producto
                 </button>
             </div>
 
@@ -110,7 +125,7 @@
 
     <!-- Footer -->
     <footer class="dark-footer">
-        <p>&copy; 2024 LC1 Goalkeeper. Todos los derechos reservados.</p>
+        <p>&copy; 2026 LC1 Goalkeeper. Todos los derechos reservados.</p>
         <p>
             Sitio web desarrollado por <a href="https://www.instagram.com/alebalzano1" target="_blank">Alejandro Balzano <i class="fab fa-instagram"></i></a>
         </p>
@@ -139,6 +154,13 @@
     <script src="js/utils.js"></script>
     <script src="js/products-data.js" defer></script>
     <script src="js/product-detail.js" defer></script>
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        (function() {
+            emailjs.init({ publicKey: "J4gkoDsXKglIVQM4m" });
+        })();
+    </script>
     <script src="js/cart.js" defer></script>
 </body>
 </html>
