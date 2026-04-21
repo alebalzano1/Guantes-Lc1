@@ -94,10 +94,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginForm) {
         loginForm.onsubmit = async (e) => {
             e.preventDefault();
-            const emailInput = document.getElementById('login-email').value.trim();
+            let emailInput = document.getElementById('login-email').value.trim();
             const passInput = document.getElementById('login-pass').value.trim();
             const loginBtn = loginForm.querySelector('.btn-primary');
             const originalText = loginBtn.innerHTML;
+
+            // Alias: Transformar 'administrador' en email válido para Firebase
+            if (emailInput.toLowerCase() === 'administrador') {
+                emailInput = 'administrador@admin.com';
+            }
 
             console.log("[LC1 Admin] Intento de login Firebase:", emailInput);
 
@@ -275,6 +280,27 @@ window.logout = async () => {
         location.reload();
     } catch (error) {
         showToast('Error al cerrar sesión', 'error');
+    }
+};
+
+window.initializeAdminAccount = async () => {
+    try {
+        console.log("[LC1 Admin] Solicitando creación de usuario maestro...");
+        // Intentar crear el correo mapeado con la contraseña pedida
+        await firebase.auth().createUserWithEmailAndPassword('administrador@admin.com', 'admin12345');
+        
+        showToast('¡Usuario administrador@admin.com creado!', 'success');
+        setTimeout(() => {
+            alert('✅ Usuario creado correctamente.\n\nAhora podés usar:\nUsuario: administrador\nPass: admin12345');
+            location.reload();
+        }, 1000);
+    } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
+            alert('ℹ️ El usuario ya está configurado en la nube. Solo ingresá tus credenciales.');
+        } else {
+            console.error(error);
+            showToast('Error: ' + error.message, 'error');
+        }
     }
 };
 

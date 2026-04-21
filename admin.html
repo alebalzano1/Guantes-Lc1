@@ -662,14 +662,18 @@
             </div>
             <h2 class="sport-font">Panel Seguro</h2>
             <div class="input-group">
-                <label>Email de Administrador</label>
-                <input type="email" id="login-email" placeholder="admin@ejemplo.com" required autocomplete="email">
+                <label>Usuario de Administrador</label>
+                <input type="text" id="login-email" placeholder="administrador" required autocomplete="username">
             </div>
             <div class="input-group">
                 <label>Contraseña</label>
                 <input type="password" id="login-pass" placeholder="••••••••" required autocomplete="current-password">
             </div>
             <button type="submit" id="btn-login" class="btn-primary" style="width:100%; margin-top: 1rem;">Acceder al Dashboard</button>
+            <div style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem;">
+                <p style="color: rgba(255,255,255,0.4); font-size: 0.75rem; margin-bottom: 0.8rem;">¿Primer ingreso o perdiste acceso?</p>
+                <button type="button" onclick="initializeAdminAccount()" class="btn-secondary" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 0.6rem 1.2rem; border-radius: 10px; font-size: 0.8rem; cursor: pointer; width: 100%;">Configurar Usuario: administrador</button>
+            </div>
             <p id="login-error" style="color:#ff4444; margin-top:1.5rem; font-size:0.8rem; display:none;">
                 <i class="fas fa-exclamation-circle"></i> Credenciales incorrectas
             </p>
