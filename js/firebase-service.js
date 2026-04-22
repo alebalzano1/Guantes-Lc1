@@ -23,6 +23,30 @@ const FirebaseService = {
         return auth.onAuthStateChanged(callback);
     },
 
+    /**
+     * Verifies connection to Firebase by attempting to fetch categories.
+     * Returns a summary of the system state.
+     */
+    async checkConnection() {
+        console.log("[Firebase] Verificando conexión...");
+        const result = {
+            initialized: !!firebase.apps.length,
+            auth: !!auth,
+            firestore: false,
+            error: null
+        };
+        
+        try {
+            // Attempt a simple read to verify Firestore
+            await db.collection("categories").limit(1).get();
+            result.firestore = true;
+        } catch (e) {
+            console.error("[Firebase] Error de diagnóstico:", e);
+            result.error = e.message;
+        }
+        return result;
+    },
+
     // --- Products ---
     async getProducts(bypassCache = false) {
         return this._getWithCache("lc1_products", async () => {

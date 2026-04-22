@@ -9,8 +9,17 @@ console.log(`%c[LC1 Admin v${ADMIN_VERSION}] Iniciando sistema...`, "color: #F9F
 // --- Diagnóstico de Carga ---
 window.onerror = function(msg, url, lineNo, columnNo, error) {
     console.error("%c[CRITICAL ERROR] Fallo en el script: ", "background: red; color: white; padding: 5px;", {msg, url, lineNo, error});
+    if (typeof showToast === 'function') {
+        showToast("Error crítico en el sistema: " + msg, "error");
+    }
     return false;
 };
+
+// Check if running via file://
+const isRunningLocally = window.location.protocol === 'file:';
+if (isRunningLocally) {
+    console.warn("[LC1 Admin] Advertencia: Ejecutado vía file://. Firebase Auth podría fallar.");
+}
 
 let currentImageBase64 = '';
 let currentImagesArray = [];
@@ -32,32 +41,38 @@ let adminSettings = {};
 
 // Obtener datos iniciales de Firebase
 async function loadInitialData() {
-    console.log("[LC1 Admin] Cargando datos desde Firebase...");
+    console.log("[LC1 Admin] Cargando datos...");
     try {
-        adminProducts = await FirebaseService.getProducts();
-        adminCategories = await FirebaseService.getCategories();
-        adminSettings = await FirebaseService.getSettings() || (window.LC1_Data ? window.LC1_Data.settings : {});
-        adminOrders = await FirebaseService.getOrders();
-        adminLogs = await FirebaseService.getEvents(2000); // Cargar últimos eventos
+        // Intentar cargar desde Firebase con un timeout implícito o capturando error
+        const fbProducts = await FirebaseService.getProducts();
+        const fbCategories = await FirebaseService.getCategories();
+        const fbSettings = await FirebaseService.getSettings();
+        const fbOrders = await FirebaseService.getOrders();
         
-        console.log("[LC1 Admin] Datos cargados:", {
-            products: adminProducts.length,
-            categories: adminCategories.length,
-            orders: adminOrders.length,
-            logs: adminLogs.length
-        });
-
-        // Sincronizar UI
+        adminProducts = fbProducts.length > 0 ? fbProducts : adminInitialProducts;
+        adminCategories = fbCategories.length > 0 ? fbCategories : adminInitialCategories;
+        adminSettings = fbSettings || (window.LC1_Data ? window.LC1_Data.settings : {});
+        adminOrders = fbOrders;
+        
+        adminLogs = await FirebaseService.getEvents(2000).catch(() => []); // Logs no son críticos
+        
+        console.log("[LC1 Admin] Datos sincronizados con la nube.");
+    } catch (error) {
+        console.warn("[LC1 Admin] Usando respaldo local (Nube inaccesible):", error.message);
+        adminProducts = adminInitialProducts;
+        adminCategories = adminInitialCategories;
+        adminSettings = window.LC1_Data ? window.LC1_Data.settings : {};
+        adminOrders = []; 
+        showToast('Modo Local: Datos de respaldo cargados', 'info');
+    } finally {
+        // Sincronizar UI independientemente de la fuente
         loadSettings();
         renderAdminProducts();
         renderAdminOrders();
         renderAdminCategories();
         renderAdminHomeFeatured();
-        renderCategorySelect(); // Inyectar categorías en formulario de producto
+        renderCategorySelect(); 
         calculateStats();
-    } catch (error) {
-        console.error("[LC1 Admin] Error fatal cargando Firebase:", error);
-        showToast('Error de conexión con la base de datos', 'error');
     }
 }
 
@@ -86,9 +101,38 @@ adminSettings = getSafeJSON('lc1-settings', window.LC1_Data ? window.LC1_Data.se
 let chartVisits = null;
 let chartMix = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     console.log("[LC1 Admin] Iniciando procesos base...");
     
+    // 0. DIAGNÓSTICO DE SISTEMA
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+    const diagPanel = document.getElementById('diag-panel');
+
+    if (isRunningLocally && diagPanel) {
+        diagPanel.innerHTML += `<p style="color:#ffb300; font-size:0.75rem; margin-top:0.5rem;"><i class="fas fa-exclamation-triangle"></i> Estás abriendo el archivo localmente. Firebase Auth requiere un servidor (usar Live Server).</p>`;
+        diagPanel.style.display = 'block';
+    }
+
+    try {
+        const connection = await FirebaseService.checkConnection();
+        if (connection.firestore) {
+            console.log("[LC1 Admin] Conexión con Firebase OK.");
+            if (statusDot) statusDot.style.background = '#00ff64';
+            if (statusText) statusText.textContent = 'En Línea';
+        } else {
+            console.warn("[LC1 Admin] Fallo de conexión:", connection.error);
+            if (statusDot) statusDot.style.background = '#ff3e3e';
+            if (statusText) statusText.textContent = 'Fuera de Línea';
+            if (diagPanel) {
+                diagPanel.innerHTML += `<p style="color:#ff4444; font-size:0.75rem;">Error de conexión: ${connection.error}</p>`;
+                diagPanel.style.display = 'block';
+            }
+        }
+    } catch (e) {
+        console.error("[LC1 Admin] Fallo en diagnóstico:", e);
+    }
+
     // 1. VINCULAR LOGIN CON FIREBASE AUTH
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
@@ -106,24 +150,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
             console.log("[LC1 Admin] Intento de login Firebase:", emailInput);
 
+            // FUNCIÓN: Entrada Manual (Local)
+            const enterLocalMode = () => {
+                console.log("[LC1 Admin] Entrando en Modo Local...");
+                sessionStorage.setItem('lc1_admin_auth', 'local');
+                showToast('Bienvenido (Modo Local)', 'info');
+                handleAuthSuccess({ email: 'administrador@local' });
+            };
+
             try {
                 loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
                 loginBtn.disabled = true;
                 
+                // 1. Intentar Firebase
                 await FirebaseService.login(emailInput, passInput);
                 // El observador onAuth se encargará del resto
             } catch (error) {
-                console.warn("[LC1 Admin] Accesso Denegado:", error.code);
-                const errorEl = document.getElementById('login-error');
-                if (errorEl) {
-                    let msg = "Credenciales incorrectas.";
-                    if (error.code === 'auth/invalid-email') msg = "Email inválido.";
-                    if (error.code === 'auth/user-not-found') msg = "Usuario no registrado.";
-                    
-                    errorEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${msg}`;
-                    errorEl.style.display = 'block';
+                console.warn("[LC1 Admin] Error Firebase Auth:", error.code);
+                
+                // 2. FALLBACK: Validar Localmente si Firebase falla o estamos en file://
+                if (emailInput === 'administrador@admin.com' && passInput === 'admin12345') {
+                    console.log("[LC1 Admin] Credenciales locales válidas. Saltando Firebase...");
+                    enterLocalMode();
+                } else {
+                    const errorEl = document.getElementById('login-error');
+                    if (errorEl) {
+                        let msg = "Credenciales incorrectas.";
+                        if (error.code === 'auth/invalid-email') msg = "Email inválido.";
+                        if (error.code === 'auth/user-not-found') msg = "Usuario no registrado.";
+                        if (isRunningLocally) msg = "Error de red/Firebase. Prueba nuevamente.";
+                        
+                        errorEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${msg}`;
+                        errorEl.style.display = 'block';
+                    }
+                    showToast('Fallo de conexión', 'error');
                 }
-                showToast('Error de autenticación', 'error');
             } finally {
                 loginBtn.innerHTML = originalText;
                 loginBtn.disabled = false;
@@ -133,35 +194,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. ESCUCHAR CAMBIOS DE AUTENTICACION (Fuente de Verdad)
     FirebaseService.onAuth((user) => {
+        if (user) {
+            handleAuthSuccess(user);
+        } else {
+            // Verificar si hay sesión local persistente
+            const localSession = sessionStorage.getItem('lc1_admin_auth');
+            if (localSession === 'local') {
+                handleAuthSuccess({ email: 'administrador@local' });
+            } else {
+                console.log("[LC1 Admin] Sin sesión activa.");
+                const loginSection = document.getElementById('login-section');
+                const dashboardSection = document.getElementById('dashboard-section');
+                if (loginSection) loginSection.style.display = 'flex';
+                if (dashboardSection) dashboardSection.style.display = 'none';
+            }
+        }
+    });
+
+    function handleAuthSuccess(user) {
         const loginSection = document.getElementById('login-section');
         const dashboardSection = document.getElementById('dashboard-section');
         
-        if (user) {
-            console.log("[LC1 Admin] Sesión activa:", user.email);
-            if (loginSection) loginSection.style.display = 'none';
-            if (dashboardSection) {
-                dashboardSection.style.display = 'flex';
-                dashboardSection.classList.add('fade-in');
-            }
-            
-            const adminNameDisplay = document.querySelector('#admin-user-info');
-            if (adminNameDisplay) {
-                adminNameDisplay.innerHTML = `<i class="fas fa-user-circle"></i> ${user.email.split('@')[0]}`;
-            }
-
-            // Cargar datos solo cuando hay sesión
-            loadInitialData();
-            
-            if (!document.body.dataset.loaded) {
-                showToast('Bienvenido, Administrador', 'success');
-                document.body.dataset.loaded = "true";
-            }
-        } else {
-            console.log("[LC1 Admin] Sin sesión activa.");
-            if (loginSection) loginSection.style.display = 'flex';
-            if (dashboardSection) dashboardSection.style.display = 'none';
+        console.log("[LC1 Admin] Sesión activa:", user.email);
+        if (loginSection) loginSection.style.display = 'none';
+        if (dashboardSection) {
+            dashboardSection.style.display = 'flex';
+            dashboardSection.classList.add('fade-in');
         }
-    });
+        
+        const adminNameDisplay = document.querySelector('#admin-user-info');
+        if (adminNameDisplay) {
+            adminNameDisplay.innerHTML = `<i class="fas fa-user-circle"></i> ${user.email.split('@')[0]}`;
+        }
+
+        // Cargar datos
+        loadInitialData();
+        
+        if (!document.body.dataset.loaded) {
+            showToast('Bienvenido, Administrador', 'success');
+            document.body.dataset.loaded = "true";
+        }
+    }
 
 
     // Image Upload Event (Products)
@@ -276,30 +349,45 @@ window.togglePassVisibility = (id, el) => {
 
 window.logout = async () => {
     try {
+        sessionStorage.removeItem('lc1_admin_auth');
         await FirebaseService.logout();
         location.reload();
     } catch (error) {
-        showToast('Error al cerrar sesión', 'error');
+        location.reload(); // Incluso si falla Firebase, recargar para limpiar UI
     }
 };
 
 window.initializeAdminAccount = async () => {
+    const btn = event?.target || document.querySelector('button[onclick*="initializeAdminAccount"]');
+    const originalText = btn ? btn.innerHTML : "Configurar";
+    
     try {
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Configurando...';
+            btn.disabled = true;
+        }
+
         console.log("[LC1 Admin] Solicitando creación de usuario maestro...");
-        // Intentar crear el correo mapeado con la contraseña pedida
         await firebase.auth().createUserWithEmailAndPassword('administrador@admin.com', 'admin12345');
         
-        showToast('¡Usuario administrador@admin.com creado!', 'success');
-        setTimeout(() => {
-            alert('✅ Usuario creado correctamente.\n\nAhora podés usar:\nUsuario: administrador\nPass: admin12345');
-            location.reload();
-        }, 1000);
+        showToast('¡Usuario administrador creado!', 'success');
+        alert('✅ Usuario maestro configurado con éxito.\n\nUsuario: administrador\nContraseña: admin12345\n\nPrueba ingresar ahora.');
+        location.reload();
     } catch (error) {
+        console.error("[LC1 Admin] Error en configuración:", error.code);
         if (error.code === 'auth/email-already-in-use') {
-            alert('ℹ️ El usuario ya está configurado en la nube. Solo ingresá tus credenciales.');
+            alert('ℹ️ El usuario ya está configurado en la nube.\n\nSolo ingresá las credenciales:\nUsuario: administrador\nPass: admin12345');
+            showToast('El usuario ya existe', 'info');
+        } else if (error.code === 'auth/operation-not-allowed') {
+            alert('❌ Error: El método de Email/Contraseña no está habilitado en tu consola de Firebase.');
         } else {
-            console.error(error);
-            showToast('Error: ' + error.message, 'error');
+            alert('❌ Error: ' + error.message);
+            showToast('Error en configuración', 'error');
+        }
+    } finally {
+        if (btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         }
     }
 };

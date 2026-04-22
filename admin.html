@@ -217,6 +217,58 @@
             box-shadow: 0 8px 20px rgba(249, 255, 32, 0.4);
         }
 
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            border-radius: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* --- Status & Diagnostics --- */
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(255,255,255,0.03);
+            padding: 0.8rem 1.2rem;
+            border-radius: 50px;
+            margin: 0 auto 2rem;
+            width: fit-content;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ffb300; /* Waiting */
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .diag-panel {
+            background: rgba(255, 50, 50, 0.05);
+            border: 1px dashed rgba(255, 50, 50, 0.2);
+            padding: 1rem;
+            border-radius: 15px;
+            margin-top: 1.5rem;
+            text-align: left;
+            display: none; /* Shown via JS if error */
+        }
+
         /* Status Badges */
         .badge-status {
             padding: 0.4rem 0.8rem;
@@ -660,6 +712,8 @@
             <div class="logo sport-font" style="color: var(--primary-color);">
                 <i class="fas fa-shield-halved"></i> LC1 GOALKEEPER
             </div>
+            
+
             <h2 class="sport-font">Panel Seguro</h2>
             <div class="input-group">
                 <label>Usuario de Administrador</label>
@@ -670,10 +724,11 @@
                 <input type="password" id="login-pass" placeholder="••••••••" required autocomplete="current-password">
             </div>
             <button type="submit" id="btn-login" class="btn-primary" style="width:100%; margin-top: 1rem;">Acceder al Dashboard</button>
-            <div style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem;">
-                <p style="color: rgba(255,255,255,0.4); font-size: 0.75rem; margin-bottom: 0.8rem;">¿Primer ingreso o perdiste acceso?</p>
-                <button type="button" onclick="initializeAdminAccount()" class="btn-secondary" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 0.6rem 1.2rem; border-radius: 10px; font-size: 0.8rem; cursor: pointer; width: 100%;">Configurar Usuario: administrador</button>
+            
+            <div id="diag-panel" class="diag-panel">
+                <h4 style="color:#ff4444; font-size:0.75rem; margin-bottom:0.5rem; text-transform:uppercase;">Diagnóstico Detallado</h4>
             </div>
+
             <p id="login-error" style="color:#ff4444; margin-top:1.5rem; font-size:0.8rem; display:none;">
                 <i class="fas fa-exclamation-circle"></i> Credenciales incorrectas
             </p>
