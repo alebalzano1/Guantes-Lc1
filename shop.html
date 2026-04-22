@@ -177,7 +177,7 @@
 
     <script src="js/utils.js"></script>
     <script src="js/products-data.js" defer></script>
-    <script src="js/app.js" defer></script>
+    <script src="js/app.js?v=1.1" defer></script>
     <!-- EmailJS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script>
@@ -186,17 +186,5 @@
         })();
     </script>
     <script src="js/cart.js" defer></script>
-    <script>
-        // Lógica específica de la página de tienda
-        window.filterByCategory = (cat, btn) => {
-            if (window.app_filter) {
-                window.app_filter(cat);
-            }
-            
-            // UI Update
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            if (btn) btn.classList.add('active');
-        };
-    </script>
 </body>
 </html>

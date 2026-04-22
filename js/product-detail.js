@@ -16,20 +16,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     console.log("[LC1 Detail] Buscando producto...");
     try {
+        if (typeof FirebaseService === 'undefined') {
+            throw new Error("FirebaseService no está definido.");
+        }
+
         // 1. Intentar obtener desde Firebase
-        let productsList = await FirebaseService.getProducts();
+        let productsList = await FirebaseService.getProducts().catch(() => []);
         
-        // Fallback inmediato si la lista de la nube está vacía
+        // Fallback inmediato
         if (!productsList || productsList.length === 0) {
-            console.log("[LC1 Detail] Nube vacía, usando catálogo local.");
             productsList = window.LC1_Data ? window.LC1_Data.products : [];
         }
 
         const product = productsList.find(p => String(p.id) === String(productId));
 
         if (!product) {
-            // Último intento: Buscar directamente en el objeto global si el find anterior falló
-            const fallbackProduct = (window.LC1_Data ? window.LC1_Data.products : []).find(p => String(p.id) === String(productId));
+            const fallbackList = window.LC1_Data ? window.LC1_Data.products : [];
+            const fallbackProduct = fallbackList.find(p => String(p.id) === String(productId));
             
             if (fallbackProduct) {
                 renderProductDetail(fallbackProduct);

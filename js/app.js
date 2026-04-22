@@ -3,31 +3,41 @@ let categoriesList = [];
 let siteSettings = {};
 
 async function loadSiteData() {
-    console.log("[LC1 App] Cargando datos desde la nube...");
+    console.log("[LC1 App] Iniciando carga de datos...");
 
-    // Mostrar Skeletons inmediatamente para evitar pantalla vacía
+    // Mostrar Skeletons inmediatamente
     if (shopContainer) renderLoadingSkeletons(shopContainer, 6);
     if (featuredContainer) renderLoadingSkeletons(featuredContainer, 3);
     if (categoriesContainer) renderLoadingSkeletons(categoriesContainer, 3, 'category');
 
     try {
-        productsList = await FirebaseService.getProducts();
-        categoriesList = await FirebaseService.getCategories();
-        siteSettings = await FirebaseService.getSettings() || window.LC1_Data.settings;
+        if (typeof FirebaseService === 'undefined') {
+            throw new Error("FirebaseService no está definido.");
+        }
 
-        // Fallback a locales si la nube está vacía (solo primer arranque o error)
-        if (!productsList || productsList.length === 0) productsList = window.LC1_Data.products;
-        if (!categoriesList || categoriesList.length === 0) categoriesList = window.LC1_Data.categories;
+        productsList = await FirebaseService.getProducts().catch(() => []);
+        categoriesList = await FirebaseService.getCategories().catch(() => []);
+        const fbSettings = await FirebaseService.getSettings().catch(() => null);
+        
+        siteSettings = fbSettings || (window.LC1_Data ? window.LC1_Data.settings : {});
+
+        if (!productsList || productsList.length === 0) {
+            productsList = window.LC1_Data ? window.LC1_Data.products : [];
+        }
+        if (!categoriesList || categoriesList.length === 0) {
+            categoriesList = window.LC1_Data ? window.LC1_Data.categories : [];
+        }
 
         renderPage();
         syncBranding();
     } catch (error) {
-        console.error("[LC1 App] Error cargando base de datos:", error);
-        // Fallback de emergencia
-        productsList = window.LC1_Data.products;
-        categoriesList = window.LC1_Data.categories;
-        siteSettings = window.LC1_Data.settings;
-        renderPage();
+        console.error("[LC1 App] Error crítico:", error);
+        if (window.LC1_Data) {
+            productsList = window.LC1_Data.products;
+            categoriesList = window.LC1_Data.categories;
+            siteSettings = window.LC1_Data.settings;
+            renderPage();
+        }
     }
 }
 

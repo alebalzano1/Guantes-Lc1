@@ -135,19 +135,6 @@ const initialProducts = [
         label: "Escuela", 
         desc: "Ideal para entrenamiento diario. Gran durabilidad y agarre confiable." 
     },
-    { 
-        id: 217, 
-        name: "Cinta Roma Wrap Pro", 
-        sku: "ACC-R04", 
-        category: "accesorios", 
-        price: 4500, 
-        image: "Roma/Photoroom_20260108_133941.png", 
-        featured: false, 
-        available: true, 
-        customizable: false, 
-        label: "Popular", 
-        desc: "Vendaje cohesivo para proteger tus manos. Máximo rendimiento articular." 
-    }
 ];
 
 const initialCategories = [
@@ -172,13 +159,6 @@ const initialCategories = [
         desc: "Mantenimiento para máximo rendimiento del látex.", 
         image: "Roma/Photoroom_20260108_133941.png" 
     },
-    { 
-        id: 4, 
-        name: "Accesorios", 
-        slug: "accesorios", 
-        desc: "Equipamiento complementario para el arquero.", 
-        image: "Roma/Photoroom_20260108_131155.png" 
-    }
 ];
 
 const initialSettings = {
