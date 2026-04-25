@@ -243,21 +243,27 @@
             display: flex;
             align-items: center;
             gap: 0.8rem;
-            background: rgba(255,255,255,0.03);
-            padding: 0.8rem 1.2rem;
+            background: rgba(255,255,255,0.05);
+            padding: 0.8rem 1.5rem;
             border-radius: 50px;
-            margin: 0 auto 2rem;
+            margin: 0;
             width: fit-content;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.8rem;
+            font-weight: 600;
         }
 
         .status-dot {
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: #ffb300; /* Waiting */
+            background: #ffb300; 
             box-shadow: 0 0 10px currentColor;
         }
+
+        .status-dot.online { background: #00ff64; color: #00ff64; }
+        .status-dot.offline { background: #ff3e3e; color: #ff3e3e; }
+        .status-dot.local { background: #00c8ff; color: #00c8ff; }
 
         .diag-panel {
             background: rgba(255, 50, 50, 0.05);
@@ -271,22 +277,45 @@
 
         /* Status Badges */
         .badge-status {
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-size: 0.7rem;
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.65rem;
             font-weight: 900;
             text-transform: uppercase;
+            z-index: 20;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .badge-featured {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            background: var(--primary-color);
+            color: #000;
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            z-index: 20;
+            box-shadow: 0 4px 15px rgba(249, 255, 32, 0.4);
+            border: 1px solid rgba(0,0,0,0.1);
         }
 
         .badge-status.no-stock {
             background: #000;
             color: #fff;
+            right: 1.5rem;
+            /* Si no hay stock, el badge de promo se moverá abajo mediante JS */
         }
 
         .badge-status.promo {
-            background: var(--primary-color);
-            color: #000;
-            border: 1px solid rgba(0,0,0,0.1);
+            background: #000;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         /* Stats Cards - Modern Elite */
@@ -371,6 +400,7 @@
             display: flex;
             flex-direction: column;
             padding: 1.5rem;
+            position: relative; /* Crucial para los badges */
         }
 
         .admin-product-card:hover {
@@ -386,6 +416,7 @@
             overflow: hidden;
             background: #f8f9fa;
             margin-bottom: 1.2rem;
+            position: relative; /* Para los badges internos */
         }
 
         .card-img-container img {
@@ -559,10 +590,48 @@
             border-radius: 24px;
             width: 95%;
             max-width: 620px;
+            max-height: 90vh;
+            overflow-y: auto;
             color: #000;
             box-shadow: 0 50px 100px rgba(0,0,0,0.2);
             position: relative;
             animation: modalFadeIn 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-body {
+            padding: 2rem;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            border-radius: 0 0 24px 24px;
+        }
+
+        .modal-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 600px) {
+            .modal-form-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal-footer {
+                flex-direction: column-reverse;
+            }
+            .modal-footer button {
+                width: 100%;
+            }
         }
 
         @keyframes modalFadeIn {
@@ -785,9 +854,16 @@
                 <i class="fas fa-bars"></i>
             </div>
 
-            <div id="section-products" class="admin-section">
+            <!-- Products Section -->
+            <div id="section-products" class="admin-section" style="display:none;">
                 <div class="admin-section-header">
-                    <h1 class="sport-font" style="color: #000; font-size: 2.5rem;">Inventario <span style="color: var(--primary-color);">Total</span></h1>
+                    <div style="display:flex; flex-direction:column; gap: 0.5rem;">
+                        <h1 class="sport-font" style="color: #000; font-size: 2.5rem; margin:0;">Inventario <span style="color: var(--primary-color);">Total</span></h1>
+                        <div id="cloud-status-bar" class="system-status">
+                            <div id="status-dot" class="status-dot"></div>
+                            <span id="status-text" style="color: #666;">Verificando nube...</span>
+                        </div>
+                    </div>
                     <div style="display:flex; gap:1.5rem; align-items:center;">
                         <button class="btn-primary" onclick="openModal()">+ Nuevo Producto</button>
                     </div>
@@ -996,6 +1072,13 @@
                             </select>
                         </div>
                         <div class="form-group">
+                            <label class="admin-label">Categoría de Edad *</label>
+                            <select id="p-age-category" class="admin-select">
+                                <option value="adulto">Adulto (T6 al T11)</option>
+                                <option value="junior">Junior (T4 al T5)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label class="admin-label">Precio (ARS) *</label>
                             <input type="number" id="p-price" class="admin-input" required placeholder="0.00">
                         </div>
@@ -1036,9 +1119,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer" style="padding: 1.5rem 0 0; border:none; background:transparent;">
+                    <div class="modal-footer">
                         <button type="button" onclick="closeModal()" class="btn-cancel" style="flex:1;">Cancelar</button>
-                        <button type="submit" class="btn-save" style="flex:2;">Guardar cambios del producto</button>
+                        <button type="submit" class="btn-save" style="flex:2;">Guardar cambios</button>
                     </div>
                 </form>
             </div>
@@ -1076,7 +1159,7 @@
                             </div>
                         </div>
                         <div class="form-group-full">
-                            <div class="modal-footer" style="padding: 1.5rem 0 0; border:none; background:transparent;">
+                            <div class="modal-footer">
                                 <button type="button" class="btn-cancel" onclick="closeCatModal()" style="flex:1;">Cancelar</button>
                                 <button type="submit" class="btn-save" style="flex:2;">Confirmar Categoría</button>
                             </div>

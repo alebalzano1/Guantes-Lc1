@@ -67,17 +67,15 @@
             </p>
 
             <div class="pd-size-selector">
-                <label for="size-select">Seleccioná tu talle:</label>
-                <select id="size-select">
-                    <option value="" disabled selected>Elegí un talle</option>
-                    <!-- Sizes injected by JS based on category, using default as fallback -->
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                    <option value="11">11</option>
-                </select>
-                <small id="size-error">Por favor seleccioná un talle para continuar.</small>
+                <label>Seleccioná tu talle:</label>
+                <div id="size-buttons-container" class="size-buttons-grid">
+                    <!-- Botones inyectados por JS -->
+                </div>
+                <input type="hidden" id="selected-size" value="">
+                <small id="size-error" style="display:none; color:#ff3e3e; font-weight:700; margin-top:10px;">Por favor seleccioná un talle para continuar.</small>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 15px;">
+                    ¿No sabés tu talle? Medí desde el inicio de la palma hasta la punta del dedo medio.
+                </p>
             </div>
 
             <div class="pd-actions">
@@ -144,6 +142,7 @@
 
     <!-- Firebase SDK (Compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     

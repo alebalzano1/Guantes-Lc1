@@ -21,9 +21,14 @@ if (isRunningLocally) {
     console.warn("[LC1 Admin] Advertencia: Ejecutado vía file://. Firebase Auth podría fallar.");
 }
 
-let currentImageBase64 = '';
-let currentImagesArray = [];
-let isProcessingImage = false;
+let currentProductImages = [];
+let currentCategoryImage = "";
+let processingImagesCount = 0;
+
+function updateProcessingState(delta) {
+    processingImagesCount += delta;
+    if (processingImagesCount < 0) processingImagesCount = 0;
+}
 
 // Productos y Categorías de Respaldo (para evitar colisión global)
 const adminInitialProducts = window.LC1_Data ? window.LC1_Data.products : [];
@@ -49,8 +54,9 @@ async function loadInitialData() {
         const fbSettings = await FirebaseService.getSettings();
         const fbOrders = await FirebaseService.getOrders();
         
-        adminProducts = fbProducts.length > 0 ? fbProducts : adminInitialProducts;
-        adminCategories = fbCategories.length > 0 ? fbCategories : adminInitialCategories;
+        // Si la conexión fue exitosa, usamos los datos de Firebase (aunque sea una lista vacía)
+        adminProducts = fbProducts;
+        adminCategories = fbCategories;
         adminSettings = fbSettings || (window.LC1_Data ? window.LC1_Data.settings : {});
         adminOrders = fbOrders;
         
@@ -118,12 +124,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const connection = await FirebaseService.checkConnection();
         if (connection.firestore) {
             console.log("[LC1 Admin] Conexión con Firebase OK.");
-            if (statusDot) statusDot.style.background = '#00ff64';
-            if (statusText) statusText.textContent = 'En Línea';
+            if (statusDot) {
+                statusDot.className = 'status-dot online';
+                statusText.innerHTML = 'En Línea <span style="color:#00ff64; font-size:0.6rem;">(Firebase Activo)</span>';
+            }
         } else {
             console.warn("[LC1 Admin] Fallo de conexión:", connection.error);
-            if (statusDot) statusDot.style.background = '#ff3e3e';
-            if (statusText) statusText.textContent = 'Fuera de Línea';
+            if (statusDot) {
+                statusDot.className = 'status-dot offline';
+                statusText.innerHTML = 'Error de Nube <span style="color:#ff3e3e; font-size:0.6rem;">(Ver Consola)</span>';
+            }
             if (diagPanel) {
                 diagPanel.innerHTML += `<p style="color:#ff4444; font-size:0.75rem;">Error de conexión: ${connection.error}</p>`;
                 diagPanel.style.display = 'block';
@@ -214,12 +224,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     function handleAuthSuccess(user) {
         const loginSection = document.getElementById('login-section');
         const dashboardSection = document.getElementById('dashboard-section');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
         
         console.log("[LC1 Admin] Sesión activa:", user.email);
         if (loginSection) loginSection.style.display = 'none';
         if (dashboardSection) {
             dashboardSection.style.display = 'flex';
             dashboardSection.classList.add('fade-in');
+        }
+
+        // Actualizar UI de estado según el tipo de sesión
+        if (user.email.includes('@local')) {
+            if (statusDot) statusDot.className = 'status-dot local';
+            if (statusText) statusText.innerHTML = 'Modo Local <span style="color:#00c8ff; font-size:0.6rem;">(Sin conexión a Firebase)</span>';
+            
+            // Mostrar advertencia persistente en el dashboard
+            const warningBanner = document.createElement('div');
+            warningBanner.id = 'local-mode-warning';
+            warningBanner.style = "background: #ff3e3e; color: white; padding: 10px; text-align: center; font-weight: bold; position: sticky; top: 0; z-index: 2000;";
+            warningBanner.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Estás en MODO LOCAL. Las imágenes y productos NO se sincronizarán con Firebase.';
+            document.body.prepend(warningBanner);
+        } else {
+            if (statusDot) statusDot.className = 'status-dot online';
+            if (statusText) statusText.innerHTML = 'Autenticado <span style="color:#00ff64; font-size:0.6rem;">(Nube Activa)</span>';
+            
+            // Remover advertencia si existe
+            const existingWarning = document.getElementById('local-mode-warning');
+            if (existingWarning) existingWarning.remove();
         }
         
         const adminNameDisplay = document.querySelector('#admin-user-info');
@@ -229,6 +261,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Cargar datos
         loadInitialData();
+        
+        // Activar sección por defecto (Inventario)
+        switchSection('products');
         
         if (!document.body.dataset.loaded) {
             showToast('Bienvenido, Administrador', 'success');
@@ -357,40 +392,7 @@ window.logout = async () => {
     }
 };
 
-window.initializeAdminAccount = async () => {
-    const btn = event?.target || document.querySelector('button[onclick*="initializeAdminAccount"]');
-    const originalText = btn ? btn.innerHTML : "Configurar";
-    
-    try {
-        if (btn) {
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Configurando...';
-            btn.disabled = true;
-        }
 
-        console.log("[LC1 Admin] Solicitando creación de usuario maestro...");
-        await firebase.auth().createUserWithEmailAndPassword('administrador@admin.com', 'admin12345');
-        
-        showToast('¡Usuario administrador creado!', 'success');
-        alert('✅ Usuario maestro configurado con éxito.\n\nUsuario: administrador\nContraseña: admin12345\n\nPrueba ingresar ahora.');
-        location.reload();
-    } catch (error) {
-        console.error("[LC1 Admin] Error en configuración:", error.code);
-        if (error.code === 'auth/email-already-in-use') {
-            alert('ℹ️ El usuario ya está configurado en la nube.\n\nSolo ingresá las credenciales:\nUsuario: administrador\nPass: admin12345');
-            showToast('El usuario ya existe', 'info');
-        } else if (error.code === 'auth/operation-not-allowed') {
-            alert('❌ Error: El método de Email/Contraseña no está habilitado en tu consola de Firebase.');
-        } else {
-            alert('❌ Error: ' + error.message);
-            showToast('Error en configuración', 'error');
-        }
-    } finally {
-        if (btn) {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    }
-};
 
 
 
@@ -429,14 +431,16 @@ function renderAdminProducts() {
 
     grid.innerHTML = adminProducts.map(p => `
         <div class="admin-product-card ${!p.available ? 'out-of-stock' : ''} ${p.featured ? 'has-featured' : ''}">
-            ${p.featured ? '<div class="badge-featured">Destacado</div>' : ''}
-            ${!p.available ? '<div class="badge-status no-stock">SIN STOCK</div>' : ''}
-            ${p.label ? `<div class="badge-status promo" style="top: ${p.available ? '1rem' : '3.5rem'}">${p.label}</div>` : ''}
             <div class="card-img-container">
+                ${p.featured ? '<div class="badge-featured">Destacado</div>' : ''}
+                ${!p.available ? '<div class="badge-status no-stock">SIN STOCK</div>' : ''}
+                ${p.label ? `<div class="badge-status promo" style="top: ${p.available ? '1.5rem' : '4.5rem'}">${p.label}</div>` : ''}
                 <img src="${p.image}" alt="${p.name}" width="300" height="300">
             </div>
-            <span class="card-id">${p.sku || '#' + p.id.toString().slice(-4)}</span>
-            <span class="card-category">${p.category}</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.5rem;">
+                <span class="card-category">${p.category}</span>
+                <span style="font-size:0.65rem; color:var(--text-muted); font-weight:700;">${p.sku || '#' + p.id.toString().slice(-4)}</span>
+            </div>
             <h3 class="card-title">${p.name}</h3>
             <span class="card-price">${adminSettings.currency}${p.price.toLocaleString('es-AR')}</span>
             
@@ -522,11 +526,11 @@ window.saveProduct = async () => {
     const saveBtn = form.querySelector('.btn-save');
     
     // 1. Validaciones Críticas
-    if (isProcessingImage) {
-        return showToast('Las imágenes se están procesando. Espera un momento...', 'info');
+    if (processingImagesCount > 0) {
+        return showToast('Las imágenes aún se están procesando. Espera un momento...', 'info');
     }
 
-    if (!currentImagesArray || currentImagesArray.length === 0) {
+    if (!currentProductImages || currentProductImages.length === 0) {
         return showToast('El producto debe tener al menos una imagen', 'error');
     }
 
@@ -542,23 +546,46 @@ window.saveProduct = async () => {
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
     saveBtn.disabled = true;
 
+    // 3. VERIFICACIÓN DE SESIÓN FIREBASE (A prueba de balas)
+    const currentUser = firebase.auth().currentUser;
+
+    if (!currentUser) {
+        // Cortar la ejecución si no hay sesión real de Firebase
+        saveBtn.innerHTML = originalBtnText;
+        saveBtn.disabled = false;
+        console.error("[LC1 Admin] Intento de guardado sin sesión de Firebase.");
+        return showToast('Sesión no sincronizada con Firebase. Cerrá sesión y volvé a ingresar.', 'error');
+    }
+
+    // Timeout helper
+    const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), ms));
+
     try {
         console.log("[LC1 Admin] Iniciando ciclo de guardado de producto...");
 
         // 3. Procesar Subida de Imágenes
         // Solo las que empiezan con 'data:image' son nuevas y requieren upload
-        const uploadPromises = currentImagesArray.map(async (img, i) => {
-            if (img.startsWith('data:image')) {
+        const uploadPromises = currentProductImages.map(async (img, i) => {
+            if (img && typeof img === 'string' && img.startsWith('data:image')) {
                 console.log(`[LC1 Admin] Subiendo nueva imagen [${i}] a Firebase...`);
                 const blob = FirebaseService.base64ToBlob(img);
                 const fileName = `products/${Date.now()}_${i}.jpg`;
-                return await FirebaseService.uploadImage(blob, fileName);
+                
+                // Aplicar timeout de 30 segundos por imagen
+                return await Promise.race([
+                    FirebaseService.uploadImage(blob, fileName),
+                    timeout(30000)
+                ]);
             }
-            return img; // Ya es una URL de Firebase
+            return img; 
         });
 
-        const finalImages = await Promise.all(uploadPromises);
-        console.log("[LC1 Admin] Imágenes procesadas:", finalImages.length);
+        console.log("[LC1 Admin] Esperando subida de imágenes...");
+        const finalImages = (await Promise.all(uploadPromises)).filter(img => img != null);
+        console.log("[LC1 Admin] Imágenes procesadas con éxito:", finalImages.length);
+
+        const ageCategory = document.getElementById('p-age-category').value;
+        const autoSizes = ageCategory === 'junior' ? ["4", "5"] : ["6", "7", "8", "9", "10", "11"];
 
         const newProduct = {
             id: idToEdit ? String(idToEdit) : String(Date.now()),
@@ -566,17 +593,23 @@ window.saveProduct = async () => {
             sku: document.getElementById('p-sku').value.trim(),
             price: price,
             category: document.getElementById('p-category').value,
+            ageCategory: ageCategory, // Nueva categoría de edad
+            sizes: autoSizes,         // Talles automáticos
             desc: document.getElementById('p-desc').value.trim(),
             label: document.getElementById('p-label').value.trim(),
             available: document.getElementById('p-available').checked,
             featured: document.getElementById('p-featured').checked,
             customizable: document.getElementById('p-customizable').checked,
-            image: finalImages[0], // Imagen principal
-            images: finalImages   // Galería completa
+            image: finalImages[0], 
+            images: finalImages   
         };
 
-        // 4. Guardar en Firestore
-        await FirebaseService.saveProduct(newProduct);
+        // 4. Guardar en Firestore (con timeout de 15 segundos)
+        console.log("[LC1 Admin] Guardando datos en Firestore...");
+        await Promise.race([
+            FirebaseService.saveProduct(newProduct),
+            timeout(15000)
+        ]);
 
         // 5. Actualizar estado local
         if (idToEdit) {
@@ -595,13 +628,17 @@ window.saveProduct = async () => {
 
     } catch (error) {
         console.error("[LC1 Admin] Error fatal al guardar producto:", error);
-        showToast('Error crítico al guardar. Reintenta o revisa la consola.', 'error');
+        let errorMsg = 'Error al guardar. Reintenta.';
+        if (error.message === 'Timeout') errorMsg = 'La conexión es lenta o falló. Reintenta.';
+        showToast(errorMsg, 'error');
     } finally {
         saveBtn.innerHTML = originalBtnText;
         saveBtn.disabled = false;
-        isProcessingImage = false; // Reset de seguridad
+        processingImagesCount = 0; 
     }
 };
+
+
 
 window.deleteProduct = (id) => {
     showConfirm('¿Estás seguro de que quieres eliminar este producto?', async () => {
@@ -624,14 +661,14 @@ window.editProduct = (id) => {
     document.getElementById('p-sku').value = p.sku || '';
     document.getElementById('p-price').value = p.price;
     document.getElementById('p-category').value = p.category;
+    document.getElementById('p-age-category').value = p.ageCategory || 'adulto'; // Cargar categoría de edad
     document.getElementById('p-desc').value = p.desc || '';
     document.getElementById('p-label').value = p.label || '';
     document.getElementById('p-available').checked = p.available !== undefined ? p.available : true;
     document.getElementById('p-featured').checked = p.featured || false;
     document.getElementById('p-customizable').checked = p.customizable || false;
     
-    currentImageBase64 = p.image;
-    currentImagesArray = p.images || (p.image ? [p.image] : []);
+    currentProductImages = p.images || (p.image ? [p.image] : []);
     
     window.renderProductImagesPreview();
     
@@ -937,15 +974,12 @@ async function saveSettings() {
 
 window.renderProductImagesPreview = () => {
     const preview = document.getElementById('p-preview');
-    if (!currentImagesArray || currentImagesArray.length === 0) {
+    if (!currentProductImages || currentProductImages.length === 0) {
         preview.innerHTML = `<i class="fas fa-image" style="color:#ccc; font-size:3rem; margin:auto;"></i>`;
-        currentImageBase64 = '';
         return;
     }
     
-    currentImageBase64 = currentImagesArray[0];
-
-    preview.innerHTML = currentImagesArray.map((img, idx) => `
+    preview.innerHTML = currentProductImages.map((img, idx) => `
         <div style="position:relative; flex-shrink:0; display:inline-block; height:100px;">
             <img src="${img}" style="height:100px; width:auto; border-radius:8px; object-fit:contain; border:2px solid var(--primary-color);">
             <button type="button" onclick="removeProductImage(${idx})" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; z-index:10;"><i class="fas fa-times"></i></button>
@@ -954,13 +988,13 @@ window.renderProductImagesPreview = () => {
 };
 
 window.removeProductImage = (idx) => {
-    currentImagesArray.splice(idx, 1);
+    currentProductImages.splice(idx, 1);
     window.renderProductImagesPreview();
 };
 
 function processImage(file, target = 'product', isMultiple = false) {
     if (!file) return;
-    isProcessingImage = true;
+    updateProcessingState(1);
     
     let previewId = 'p-preview';
     if (target === 'category') previewId = 'cat-preview';
@@ -1006,25 +1040,25 @@ function processImage(file, target = 'product', isMultiple = false) {
             const finalBase64 = canvas.toDataURL('image/jpeg', 0.8); 
             
             if (target === 'product' && isMultiple) {
-                currentImagesArray.push(finalBase64);
+                currentProductImages.push(finalBase64);
                 window.renderProductImagesPreview();
             } else {
-                currentImageBase64 = finalBase64;
+                currentCategoryImage = finalBase64;
                 if (preview) {
-                    preview.innerHTML = `<img src="${currentImageBase64}" style="width:100%; height:100%; object-fit:${target === 'product' ? 'contain' : 'cover'};">`;
+                    preview.innerHTML = `<img src="${currentCategoryImage}" style="width:100%; height:100%; object-fit:${target === 'product' ? 'contain' : 'cover'};">`;
                 }
             }
         } catch (err) {
             console.error("[LC1 Admin] Error al procesar canvas:", err);
             showToast('Error cargando la foto', 'error');
         } finally {
-            isProcessingImage = false;
+            updateProcessingState(-1);
             URL.revokeObjectURL(objectUrl);
         }
     };
     
     img.onerror = () => {
-        isProcessingImage = false;
+        updateProcessingState(-1);
         URL.revokeObjectURL(objectUrl);
         showToast('Error al abrir la imagen', 'error');
         if (preview) preview.innerHTML = originalPreviewContent;
@@ -1038,7 +1072,7 @@ window.openModal = (isFeatured = false) => {
     document.getElementById('product-modal').style.display = 'flex';
     document.getElementById('modal-title').textContent = isFeatured ? 'Nuevo Producto Destacado' : 'Nuevo Producto';
     document.getElementById('product-form').reset();
-    currentImagesArray = [];
+    currentProductImages = [];
     window.renderProductImagesPreview();
     delete document.getElementById('product-form').dataset.editId;
     
@@ -1060,7 +1094,8 @@ function renderAdminCategories() {
     grid.innerHTML = adminCategories.map(cat => `
         <div class="admin-product-card">
             <div class="card-img-container" style="height: 180px; background: #f8f9fa;">
-                <img src="${cat.image}" alt="${cat.name}" style="width:100%; height:100%; object-fit:contain;" width="400" height="400">
+                <img src="${cat.image}" alt="${cat.name}" style="width:100%; height:100%; object-fit:contain;" width="400" height="400"
+                     onerror="this.src='https://placehold.co/400x400/f8f9fa/111?text=${cat.name}'; this.onerror=null;">
             </div>
             <h3 class="card-title" style="color: #000; font-size: 1.2rem; margin-top: 0.5rem;">${cat.name}</h3>
             <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.5rem; height: 2.4rem; overflow: hidden;">${cat.desc}</p>
@@ -1088,19 +1123,19 @@ window.openCategoryModal = (id = null) => {
         document.getElementById('cat-name').value = cat.name;
         document.getElementById('cat-desc').value = cat.desc;
         document.getElementById('cat-preview').innerHTML = `<img src="${cat.image}" style="width:100%; height:100%; object-fit:cover;">`;
-        currentImageBase64 = cat.image;
+        currentCategoryImage = cat.image;
     } else {
         delete modal.dataset.editId;
         document.getElementById('cat-modal-title').textContent = 'Nueva Categoría';
         document.getElementById('category-form').reset();
         document.getElementById('cat-preview').innerHTML = `<i class="fas fa-image" style="color:#333; font-size:4rem;"></i>`;
-        currentImageBase64 = '';
+        currentCategoryImage = '';
     }
 };
 
 window.closeCatModal = () => {
     document.getElementById('category-modal').style.display = 'none';
-    currentImageBase64 = '';
+    currentCategoryImage = '';
 };
 
 window.saveCategory = async () => {
@@ -1108,11 +1143,11 @@ window.saveCategory = async () => {
     const idToEdit = modal.dataset.editId;
     const saveBtn = document.querySelector('#category-modal .btn-save');
     
-    if (isProcessingImage) {
+    if (processingImagesCount > 0) {
         return showToast('Espera a que termine de procesarse la imagen...', 'info');
     }
 
-    if (!currentImageBase64) {
+    if (!currentCategoryImage) {
         return showToast('Por favor, selecciona una foto para la categoría', 'error');
     }
 
@@ -1121,11 +1156,11 @@ window.saveCategory = async () => {
     saveBtn.disabled = true;
 
     try {
-        let finalImageUrl = currentImageBase64;
+        let finalImageUrl = currentCategoryImage;
         
         // Subir si es nueva imagen
-        if (currentImageBase64.startsWith('data:image')) {
-            const blob = FirebaseService.base64ToBlob(currentImageBase64);
+        if (currentCategoryImage.startsWith('data:image')) {
+            const blob = FirebaseService.base64ToBlob(currentCategoryImage);
             finalImageUrl = await FirebaseService.uploadImage(blob, `categories/${Date.now()}.jpg`);
         }
 

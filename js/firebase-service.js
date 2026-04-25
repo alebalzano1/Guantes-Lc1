@@ -4,7 +4,7 @@
 // Initialize Firebase
 firebase.initializeApp(window.firebaseConfig);
 const db = firebase.firestore();
-const storage = firebase.storage();
+
 const auth = firebase.auth();
 
 const FirebaseService = {
@@ -148,17 +148,50 @@ const FirebaseService = {
 
     // --- Storage (Images) ---
     async uploadImage(file, path) {
-        console.log(`[Firebase] Iniciando subida a: ${path}...`);
+        console.log(`[Cloudinary] Iniciando subida a Cloudinary...`);
+        
+        // Configuración de Cloudinary
+        const cloudName = "dgb5o9y0v";
+        const uploadPreset = "ugda3w5p";
+        const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+
+        // AbortController para manejar el timeout de 30 segundos
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+
         try {
-            const storageRef = storage.ref(path);
-            const snapshot = await storageRef.put(file);
-            console.log(`[Firebase] Archivo subido con éxito: ${path}`);
-            const url = await snapshot.ref.getDownloadURL();
-            console.log(`[Firebase] URL obtenida: ${url}`);
-            return url;
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("upload_preset", uploadPreset);
+            // Usamos el path original como referencia en el nombre del archivo si se desea
+            if (path) formData.append("public_id", path.replace(/\//g, '_').split('.')[0]);
+
+            const response = await fetch(url, {
+                method: "POST",
+                body: formData,
+                signal: controller.signal
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || "Error en la respuesta de Cloudinary");
+            }
+
+            const data = await response.json();
+            console.log(`[Cloudinary] Archivo subido con éxito: ${data.secure_url}`);
+            
+            // Retornamos la secure_url que es la que se guardará en Firestore
+            return data.secure_url;
         } catch (error) {
-            console.error(`[Firebase] Error CRÍTICO en la subida a ${path}:`, error);
+            if (error.name === 'AbortError') {
+                console.error(`[Cloudinary] Error: Tiempo de espera agotado (30s)`);
+                throw new Error('Tiempo de espera agotado al subir imagen a Cloudinary');
+            }
+            console.error(`[Cloudinary] Error CRÍTICO en la subida a Cloudinary:`, error);
             throw error;
+        } finally {
+            // Limpiamos el timeout siempre
+            clearTimeout(timeoutId);
         }
     },
 

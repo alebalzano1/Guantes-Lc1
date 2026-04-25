@@ -167,9 +167,10 @@ function renderProductDetail(product) {
         if (thumbnailsContainer) thumbnailsContainer.style.display = 'none';
     }
 
-    // 2.8 Configurar selector de talle dependiendo de la categoría
-    const sizeSelect = document.getElementById('size-select');
+    // 2.8 Configurar botones de talle dependiendo de la categoría y ageCategory
+    const sizeButtonsContainer = document.getElementById('size-buttons-container');
     const sizeContainer = document.querySelector('.pd-size-selector');
+    const selectedSizeInput = document.getElementById('selected-size');
     const category = product.category.toLowerCase();
     const requiresSize = ['guantes', 'indumentaria'].includes(category) && !['accesorios', 'reparacion'].includes(category);
 
@@ -177,28 +178,44 @@ function renderProductDetail(product) {
         sizeContainer.style.display = requiresSize ? 'block' : 'none';
     }
 
-    if (sizeSelect && product.category.toLowerCase() === 'indumentaria') {
-        sizeSelect.innerHTML = `
-            <option value="" disabled selected>Elegí un talle</option>
-            <option value="S">S</option>
-            <option value="M">M</option>
-            <option value="L">L</option>
-            <option value="XL">XL</option>
-            <option value="XXL">XXL</option>
-        `;
+    if (sizeButtonsContainer && requiresSize) {
+        // Usar talles del producto (asignados por Admin) o fallback si es indumentaria antigua
+        let availableSizes = product.sizes || [];
+        
+        if (availableSizes.length === 0) {
+            if (category === 'indumentaria') availableSizes = ["S", "M", "L", "XL", "XXL"];
+            else availableSizes = ["7", "8", "9", "10", "11"]; // Fallback por defecto
+        }
+
+        sizeButtonsContainer.innerHTML = availableSizes.map(size => `
+            <button class="size-btn" onclick="selectProductSize('${size}', this)">${size}</button>
+        `).join('');
+
+        // Función global para manejar el click en los botones
+        window.selectProductSize = (size, element) => {
+            selectedSizeInput.value = size;
+            // Remover clase active de todos
+            document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
+            // Agregar a este
+            element.classList.add('active');
+            // Ocultar error si existía
+            document.getElementById('size-error').style.display = 'none';
+        };
     }
 
     // Validación de Talle Helper
     const validateSize = () => {
-        if (!requiresSize) return 'N/A'; // No requiere talle
+        if (!requiresSize) return 'N/A'; 
         
         const errorMsg = document.getElementById('size-error');
-        if (sizeSelect && !sizeSelect.value) {
-            errorMsg.style.display = 'block';
+        const size = selectedSizeInput.value;
+        
+        if (!size) {
+            if (errorMsg) errorMsg.style.display = 'block';
             return null;
         }
         if (errorMsg) errorMsg.style.display = 'none';
-        return sizeSelect ? sizeSelect.value : null;
+        return size;
     };
 
     // 3. Botones de Acción y Validación de Stock

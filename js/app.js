@@ -21,10 +21,12 @@ async function loadSiteData() {
         
         siteSettings = fbSettings || (window.LC1_Data ? window.LC1_Data.settings : {});
 
-        if (!productsList || productsList.length === 0) {
+        // Si la conexión fue exitosa, respetamos la base de datos (aunque esté vacía)
+        // Solo usamos respaldo si Firebase falló o no devolvió nada y el usuario no está logueado
+        if (productsList.length === 0 && !fbSettings) {
             productsList = window.LC1_Data ? window.LC1_Data.products : [];
         }
-        if (!categoriesList || categoriesList.length === 0) {
+        if (categoriesList.length === 0 && !fbSettings) {
             categoriesList = window.LC1_Data ? window.LC1_Data.categories : [];
         }
 
@@ -136,7 +138,7 @@ function renderSidebarFilters() {
 function renderCategories() {
     categoriesContainer.innerHTML = categoriesList.map(cat => `
         <a href="shop.html?cat=${cat.slug}" class="category-card">
-            <img src="${cat.image}" alt="${cat.name}" width="600" height="800">
+            <img src="${cat.image}" alt="${cat.name}" width="600" height="800" onerror="this.src='https://placehold.co/600x800/111/fff?text=${cat.name}'; this.onerror=null;">
             <div class="category-overlay">
                 <h3 class="sport-font">${cat.name}</h3>
                 <p>${cat.desc}</p>
@@ -215,7 +217,7 @@ function productCard(product) {
     return `
         <div class="product-card reveal">
             <div class="product-img" onclick="window.location.href='product.html?id=${product.id}'" style="cursor:pointer;">
-                <img src="${product.image}" alt="${product.name}" loading="lazy" width="400" height="400">
+                <img src="${product.image}" alt="${product.name}" loading="lazy" width="400" height="400" onerror="this.src='https://placehold.co/400x400/111/fff?text=Producto'; this.onerror=null;">
             </div>
             <div class="product-info" style="padding-top: 0.5rem; display: flex; flex-direction: column; flex: 1;">
                 <span class="card-category">${product.category}</span>
