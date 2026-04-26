@@ -211,27 +211,31 @@ function productCard(product) {
     const sizeOptions = availableSizes.map(s => `<option value="${s}">${s}</option>`).join('');
 
     let sizeHTML = showSize ? `
-        <div class="shop-size-selector" style="margin-bottom: 8px;">
-            <!-- Botón para desplegar talles -->
+        <div class="shop-size-selector" style="margin-bottom: 8px; position: relative;">
+            <!-- Botón Estilo Dropdown -->
             <button id="size-toggle-btn-${product.id}" 
-                    onclick="document.getElementById('size-chips-wrapper-${product.id}').style.display='block'; this.style.display='none';"
-                    style="width: 100%; padding: 8px; border: 1.5px solid var(--glass-border); background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 0.8rem; font-weight: 700; color: var(--text-color); cursor: pointer; transition: all 0.2s;">
-                Seleccionar Talle
+                    onclick="document.getElementById('size-list-wrapper-${product.id}').style.display='block'; this.style.display='none';"
+                    style="width: 100%; padding: 10px; border: 1.5px solid var(--glass-border); background: rgba(255,255,255,0.05); border-radius: 10px; font-size: 0.8rem; font-weight: 700; color: var(--text-color); cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s;">
+                <span>Seleccionar Talle</span>
+                <i class="fas fa-chevron-down" style="font-size: 0.7rem; opacity: 0.5;"></i>
             </button>
 
-            <!-- Contenedor de chips (oculto por defecto) -->
-            <div id="size-chips-wrapper-${product.id}" style="display: none;">
-                <p style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; color: var(--text-muted); letter-spacing: 1px;">
-                    Talle:
-                </p>
-                <div id="size-chips-${product.id}" style="display: flex; gap: 5px; flex-wrap: wrap;">
+            <!-- Lista de Talles (Vertical y Estilizada) -->
+            <div id="size-list-wrapper-${product.id}" class="size-list-container" style="display: none; animation: slideDown 0.3s ease-out;">
+                <div style="display: flex; flex-direction: column; gap: 4px; background: rgba(255,255,255,0.02); border-radius: 10px; border: 1px solid var(--glass-border); padding: 5px;">
                     ${availableSizes.map(s => `
-                        <button class="size-chip" 
+                        <button class="size-list-item" 
                             onclick="window.selectShopSize('${product.id}', '${s}', this)"
-                            style="padding: 4px 10px; border: 1.5px solid var(--glass-border); background: transparent; border-radius: 5px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; color: var(--text-color);">
-                            ${s}
+                            style="width: 100%; padding: 8px 15px; border: none; background: transparent; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-align: left; cursor: pointer; color: var(--text-color); transition: all 0.2s; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Talle ${s}</span>
+                            <i class="fas fa-check check-icon" style="display: none; font-size: 0.7rem; color: #000;"></i>
                         </button>
                     `).join('')}
+                    <!-- Opción para cerrar/cancelar -->
+                    <button onclick="document.getElementById('size-list-wrapper-${product.id}').style.display='none'; document.getElementById('size-toggle-btn-${product.id}').style.display='flex';"
+                            style="width: 100%; padding: 6px; border: none; background: transparent; color: var(--text-muted); font-size: 0.7rem; cursor: pointer; text-align: center; border-top: 1px solid var(--glass-border); margin-top: 4px;">
+                        Cerrar
+                    </button>
                 </div>
             </div>
             <input type="hidden" id="shop-size-input-${product.id}" value="">
@@ -288,26 +292,37 @@ window.filterByPrice = (order) => {
     updateShopDisplay();
 };
 
-window.selectShopSize = (productId, size, chipEl) => {
-    // Quitar clase active de todos los chips del mismo producto
-    document.querySelectorAll('.size-chip').forEach(btn => {
-        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${productId}'`)) {
-            btn.classList.remove('active');
-            btn.style.background = 'transparent';
-            btn.style.borderColor = 'var(--glass-border)';
-            btn.style.color = 'var(--text-color)';
-        }
+window.selectShopSize = (productId, size, itemEl) => {
+    const wrapper = document.getElementById(`size-list-wrapper-${productId}`);
+    const toggleBtn = document.getElementById(`size-toggle-btn-${productId}`);
+
+    // Quitar clase active y ocultar iconos de check de todos los items del mismo producto
+    document.querySelectorAll(`#size-list-wrapper-${productId} .size-list-item`).forEach(btn => {
+        btn.style.background = 'transparent';
+        btn.style.color = 'var(--text-color)';
+        const icon = btn.querySelector('.check-icon');
+        if (icon) icon.style.display = 'none';
     });
-    // Activar el chip clickeado
-    if (chipEl) {
-        chipEl.classList.add('active');
-        chipEl.style.background = '#f5c518';
-        chipEl.style.borderColor = '#f5c518';
-        chipEl.style.color = '#000';
+
+    // Activar el item clickeado
+    if (itemEl) {
+        itemEl.style.background = 'var(--accent-color)';
+        itemEl.style.color = '#000';
+        const icon = itemEl.querySelector('.check-icon');
+        if (icon) icon.style.display = 'block';
     }
+
     // Guardar el valor en el input hidden
     const input = document.getElementById(`shop-size-input-${productId}`);
     if (input) input.value = size;
+
+    // Actualizar el texto del botón toggle para mostrar el talle elegido y cerrarlo
+    if (toggleBtn) {
+        toggleBtn.querySelector('span').textContent = `Talle: ${size}`;
+        toggleBtn.style.display = 'flex';
+        toggleBtn.style.borderColor = 'var(--accent-color)';
+    }
+    if (wrapper) wrapper.style.display = 'none';
 };
 
 window.addToCartWithSize = (productId) => {
@@ -318,16 +333,15 @@ window.addToCartWithSize = (productId) => {
 
     if (requiresSize && sizeInput && !sizeInput.value) {
         showToast('Seleccioná un talle para continuar', 'error');
-        // Si el contenedor está oculto, mostrarlo automáticamente
-        const wrapper = document.getElementById(`size-chips-wrapper-${productId}`);
+        // Si la lista está oculta, mostrarla automáticamente
+        const wrapper = document.getElementById(`size-list-wrapper-${productId}`);
         const toggleBtn = document.getElementById(`size-toggle-btn-${productId}`);
         if (wrapper) wrapper.style.display = 'block';
         if (toggleBtn) toggleBtn.style.display = 'none';
 
-        const container = document.getElementById(`size-chips-${productId}`);
-        if (container) {
-            container.classList.add('shake');
-            setTimeout(() => container.classList.remove('shake'), 400);
+        if (wrapper) {
+            wrapper.classList.add('shake');
+            setTimeout(() => wrapper.classList.remove('shake'), 400);
         }
         return;
     }
@@ -365,16 +379,15 @@ window.buyWhatsappWithSize = (productId) => {
 
     if (requiresSize && sizeInput && !sizeInput.value) {
         showToast('Seleccioná un talle para continuar', 'error');
-        // Si el contenedor está oculto, mostrarlo automáticamente
-        const wrapper = document.getElementById(`size-chips-wrapper-${productId}`);
+        // Si la lista está oculta, mostrarla automáticamente
+        const wrapper = document.getElementById(`size-list-wrapper-${productId}`);
         const toggleBtn = document.getElementById(`size-toggle-btn-${productId}`);
         if (wrapper) wrapper.style.display = 'block';
         if (toggleBtn) toggleBtn.style.display = 'none';
 
-        const container = document.getElementById(`size-chips-${productId}`);
-        if (container) {
-            container.classList.add('shake');
-            setTimeout(() => container.classList.remove('shake'), 400);
+        if (wrapper) {
+            wrapper.classList.add('shake');
+            setTimeout(() => wrapper.classList.remove('shake'), 400);
         }
         return;
     }
@@ -398,6 +411,9 @@ const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-100%); opacity: 0; } }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .size-list-item:hover { background: rgba(249, 255, 32, 0.1) !important; padding-left: 20px !important; }
 `;
 document.head.appendChild(style);
 
