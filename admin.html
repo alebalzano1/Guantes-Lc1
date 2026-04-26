@@ -1027,7 +1027,8 @@
                                 <div id="p-preview" class="image-preview-large">
                                     <i class="fas fa-image" style="color:#333; font-size:4rem;"></i>
                                 </div>
-                                <input type="file" id="p-file" accept="image/*" multiple style="padding: 1rem;">
+                                <div id="image-preview-container" style="margin-top: 10px; display:flex; gap:10px; flex-wrap:wrap;"></div>
+                                <input type="file" id="p-image" accept="image/*" multiple style="padding: 1rem;">
                                 <p style="font-size:0.7rem; color:var(--text-muted); margin-top:10px;">Podés subir varias fotos para crear un carrusel.</p>
                             </div>
                         </div>
@@ -1035,6 +1036,11 @@
                         <div>
                             <label class="admin-label">Nombre del Producto</label>
                             <input type="text" id="p-name" class="admin-input" required>
+                        </div>
+
+                        <div>
+                            <label class="admin-label">Código SKU (opcional)</label>
+                            <input type="text" id="p-sku" class="admin-input" placeholder="Ej: LC1-G-001">
                         </div>
                         
                         <div>
@@ -1123,10 +1129,10 @@
                         <div class="form-group-full">
                             <label class="admin-label">Foto de Portada</label>
                             <div id="cat-image-upload" class="modern">
-                                <div id="cat-preview" class="image-preview-large">
-                                    <i class="fas fa-image" style="color:#333; font-size:4rem;"></i>
+                                <div class="image-preview-large" style="background:#eee; border-radius:10px; overflow:hidden; display:flex; align-items:center; justify-content:center; height:200px;">
+                                    <img id="cat-image-preview" src="" style="max-width:100%; max-height:100%; object-fit:contain;">
                                 </div>
-                                <input type="file" id="cat-file" accept="image/*" style="padding: 1rem;">
+                                <input type="file" id="c-image" accept="image/*" style="padding: 1rem;">
                             </div>
                         </div>
                         <div class="form-group-full">
