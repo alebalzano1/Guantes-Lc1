@@ -1,6 +1,6 @@
 ﻿********************************************************************************
 PROYECTO: LC1 GOALKEEPER - PLATAFORMA ELITE
-RESUMEN DE MEJORAS Y CÓDIGO COMPLETO (ACTUALIZADO 26/04/2026 - v2.9)
+RESUMEN DE MEJORAS Y CÓDIGO COMPLETO (ACTUALIZADO 26/04/2026 - v3.0)
 ********************************************************************************
 
 1. REDISEÑO DE MARCA: Título "PRODUCTOS TOP" y nuevo lema.
@@ -9,6 +9,7 @@ RESUMEN DE MEJORAS Y CÓDIGO COMPLETO (ACTUALIZADO 26/04/2026 - v2.9)
    - Indumentaria: S, M, L, XL, XXL (Automático).
    - Reparación: Sin talles.
 3. EXPERIENCIA DE COMPRA (TIENDA): 
+   - Precios en color NEGRO para máxima legibilidad.
    - Nuevo selector de talles: Lista vertical interactiva con checkmarks.
    - Botón toggle dinámico que muestra el talle seleccionado.
    - Animaciones premium (slideDown, hover effects).
@@ -2867,10 +2868,9 @@ nav {
 .card-price {
     font-size: 1.6rem;
     font-weight: 900;
-    color: var(--accent-color);
+    color: #000;
     margin-bottom: 1.5rem;
     display: block;
-    text-shadow: 0 0 15px rgba(249, 255, 32, 0.2);
 }
 
 .card-actions {
