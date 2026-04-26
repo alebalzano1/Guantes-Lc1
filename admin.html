@@ -847,256 +847,184 @@
             </div>
         </aside>
 
-        <!-- Product Table Area -->
+        <!-- Main Content Area -->
         <main class="main-content">
-            <!-- Mobile Admin Nav -->
-            <div id="mobile-sidebar-toggle" class="btn-icon" style="display:none; margin-bottom: 2rem; width: 50px; height: 50px; border-radius: 15px; border: none; box-shadow: 0 8px 25px rgba(0,0,0,0.1);">
+            <!-- Mobile Toggle -->
+            <button id="mobile-sidebar-toggle" style="display:none; position:fixed; top:20px; left:20px; z-index:10001; width:50px; height:50px; border-radius:12px; border:none; box-shadow:0 10px 30px rgba(0,0,0,0.1);">
                 <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Status Indicator -->
+            <div style="display:flex; justify-content:flex-end; margin-bottom: 2rem;">
+                <div class="system-status">
+                    <div id="status-dot" class="status-dot"></div>
+                    <span id="status-text">Verificando...</span>
+                    <span id="admin-user-info" style="margin-left:1rem; padding-left:1rem; border-left:1px solid rgba(0,0,0,0.1); color:var(--text-color);"></span>
+                </div>
             </div>
 
-            <!-- Products Section -->
-            <div id="section-products" class="admin-section" style="display:none;">
+            <!-- Sections will be managed by JS -->
+            <div id="section-products" class="admin-section">
                 <div class="admin-section-header">
-                    <div style="display:flex; flex-direction:column; gap: 0.5rem;">
-                        <h1 class="sport-font" style="color: #000; font-size: 2.5rem; margin:0;">Inventario <span style="color: var(--primary-color);">Total</span></h1>
-                        <div id="cloud-status-bar" class="system-status">
-                            <div id="status-dot" class="status-dot"></div>
-                            <span id="status-text" style="color: #666;">Verificando nube...</span>
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:1.5rem; align-items:center;">
-                        <button class="btn-primary" onclick="openModal()">+ Nuevo Producto</button>
-                    </div>
+                    <h2 class="sport-font">Gestión de <span>Productos</span></h2>
+                    <button onclick="openModal()" class="btn-primary">
+                        <i class="fas fa-plus"></i> Nuevo Producto
+                    </button>
                 </div>
-
-                <!-- Grid instead of table -->
-                <div id="admin-product-grid" class="product-cards-grid">
+                <div id="admin-products-list" class="product-cards-grid">
                     <!-- Cards via JS -->
                 </div>
             </div>
 
             <div id="section-orders" class="admin-section" style="display:none;">
-                <div class="top-bar">
-                    <h1 class="sport-font">Control de <span>Pedidos</span></h1>
-                    <div style="display:flex; gap:1rem; align-items:center;">
-                        <span style="color:var(--text-muted); font-size:0.8rem;" id="stat-total-orders">0 Pedidos Registrados</span>
-                    </div>
+                <div class="admin-section-header">
+                    <h2 class="sport-font">Registro de <span>Pedidos</span></h2>
                 </div>
                 <div class="table-container">
                     <table class="pro-table">
                         <thead>
                             <tr>
+                                <th>ID Pedido</th>
                                 <th>Fecha</th>
-                                <th>Pedido ID</th>
-                                <th>Monto</th>
+                                <th>Cliente</th>
+                                <th>Total</th>
                                 <th>Estado</th>
-                                <th>Detalle</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="admin-orders-list"></tbody>
+                        <tbody id="admin-orders-list">
+                            <!-- Filas via JS -->
+                        </tbody>
                     </table>
                 </div>
             </div>
 
             <div id="section-stats" class="admin-section" style="display:none;">
-                <div class="top-bar">
-                    <h1 class="sport-font">Análisis de <span>Rendimiento</span></h1>
-                </div>
+                <h2 class="sport-font" style="margin-bottom: 3rem;">Analíticas <span>Elite</span></h2>
                 <div class="analytics-grid">
                     <div class="card-pro">
-                        <div class="card-icon" style="background:rgba(0,255,100,0.1); color:#00ff64;"><i class="fas fa-money-bill-trend-up"></i></div>
+                        <div class="card-icon"><i class="fas fa-shopping-cart"></i></div>
                         <div class="card-info">
-                            <span id="stat-total-revenue">$0</span>
-                            <h3>Ingresos Brutos</h3>
+                            <span>Ventas Totales</span>
+                            <h3 id="stat-total-sales">$0</h3>
                         </div>
                     </div>
                     <div class="card-pro">
-                        <div class="card-icon" style="background:rgba(204,255,0,0.1); color:var(--primary-color);"><i class="fas fa-cart-shopping"></i></div>
+                        <div class="card-icon"><i class="fas fa-box"></i></div>
                         <div class="card-info">
-                            <span id="stat-avg-order">$0</span>
-                            <h3>Ticket Promedio</h3>
+                            <span>Productos</span>
+                            <h3 id="stat-total-products">0</h3>
+                        </div>
+                    </div>
+                    <div class="card-pro">
+                        <div class="card-icon"><i class="fas fa-users"></i></div>
+                        <div class="card-info">
+                            <span>Pedidos</span>
+                            <h3 id="stat-total-orders">0</h3>
                         </div>
                     </div>
                 </div>
-
-                <!-- ANALYTICS KPIs -->
-                <div class="stats-grid" style="margin-bottom: 3rem;">
-                    <div class="card-pro">
-                        <div class="card-icon" style="background:rgba(0,255,100,0.1); color:#00ff64;"><i class="fas fa-eye"></i></div>
-                        <div class="card-info">
-                            <span id="ana-total-visits">0</span>
-                            <h3>Visitas Totales</h3>
-                        </div>
-                    </div>
-                    <div class="card-pro">
-                        <div class="card-icon" style="background:rgba(37,211,102,0.1); color:#25d366;"><i class="fab fa-whatsapp"></i></div>
-                        <div class="card-info">
-                            <span id="ana-wa-clicks">0</span>
-                            <h3>Clicks WhatsApp</h3>
-                        </div>
-                    </div>
-                    <div class="card-pro">
-                        <div class="card-icon" style="background:rgba(204,255,0,0.1); color:var(--primary-color);"><i class="fas fa-cart-arrow-down"></i></div>
-                        <div class="card-info">
-                            <span id="ana-cart-adds">0</span>
-                            <h3>Prod. en Carritos</h3>
-                        </div>
-                    </div>
-                    <div class="card-pro">
-                        <div class="card-icon" style="background:rgba(0,200,255,0.1); color:#00c8ff;"><i class="fas fa-stopwatch"></i></div>
-                        <div class="card-info">
-                            <span id="ana-avg-time">0m</span>
-                            <h3>Permanencia Promed.</h3>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PRO CHARTS SECTION -->
-                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:2rem; margin-bottom:3rem;">
-                    <div class="chart-container">
-                        <h3 class="sport-font" style="margin-bottom: 2rem;"><i class="fas fa-chart-area" style="color:var(--primary-color);"></i> Actividad de <span>Visitas (7 días)</span></h3>
-                        <canvas id="chart-visits-daily" height="150"></canvas>
-                    </div>
-                    <div class="chart-container">
-                        <h3 class="sport-font" style="margin-bottom: 2rem;"><i class="fas fa-chart-pie" style="color:#00ff64;"></i> Mix de <span>Eventos</span></h3>
-                        <canvas id="chart-events-mix" height="250"></canvas>
-                    </div>
-                </div>
-
-                <div class="table-container" style="padding: 2rem; margin-bottom: 2rem;">
-                    <h3 class="sport-font" style="margin-bottom: 1.5rem;">Resumen Mensual</h3>
-                    <p style="color:var(--text-muted);">En esta versión de prototipo, los datos se basan en los pedidos guardados en tu navegador actual.</p>
-                </div>
-
-                <!-- Top Products Chart Container -->
-                <div class="chart-container" style="background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 2rem; border-radius: 20px;">
-                    <h3 class="sport-font" style="margin-bottom: 2rem;"><i class="fas fa-trophy" style="color:var(--primary-color);"></i> Ranking de <span>Más Vendidos</span></h3>
-                    <div id="top-products-chart" class="pro-bar-chart">
-                        <!-- Bars injected via JS -->
-                    </div>
+                
+                <!-- Chart Area -->
+                <div class="card-pro" style="display:block; height: 400px;">
+                    <h4 class="sport-font" style="margin-bottom: 1.5rem;">Rendimiento de Ventas</h4>
+                    <canvas id="salesChart"></canvas>
                 </div>
             </div>
 
+            <!-- Nueva Sección: Mi Portada -->
             <div id="section-categories" class="admin-section" style="display:none;">
-                <!-- Bloque 1: Categorías de Portada -->
-                <div class="admin-section-header" style="margin-bottom: 2rem;">
-                    <div style="display:flex; flex-direction:column;">
-                        <h1 class="sport-font" style="color: var(--primary-color); margin-bottom:0;">Mi Portada / <span>Categorías</span></h1>
-                        <p style="color: var(--text-muted); font-size:0.8rem;">Gestiona las 3 categorías principales del inicio.</p>
-                    </div>
-                    <button class="btn-primary" onclick="openCategoryModal()" style="font-size: 0.8rem; padding: 0.5rem 1rem;">+ Nueva Categoría</button>
+                <div class="admin-section-header">
+                    <h2 class="sport-font">Gestionar <span>Categorías</span></h2>
+                    <button onclick="openCatModal()" class="btn-primary">
+                        <i class="fas fa-plus"></i> Nueva Categoría
+                    </button>
                 </div>
-                <div id="admin-categories-grid" class="product-cards-grid" style="margin-bottom: 4rem;">
-                    <!-- Cards via JS -->
-                </div>
-
-                <!-- Bloque 2: Lanzamientos Elite (Destacados) -->
-                <div class="admin-section-header" style="border-top: 1px solid var(--glass-border); padding-top: 3rem; margin-bottom: 2rem;">
-                    <div style="display:flex; flex-direction:column;">
-                        <h1 class="sport-font" style="color: var(--primary-color); margin-bottom:0;">PRODUCTOS <span>TOP</span></h1>
-                        <p style="color: var(--text-muted); font-size:0.8rem;">Productos destacados que aparecen en el inicio.</p>
-                    </div>
-                    <button class="btn-primary" onclick="openModal(true)" style="font-size: 0.8rem; padding: 0.5rem 1rem;">+ Añadir Destacado</button>
-                </div>
-                <div id="admin-featured-grid" class="product-cards-grid">
+                <p style="margin-bottom: 2rem; color: var(--text-muted);">Gestioná las categorías que aparecen en la página principal.</p>
+                <div id="admin-categories-list" class="product-cards-grid">
                     <!-- Cards via JS -->
                 </div>
             </div>
-
 
             <div id="section-settings" class="admin-section" style="display:none;">
-                <div class="top-bar">
-                    <h1 class="sport-font">Ajustes del <span>Negocio</span></h1>
-                </div>
-                <div class="card-pro" style="display:block; max-width: 600px; margin-bottom: 2rem;">
+                <h2 class="sport-font" style="margin-bottom: 3rem;">Ajustes del <span>Sistema</span></h2>
+                <div class="card-pro" style="display:block; max-width: 600px;">
                     <form id="settings-form">
-                        <div class="form-group" style="margin-bottom: 2rem;">
-                            <label>Nombre de la Tienda</label>
-                            <input type="text" id="set-store-name" value="LC1 GOALKEEPER">
+                        <div class="input-group">
+                            <label style="color:var(--text-color); font-weight:700;">Número de WhatsApp (con código de país)</label>
+                            <input type="text" id="set-whatsapp" class="admin-input" placeholder="5411..." style="border:1px solid #ddd; color:#000;">
                         </div>
-                        <div class="form-group" style="margin-bottom: 2rem;">
-                            <label>Número de WhatsApp (Sin +)</label>
-                            <input type="text" id="set-whatsapp" value="5491100000000">
+                        <div class="input-group">
+                            <label style="color:var(--text-color); font-weight:700;">Mensaje de Bienvenida</label>
+                            <textarea id="set-welcome" class="admin-textarea" rows="3" style="border:1px solid #ddd; color:#000;"></textarea>
                         </div>
-                        <div class="form-group" style="margin-bottom: 2rem;">
-                            <label>Moneda Símbolo</label>
-                            <input type="text" id="set-currency" value="$">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 2rem;">
-                            <label>Título Sección Categorías</label>
-                            <input type="text" id="set-cat-title" value="Nuestras <span>Categorías</span>">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 2rem;">
-                            <label>Título Sección Lanzamientos</label>
-                            <input type="text" id="set-featured-title" value="PRODUCTOS <span>TOP</span>">
-                        </div>
-                        <button type="submit" class="btn-primary" style="width:100%;">Guardar Ajustes del Sitio</button>
+                        <button type="submit" class="btn-primary" style="width:100%;">Guardar Ajustes</button>
                     </form>
-                </div>
-
-                <div class="card-pro" style="display:block; max-width: 600px; border: 2px solid var(--primary-color);">
-                    <h3 class="sport-font" style="margin-bottom: 1rem;"><i class="fas fa-shield-check" style="color:var(--primary-color);"></i> Seguridad <span>Activa</span></h3>
-                    <p style="font-size: 0.9rem; color: #111; line-height: 1.6;">
-                        El sistema ahora está protegido por <strong>Firebase Authentication</strong>. 
-                        Las credenciales y contraseñas se gestionan de forma segura desde la consola de Firebase.
-                    </p>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Modal Pro -->
+    <!-- Product Modal -->
     <div id="product-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modal-title">Editar producto</h2>
-                <button onclick="closeModal()" class="modal-close">&times;</button>
+                <h2 id="modal-title" class="sport-font">Añadir Producto</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="product-form">
                     <div class="modal-form-grid">
-                        <div class="form-group">
-                            <label class="admin-label">Nombre *</label>
-                            <input type="text" id="p-name" class="admin-input" required placeholder="Remera Sublimada Full Print">
-                        </div>
-                        <div class="form-group">
-                            <label class="admin-label">Código SKU</label>
-                            <input type="text" id="p-sku" class="admin-input" placeholder="REM-001">
+                        <div class="form-group-full" style="grid-column: span 2;">
+                            <label class="admin-label">Imagen del Producto</label>
+                            <div id="image-upload-area" class="modern">
+                                <div id="p-preview" class="image-preview-large">
+                                    <i class="fas fa-image" style="color:#333; font-size:4rem;"></i>
+                                </div>
+                                <input type="file" id="p-file" accept="image/*" multiple style="padding: 1rem;">
+                                <p style="font-size:0.7rem; color:var(--text-muted); margin-top:10px;">Podés subir varias fotos para crear un carrusel.</p>
+                            </div>
                         </div>
                         
-                        <div class="form-group">
-                            <label class="admin-label">Categoría *</label>
-                            <select id="p-category" class="admin-select">
-                                <!-- Dinámico: Inyectado por JS -->
+                        <div>
+                            <label class="admin-label">Nombre del Producto</label>
+                            <input type="text" id="p-name" class="admin-input" required>
+                        </div>
+                        
+                        <div>
+                            <label class="admin-label">Precio ($)</label>
+                            <input type="number" id="p-price" class="admin-input" required>
+                        </div>
+                        
+                        <div>
+                            <label class="admin-label">Categoría</label>
+                            <select id="p-category" class="admin-select" required>
+                                <option value="guantes">Guantes</option>
+                                <option value="indumentaria">Indumentaria</option>
+                                <option value="accesorios">Accesorios</option>
+                                <option value="reparacion">Servicio de Reparación</option>
                             </select>
                         </div>
-                        <div class="form-group" id="age-category-wrapper" style="display:none;">
-                            <label class="admin-label">Categoría de Edad *</label>
+
+                        <!-- Selector de Edad (dinámico) -->
+                        <div id="age-category-wrapper">
+                            <label class="admin-label">Tipo de Producto (Edad)</label>
                             <select id="p-age-category" class="admin-select">
-                                <option value="adulto">Adulto (T6 al T11)</option>
-                                <option value="junior">Junior (T4 al T5)</option>
+                                <option value="adulto">Adulto (Talles 8 al 11)</option>
+                                <option value="niño">Niño (Talles 4 al 7)</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label class="admin-label">Precio (ARS) *</label>
-                            <input type="number" id="p-price" class="admin-input" required placeholder="0.00">
-                        </div>
 
-                        <div class="form-group-full">
+                        <div style="grid-column: span 2;">
                             <label class="admin-label">Descripción</label>
-                            <textarea id="p-desc" class="admin-textarea" placeholder="Escribe una breve descripción del producto..."></textarea>
+                            <textarea id="p-desc" class="admin-textarea" rows="4" required></textarea>
                         </div>
 
-                        <div class="form-group-full">
-                            <label class="admin-label">Foto del producto</label>
-                            <div id="image-upload-container" class="modern">
-                                <div class="image-preview-large" id="p-preview" style="display:flex; gap:10px; overflow-x:auto; padding:10px; justify-content:flex-start;">
-                                    <i class="fas fa-image" style="color:#ccc; font-size:3rem; margin:auto;"></i>
-                                </div>
-                                <div style="padding: 1rem; border-top: 1px solid var(--glass-border);">
-                                    <input type="file" id="p-file" accept="image/*" multiple style="font-size: 0.8rem; color: #fff;">
-                                </div>
+                        <div style="grid-column: span 2;">
+                            <label class="admin-label">Talles Disponibles (Separados por coma)</label>
+                            <input type="text" id="p-sizes" class="admin-input" placeholder="8, 9, 10, 11">
+                            <div id="size-presets" style="margin-top: 10px; display:flex; gap:10px; flex-wrap:wrap;">
+                                <!-- Presets inyectados por JS -->
                             </div>
                         </div>
 
@@ -1125,9 +1053,6 @@
                     </div>
                 </form>
             </div>
-        </div>
-    </div>
-
         </div>
     </div>
 
