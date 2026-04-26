@@ -11,6 +11,8 @@ const FirebaseService = {
     // --- Authentication ---
     async login(email, password) {
         console.log("[Firebase] Iniciar sesión para:", email);
+        // Forzar persistencia de SESIÓN (se cierra al cerrar el navegador/pestaña)
+        await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
         return await auth.signInWithEmailAndPassword(email, password);
     },
 

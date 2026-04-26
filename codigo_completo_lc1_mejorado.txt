@@ -1,23 +1,21 @@
 ﻿********************************************************************************
 PROYECTO: LC1 GOALKEEPER - PLATAFORMA ELITE
-RESUMEN DE MEJORAS Y CÓDIGO COMPLETO (ACTUALIZADO 26/04/2026 - v3.0)
+RESUMEN DE MEJORAS Y CÓDIGO COMPLETO (ACTUALIZADO 26/04/2026 - v3.1)
 ********************************************************************************
 
-1. REDISEÑO DE MARCA: Título "PRODUCTOS TOP" y nuevo lema.
-2. SISTEMA DE TALLES AUTOMÁTICO: 
-   - Guantes: Adulto (6-11) / Junior (4-5).
-   - Indumentaria: S, M, L, XL, XXL (Automático).
-   - Reparación: Sin talles.
-3. EXPERIENCIA DE COMPRA (TIENDA): 
-   - Precios en color NEGRO para máxima legibilidad.
-   - Nuevo selector de talles: Lista vertical interactiva con checkmarks.
-   - Botón toggle dinámico que muestra el talle seleccionado.
-   - Animaciones premium (slideDown, hover effects).
+1. SEGURIDAD REFORZADA (ADMIN): 
+   - Dashboard oculto por defecto en CSS para evitar accesos directos.
+   - Persistencia de sesión configurada en Firebase (SESSION).
+   - El sistema ahora requiere login obligatorio tras cerrar el navegador/pestaña.
+2. DISEÑO Y LEGUIBILIDAD:
+   - Precios en color NEGRO para máximo contraste.
    - Cards ultra compactas y botones simétricos.
-4. FAQ: Guía de talles para guantes e indumentaria con textos dinámicos.
-5. ADMIN: 
-   - Selector de Categoría con fallback automático.
-   - Visibilidad condicional del selector de edad.
+3. EXPERIENCIA DE COMPRA (TIENDA): 
+   - Selector de talles dinámico (Lista vertical con checks).
+   - Animaciones premium y validación inteligente.
+4. ADMIN & SISTEMA: 
+   - Sistema de talles automático por categoría.
+   - Sincronización robusta con Firebase.
 
 ================================================================================
  
@@ -972,7 +970,7 @@ ARCHIVO: admin.html
 
         /* --- Main Dashboard Layout --- */
         #dashboard-section {
-            display: flex;
+            display: none;
             width: 100%;
             height: 100%;
             overflow: hidden;
@@ -6018,6 +6016,8 @@ const FirebaseService = {
     // --- Authentication ---
     async login(email, password) {
         console.log("[Firebase] Iniciar sesiÃ³n para:", email);
+        // Forzar persistencia de SESIÃ“N (se cierra al cerrar el navegador/pestaÃ±a)
+        await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
         return await auth.signInWithEmailAndPassword(email, password);
     },
 
