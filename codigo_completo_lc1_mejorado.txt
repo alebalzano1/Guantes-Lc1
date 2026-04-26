@@ -1,6 +1,6 @@
 ﻿********************************************************************************
 PROYECTO: LC1 GOALKEEPER - PLATAFORMA ELITE
-RESUMEN DE MEJORAS Y CÓDIGO COMPLETO (ACTUALIZADO 26/04/2026 - v2.6)
+RESUMEN DE MEJORAS Y CÓDIGO COMPLETO (ACTUALIZADO 26/04/2026 - v2.7)
 ********************************************************************************
 
 1. REDISEÑO DE MARCA: Título "PRODUCTOS TOP" y nuevo lema.
@@ -9,15 +9,14 @@ RESUMEN DE MEJORAS Y CÓDIGO COMPLETO (ACTUALIZADO 26/04/2026 - v2.6)
    - Indumentaria: S, M, L, XL, XXL (Automático).
    - Reparación: Sin talles.
 3. EXPERIENCIA DE COMPRA (TIENDA): 
-   - Diseño ultra limpio: Botón "Seleccionar Talle" que despliega los chips al hacer clic.
-   - Cards ultra compactas (Imagen 180px, menos padding).
-   - Validación inteligente: Abre automáticamente los talles si el usuario olvida elegir.
-   - WhatsApp incluye el talle seleccionado.
+   - Cards ultra compactas con botones de compra redimensionados.
+   - Botón de WhatsApp estilizado (estilo ghost/bordeado).
+   - Selector de talles dinámico mediante botón "Seleccionar Talle".
+   - Validación inteligente con animación "shake".
 4. FAQ: Guía de talles para guantes e indumentaria con textos dinámicos.
 5. ADMIN: 
-   - Selector de Categoría con fallback automático (Guantes, Indumentaria, Reparación).
-   - Visibilidad condicional del selector de edad según categoría.
-   - Gestión robusta de sincronización Firebase.
+   - Selector de Categoría con fallback automático.
+   - Visibilidad condicional del selector de edad.
 
 ================================================================================
  
@@ -2932,9 +2931,9 @@ nav {
     background: #F9FF20; /* NEON YELLOW */
     color: #000;
     border: none;
-    padding: 1.25rem;
+    padding: 0.9rem;
     border-radius: 8px;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 950;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -2966,9 +2965,9 @@ nav {
     background: transparent;
     color: #25d366;
     border: 1px solid #25d366;
-    padding: 0.9rem;
+    padding: 0.75rem;
     border-radius: 12px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
