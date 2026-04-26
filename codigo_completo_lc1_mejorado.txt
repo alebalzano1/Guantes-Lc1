@@ -1,6 +1,6 @@
 ﻿********************************************************************************
 PROYECTO: LC1 GOALKEEPER - PLATAFORMA ELITE
-RESUMEN DE MEJORAS Y CÓDIGO COMPLETO (ACTUALIZADO 26/04/2026 - v2.7)
+RESUMEN DE MEJORAS Y CÓDIGO COMPLETO (ACTUALIZADO 26/04/2026 - v2.8)
 ********************************************************************************
 
 1. REDISEÑO DE MARCA: Título "PRODUCTOS TOP" y nuevo lema.
@@ -9,7 +9,7 @@ RESUMEN DE MEJORAS Y CÓDIGO COMPLETO (ACTUALIZADO 26/04/2026 - v2.7)
    - Indumentaria: S, M, L, XL, XXL (Automático).
    - Reparación: Sin talles.
 3. EXPERIENCIA DE COMPRA (TIENDA): 
-   - Cards ultra compactas con botones de compra redimensionados.
+   - Cards simétricas: Botones de Compra y WhatsApp con el mismo tamaño y estilo.
    - Botón de WhatsApp estilizado (estilo ghost/bordeado).
    - Selector de talles dinámico mediante botón "Seleccionar Talle".
    - Validación inteligente con animación "shake".
@@ -2931,9 +2931,9 @@ nav {
     background: #F9FF20; /* NEON YELLOW */
     color: #000;
     border: none;
-    padding: 0.9rem;
+    padding: 0.75rem;
     border-radius: 8px;
-    font-size: 0.95rem;
+    font-size: 0.8rem;
     font-weight: 950;
     text-transform: uppercase;
     letter-spacing: 1px;
