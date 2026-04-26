@@ -104,7 +104,7 @@ function renderProductDetail(product) {
     const allImages = product.images && product.images.length > 0 ? product.images : [product.image];
 
     if (sliderTrack) {
-        sliderTrack.innerHTML = allImages.map(img => `<img src="${img}" class="slider-item" style="width:100%; height:auto; object-fit:contain;" width="600" height="600">`).join('');
+        sliderTrack.innerHTML = allImages.map(img => `<img src="${img}" class="slider-item" width="600" height="600">`).join('');
     }
 
     if (allImages.length > 1) {
