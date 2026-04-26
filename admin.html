@@ -793,6 +793,7 @@
                 <input type="password" id="login-pass" placeholder="••••••••" required autocomplete="current-password">
             </div>
             <button type="submit" id="btn-login" class="btn-primary" style="width:100%; margin-top: 1rem;">Acceder al Dashboard</button>
+            <div id="login-error" style="display:none; color:#ff4444; font-size:0.8rem; margin-top:1rem; padding:10px; background:rgba(255,68,68,0.1); border-radius:8px;"></div>
             
             <div id="diag-panel" class="diag-panel">
                 <h4 style="color:#ff4444; font-size:0.75rem; margin-bottom:0.5rem; text-transform:uppercase;">Diagnóstico Detallado</h4>
@@ -866,7 +867,7 @@
             <!-- Sections will be managed by JS -->
             <div id="section-products" class="admin-section">
                 <div class="admin-section-header">
-                    <h2 class="sport-font">Gestión de <span>Productos</span></h2>
+                    <h2 class="sport-font" style="color: #000;">Gestión de <span>Productos</span></h2>
                     <button onclick="openModal()" class="btn-primary">
                         <i class="fas fa-plus"></i> Nuevo Producto
                     </button>
@@ -878,7 +879,7 @@
 
             <div id="section-orders" class="admin-section" style="display:none;">
                 <div class="admin-section-header">
-                    <h2 class="sport-font">Registro de <span>Pedidos</span></h2>
+                    <h2 class="sport-font" style="color: #000;">Registro de <span>Pedidos</span></h2>
                 </div>
                 <div class="table-container">
                     <table class="pro-table">
@@ -947,18 +948,63 @@
             </div>
 
             <div id="section-settings" class="admin-section" style="display:none;">
-                <h2 class="sport-font" style="margin-bottom: 3rem;">Ajustes del <span>Sistema</span></h2>
-                <div class="card-pro" style="display:block; max-width: 600px;">
+                <h2 class="sport-font" style="margin-bottom: 3rem; color: #000;">Ajustes del <span>Sistema</span></h2>
+                <div class="card-pro" style="display:block; max-width: 800px;">
                     <form id="settings-form">
-                        <div class="input-group">
-                            <label style="color:var(--text-color); font-weight:700;">Número de WhatsApp (con código de país)</label>
-                            <input type="text" id="set-whatsapp" class="admin-input" placeholder="5411..." style="border:1px solid #ddd; color:#000;">
+                        <div class="modal-form-grid">
+                            <div class="form-group">
+                                <label class="admin-label">Nombre de la Tienda</label>
+                                <input type="text" id="set-store-name" class="admin-input" placeholder="LC1 GOALKEEPER">
+                            </div>
+                            <div class="form-group">
+                                <label class="admin-label">Número de WhatsApp</label>
+                                <input type="text" id="set-whatsapp" class="admin-input" placeholder="5411...">
+                            </div>
+                            <div class="form-group">
+                                <label class="admin-label">Moneda (Símbolo)</label>
+                                <input type="text" id="set-currency" class="admin-input" placeholder="$">
+                            </div>
+                            <div class="form-group-full" style="grid-column: span 2; margin-top: 1rem;">
+                                <h4 class="sport-font" style="font-size: 1rem; margin-bottom: 1rem; color: #000;">Personalización de <span>Textos</span></h4>
+                            </div>
+                            <div class="form-group">
+                                <label class="admin-label">Título Sección Categorías</label>
+                                <input type="text" id="set-cat-title" class="admin-input" placeholder="Nuestras <span>Categorías</span>">
+                                <small style="font-size: 0.65rem; color: #888;">Usá &lt;span&gt; para resaltar una palabra.</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="admin-label">Título Sección Destacados</label>
+                                <input type="text" id="set-featured-title" class="admin-input" placeholder="PRODUCTOS <span>TOP</span>">
+                            </div>
+
+                            <!-- Seguridad y Acceso -->
+                            <div class="form-group-full" style="grid-column: span 2; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #eee;">
+                                <h4 class="sport-font" style="font-size: 1rem; margin-bottom: 1rem; color: #000;">Seguridad y <span>Acceso</span></h4>
+                            </div>
+                            <div class="form-group">
+                                <label class="admin-label">Nombre de Usuario</label>
+                                <input type="text" id="set-admin-email" class="admin-input" placeholder="Ej: administrador">
+                            </div>
+                            <div class="form-group">
+                                <label class="admin-label">Nueva Contraseña</label>
+                                <div style="position:relative;">
+                                    <input type="password" id="set-admin-pass" class="admin-input" placeholder="Nueva clave">
+                                    <i class="fas fa-eye" onclick="togglePassVisibility('set-admin-pass', this)" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; color:#888;"></i>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="admin-label">Confirmar Nueva Contraseña</label>
+                                <div style="position:relative;">
+                                    <input type="password" id="set-admin-pass-confirm" class="admin-input" placeholder="Repetí la clave">
+                                    <i class="fas fa-eye" onclick="togglePassVisibility('set-admin-pass-confirm', this)" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; color:#888;"></i>
+                                </div>
+                                <small style="font-size: 0.6rem; color: #888;">Dejar en blanco para no cambiar.</small>
+                            </div>
                         </div>
-                        <div class="input-group">
-                            <label style="color:var(--text-color); font-weight:700;">Mensaje de Bienvenida</label>
-                            <textarea id="set-welcome" class="admin-textarea" rows="3" style="border:1px solid #ddd; color:#000;"></textarea>
+                        
+                        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #eee;">
+                            <button type="submit" class="btn-primary" style="width:100%;">Guardar Todos los Ajustes</button>
                         </div>
-                        <button type="submit" class="btn-primary" style="width:100%;">Guardar Ajustes</button>
                     </form>
                 </div>
             </div>
@@ -1134,7 +1180,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     
     <!-- LC1 Firebase Config & Service -->
     <script src="js/firebase-config.js?v=2.2"></script>

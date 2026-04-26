@@ -9,11 +9,10 @@ const auth = firebase.auth();
 
 const FirebaseService = {
     // --- Authentication ---
-    async login(email, password) {
-        console.log("[Firebase] Iniciar sesión para:", email);
-        // Forzar persistencia de SESIÓN (se cierra al cerrar el navegador/pestaña)
-        await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
-        return await auth.signInWithEmailAndPassword(email, password);
+    login: async (email, password) => {
+        return await firebase.auth().signInWithEmailAndPassword(
+            email, password
+        );
     },
 
     async logout() {
@@ -21,8 +20,29 @@ const FirebaseService = {
         return await auth.signOut();
     },
 
-    onAuth(callback) {
-        return auth.onAuthStateChanged(callback);
+    onAuth: (callback) => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user && user.email && !user.email.includes('@local')) {
+                callback(user);
+            } else {
+                callback(null);
+            }
+        });
+    },
+
+    async getAccess() {
+        console.log("[Firebase] Obteniendo credenciales de acceso...");
+        const doc = await db.collection("settings").doc("access").get();
+        return doc.exists ? doc.data() : { username: 'laucha', password: 'lauchaputo' };
+    },
+
+    async updateAccess(username, password) {
+        console.log("[Firebase] Actualizando credenciales de acceso en Firestore...");
+        return await db.collection("settings").doc("access").set({
+            username: username,
+            password: password,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
     },
 
     /**
