@@ -706,6 +706,38 @@ window.editProduct = (id) => {
     document.getElementById('product-modal').style.display = 'flex';
 };
 
+window.openModal = () => {
+    const form = document.getElementById('product-form');
+    if (form) form.reset();
+    document.getElementById('product-form').dataset.editId = '';
+    document.getElementById('modal-title').textContent = 'Nuevo producto';
+    currentProductImages = [];
+    window.renderProductImagesPreview();
+    document.getElementById('product-modal').style.display = 'flex';
+};
+
+window.closeModal = () => {
+    document.getElementById('product-modal').style.display = 'none';
+};
+
+window.renderProductImagesPreview = () => {
+    const container = document.getElementById('image-preview-container');
+    if (!container) return;
+    container.innerHTML = currentProductImages.map((img, index) => `
+        <div class="image-preview-item" style="position:relative; display:inline-block; margin-right:10px;">
+            <img src="${img}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid #ddd;">
+            <button type="button" onclick="window.removeProductImage(${index})" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border:none; border-radius:50%; width:20px; height:20px; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `).join('');
+};
+
+window.removeProductImage = (index) => {
+    currentProductImages.splice(index, 1);
+    window.renderProductImagesPreview();
+};
+
 // --- Orders Management ---
 
 function renderAdminOrders() {
@@ -1198,6 +1230,30 @@ window.openCategoryModal = (id = null) => {
     }
 };
 
+window.openCatModal = () => {
+    const modal = document.getElementById('category-modal');
+    modal.dataset.editId = '';
+    document.getElementById('cat-name').value = '';
+    document.getElementById('cat-desc').value = '';
+    currentCategoryImage = '';
+    const preview = document.getElementById('cat-image-preview');
+    if (preview) preview.src = '';
+    modal.style.display = 'flex';
+};
+
+window.editCategory = (id) => {
+    const cat = adminCategories.find(c => String(c.id) === String(id));
+    if (!cat) return;
+    const modal = document.getElementById('category-modal');
+    modal.dataset.editId = id;
+    document.getElementById('cat-name').value = cat.name;
+    document.getElementById('cat-desc').value = cat.desc || '';
+    currentCategoryImage = cat.image;
+    const preview = document.getElementById('cat-image-preview');
+    if (preview) preview.src = cat.image;
+    modal.style.display = 'flex';
+};
+
 window.closeCatModal = () => {
     document.getElementById('category-modal').style.display = 'none';
     currentCategoryImage = '';
@@ -1298,6 +1354,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const categorySelect = document.getElementById('p-category');
     if (categorySelect) {
         categorySelect.addEventListener('change', window.toggleAgeCategoryVisibility);
+    }
+
+    // Listener para imágenes de producto
+    const pImageInput = document.getElementById('p-image');
+    if (pImageInput) {
+        pImageInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    currentProductImages.push(event.target.result);
+                    window.renderProductImagesPreview();
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+    }
+
+    // Listener para imagen de categoría
+    const cImageInput = document.getElementById('c-image');
+    if (cImageInput) {
+        cImageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    currentCategoryImage = event.target.result;
+                    const preview = document.getElementById('cat-image-preview');
+                    if (preview) preview.src = currentCategoryImage;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     }
 });
 
