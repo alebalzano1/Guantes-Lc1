@@ -953,7 +953,7 @@ nav {
 
 .info-item i {
     font-size: 3rem;
-    color: var(--accent-color); /* YELLOW FOR WHITE THEME VISIBILITY */
+    color: #000000; /* Changed to Black for visibility */
     margin-bottom: 1.5rem;
     display: block;
 }
@@ -1161,6 +1161,7 @@ nav {
     .category-card {
         height: 350px;
     }
+}
 
 @media (max-width: 850px) {
     .testimonials-grid, .info-grid {
@@ -1501,6 +1502,46 @@ nav {
     }
 }
 
+/* Size Selector Enhancements */
+.size-buttons-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.size-btn {
+    min-width: 50px;
+    height: 50px;
+    padding: 0 15px;
+    border: 1px solid #eee;
+    background: #fff;
+    color: #000;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: 'Oswald', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.size-btn:hover {
+    border-color: var(--accent-color);
+    background: #f9f9f9;
+    transform: translateY(-2px);
+}
+
+.size-btn.active {
+    background: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: #000 !important;
+    box-shadow: 0 8px 20px rgba(249, 255, 32, 0.4);
+    transform: scale(1.05);
+}
+
 /* --- Product Detail Page --- */
 .product-detail-page {
     padding-top: 100px;
@@ -1733,7 +1774,7 @@ nav {
 
 .trust-item i {
     font-size: 1.5rem;
-    color: var(--primary-color);
+    color: #000000; /* Changed to Black for visibility */
     margin-bottom: 1rem;
 }
 

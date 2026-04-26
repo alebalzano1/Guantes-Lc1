@@ -91,7 +91,7 @@ function renderProductDetail(product) {
 
     // Badges dinámicos (Solo categoría para ser 100% honestos)
     if (badgeContainer) {
-        badgeContainer.innerHTML = `<span class="pd-badge" style="background:#f4f4f4; color:#000; border:1px solid #ddd;">${product.category}</span>`;
+        badgeContainer.innerHTML = `<span class="pd-badge">${product.category}</span>`;
     }
 
     // 2.5 Galería de imágenes (Carrusel estilo Mercado Libre)
