@@ -1,6 +1,6 @@
 ﻿********************************************************************************
 PROYECTO: LC1 GOALKEEPER - PLATAFORMA ELITE
-RESUMEN DE MEJORAS Y CÓDIGO COMPLETO (ACTUALIZADO 26/04/2026 - v2.4)
+RESUMEN DE MEJORAS Y CÓDIGO COMPLETO (ACTUALIZADO 26/04/2026 - v2.6)
 ********************************************************************************
 
 1. REDISEÑO DE MARCA: Título "PRODUCTOS TOP" y nuevo lema.
@@ -8,14 +8,15 @@ RESUMEN DE MEJORAS Y CÓDIGO COMPLETO (ACTUALIZADO 26/04/2026 - v2.4)
    - Guantes: Adulto (6-11) / Junior (4-5).
    - Indumentaria: S, M, L, XL, XXL (Automático).
    - Reparación: Sin talles.
-3. EXPERIENCIA DE COMPRA: 
-   - Selector "Dropdown" profesional en tienda.
-   - Validación obligatoria con animación "shake".
+3. EXPERIENCIA DE COMPRA (TIENDA): 
+   - Diseño ultra limpio: Botón "Seleccionar Talle" que despliega los chips al hacer clic.
+   - Cards ultra compactas (Imagen 180px, menos padding).
+   - Validación inteligente: Abre automáticamente los talles si el usuario olvida elegir.
    - WhatsApp incluye el talle seleccionado.
 4. FAQ: Guía de talles para guantes e indumentaria con textos dinámicos.
 5. ADMIN: 
-   - Selector de Categoría con fallback automático.
-   - Visibilidad condicional del selector de edad.
+   - Selector de Categoría con fallback automático (Guantes, Indumentaria, Reparación).
+   - Visibilidad condicional del selector de edad según categoría.
    - Gestión robusta de sincronización Firebase.
 
 ================================================================================
@@ -4292,29 +4293,49 @@ function productCard(product) {
     const sizeOptions = availableSizes.map(s => `<option value="${s}">${s}</option>`).join('');
 
     let sizeHTML = showSize ? `
-        <div class="shop-size-selector" style="margin-bottom: 15px;">
-            <select class="size-select-pro" id="shop-size-input-${product.id}" 
-                    onchange="window.selectShopSize('${product.id}', this.value)"
-                    style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: var(--text-color); font-weight: 700; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 10px center; background-size: 18px;">
-                <option value="" disabled selected>Seleccionar Talle</option>
-                ${availableSizes.map(s => `<option value="${s}">Talle ${s}</option>`).join('')}
-            </select>
+        <div class="shop-size-selector" style="margin-bottom: 8px;">
+            <!-- BotÃ³n para desplegar talles -->
+            <button id="size-toggle-btn-${product.id}" 
+                    onclick="document.getElementById('size-chips-wrapper-${product.id}').style.display='block'; this.style.display='none';"
+                    style="width: 100%; padding: 8px; border: 1.5px solid var(--glass-border); background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 0.8rem; font-weight: 700; color: var(--text-color); cursor: pointer; transition: all 0.2s;">
+                Seleccionar Talle
+            </button>
+
+            <!-- Contenedor de chips (oculto por defecto) -->
+            <div id="size-chips-wrapper-${product.id}" style="display: none;">
+                <p style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; color: var(--text-muted); letter-spacing: 1px;">
+                    Talle:
+                </p>
+                <div id="size-chips-${product.id}" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                    ${availableSizes.map(s => `
+                        <button class="size-chip" 
+                            onclick="window.selectShopSize('${product.id}', '${s}', this)"
+                            style="padding: 4px 10px; border: 1.5px solid var(--glass-border); background: transparent; border-radius: 5px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; color: var(--text-color);">
+                            ${s}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+            <input type="hidden" id="shop-size-input-${product.id}" value="">
         </div>
     ` : '';
 
     return `
         <div class="product-card reveal">
             <div class="product-img" onclick="window.location.href='product.html?id=${product.id}'" style="cursor:pointer;">
-                <img src="${product.image}" alt="${product.name}" loading="lazy" width="400" height="400" onerror="this.src='https://placehold.co/400x400/111/fff?text=Producto'; this.onerror=null;">
+                <img src="${product.image}" alt="${product.name}" loading="lazy" width="400" height="400" 
+                     style="max-height: 180px; object-fit: cover;"
+                     onerror="this.src='https://placehold.co/400x400/111/fff?text=Producto'; this.onerror=null;">
             </div>
-            <div class="product-info" style="padding-top: 0.5rem; display: flex; flex-direction: column; flex: 1;">
+            <div class="product-info" style="padding-top: 0.3rem; display: flex; flex-direction: column; flex: 1;">
                 <span class="card-category">${product.category}</span>
-                <h3 class="card-title" onclick="window.location.href='product.html?id=${product.id}'" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.8rem; cursor:pointer;">${product.name}</h3>
-                <p class="card-price" style="margin-bottom: 10px;">$${product.price.toLocaleString('es-AR')}</p>
+                <h3 class="card-title" onclick="window.location.href='product.html?id=${product.id}'" 
+                    style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.4rem; cursor:pointer;">${product.name}</h3>
+                <p class="card-price" style="margin-bottom: 5px;">$${product.price.toLocaleString('es-AR')}</p>
                 
                 ${sizeHTML}
                 
-                <div class="product-actions" style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;">
+                <div class="product-actions" style="margin-top: auto; display: flex; flex-direction: column; gap: 6px;">
                     <button class="btn-buy" onclick="window.addToCartWithSize('${product.id}')">
                         <i class="fas fa-shopping-bag"></i> AGREGAR AL CARRITO
                     </button>
@@ -4349,25 +4370,47 @@ window.filterByPrice = (order) => {
     updateShopDisplay();
 };
 
-window.selectShopSize = (productId, size) => {
-    const select = document.getElementById(`shop-size-input-${productId}`);
-    if (select && size) {
-        select.style.borderColor = 'var(--accent-color)';
-        select.style.background = 'rgba(249, 255, 32, 0.05)'; 
+window.selectShopSize = (productId, size, chipEl) => {
+    // Quitar clase active de todos los chips del mismo producto
+    document.querySelectorAll('.size-chip').forEach(btn => {
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${productId}'`)) {
+            btn.classList.remove('active');
+            btn.style.background = 'transparent';
+            btn.style.borderColor = 'var(--glass-border)';
+            btn.style.color = 'var(--text-color)';
+        }
+    });
+    // Activar el chip clickeado
+    if (chipEl) {
+        chipEl.classList.add('active');
+        chipEl.style.background = '#f5c518';
+        chipEl.style.borderColor = '#f5c518';
+        chipEl.style.color = '#000';
     }
+    // Guardar el valor en el input hidden
+    const input = document.getElementById(`shop-size-input-${productId}`);
+    if (input) input.value = size;
 };
 
 window.addToCartWithSize = (productId) => {
     const sizeInput = document.getElementById(`shop-size-input-${productId}`);
     const product = productsList.find(p => String(p.id) === String(productId));
     const category = product.category.toLowerCase();
-    const requiresSize = ['guantes', 'indumentaria'].includes(category) && !['accesorios', 'reparacion'].includes(category);
+    const requiresSize = category.includes('guante') || category.includes('indumentaria');
 
     if (requiresSize && sizeInput && !sizeInput.value) {
         showToast('SeleccionÃ¡ un talle para continuar', 'error');
-        // Sacudir el selector para llamar la atenciÃ³n
-        sizeInput.classList.add('shake');
-        setTimeout(() => sizeInput.classList.remove('shake'), 400);
+        // Si el contenedor estÃ¡ oculto, mostrarlo automÃ¡ticamente
+        const wrapper = document.getElementById(`size-chips-wrapper-${productId}`);
+        const toggleBtn = document.getElementById(`size-toggle-btn-${productId}`);
+        if (wrapper) wrapper.style.display = 'block';
+        if (toggleBtn) toggleBtn.style.display = 'none';
+
+        const container = document.getElementById(`size-chips-${productId}`);
+        if (container) {
+            container.classList.add('shake');
+            setTimeout(() => container.classList.remove('shake'), 400);
+        }
         return;
     }
     const size = sizeInput ? sizeInput.value : 'N/A';
@@ -4400,12 +4443,21 @@ window.buyWhatsappWithSize = (productId) => {
     const sizeInput = document.getElementById(`shop-size-input-${productId}`);
     const product = productsList.find(p => String(p.id) === String(productId));
     const category = product.category.toLowerCase();
-    const requiresSize = ['guantes', 'indumentaria'].includes(category) && !['accesorios', 'reparacion'].includes(category);
+    const requiresSize = category.includes('guante') || category.includes('indumentaria');
 
     if (requiresSize && sizeInput && !sizeInput.value) {
         showToast('SeleccionÃ¡ un talle para continuar', 'error');
-        sizeInput.classList.add('shake');
-        setTimeout(() => sizeInput.classList.remove('shake'), 400);
+        // Si el contenedor estÃ¡ oculto, mostrarlo automÃ¡ticamente
+        const wrapper = document.getElementById(`size-chips-wrapper-${productId}`);
+        const toggleBtn = document.getElementById(`size-toggle-btn-${productId}`);
+        if (wrapper) wrapper.style.display = 'block';
+        if (toggleBtn) toggleBtn.style.display = 'none';
+
+        const container = document.getElementById(`size-chips-${productId}`);
+        if (container) {
+            container.classList.add('shake');
+            setTimeout(() => container.classList.remove('shake'), 400);
+        }
         return;
     }
     const size = sizeInput ? sizeInput.value : 'N/A';
