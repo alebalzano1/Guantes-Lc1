@@ -199,17 +199,24 @@ function updateShopDisplay() {
 
 function productCard(product) {
     const category = product.category.toLowerCase();
-    const showSize = ['guantes', 'indumentaria'].includes(category) && !['accesorios', 'reparacion'].includes(category);
-    const isIndumentaria = product.category.toLowerCase() === 'indumentaria';
-    const sizeOptions = isIndumentaria 
-        ? `<option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option>`
-        : `<option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option>`;
+    // Mejora: Detección flexible de categoría para mostrar talles (Bug 1 Fix)
+    const showSize = category.includes('guante') || category.includes('indumentaria');
+    let availableSizes = product.sizes || [];
+    if (availableSizes.length === 0) {
+        if (category === 'indumentaria') availableSizes = ["S", "M", "L", "XL", "XXL"];
+        else if (product.ageCategory === 'junior') availableSizes = ["4", "5"];
+        else availableSizes = ["6", "7", "8", "9", "10", "11"];
+    }
+
+    const sizeOptions = availableSizes.map(s => `<option value="${s}">${s}</option>`).join('');
 
     let sizeHTML = showSize ? `
-        <div style="margin-bottom: 15px;">
-            <select id="shop-size-${product.id}" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--glass-border); background: var(--bg-color); color: var(--text-color); font-size: 0.9rem;">
-                <option value="" disabled selected>Seleccioná tu talle</option>
-                ${sizeOptions}
+        <div class="shop-size-selector" style="margin-bottom: 15px;">
+            <select class="size-select-pro" id="shop-size-input-${product.id}" 
+                    onchange="window.selectShopSize('${product.id}', this.value)"
+                    style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: var(--text-color); font-weight: 700; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 10px center; background-size: 18px;">
+                <option value="" disabled selected>Seleccionar Talle</option>
+                ${availableSizes.map(s => `<option value="${s}">Talle ${s}</option>`).join('')}
             </select>
         </div>
     ` : '';
@@ -261,17 +268,28 @@ window.filterByPrice = (order) => {
     updateShopDisplay();
 };
 
+window.selectShopSize = (productId, size) => {
+    const select = document.getElementById(`shop-size-input-${productId}`);
+    if (select && size) {
+        select.style.borderColor = 'var(--accent-color)';
+        select.style.background = 'rgba(249, 255, 32, 0.05)'; 
+    }
+};
+
 window.addToCartWithSize = (productId) => {
-    const sizeSelect = document.getElementById(`shop-size-${productId}`);
+    const sizeInput = document.getElementById(`shop-size-input-${productId}`);
     const product = productsList.find(p => String(p.id) === String(productId));
     const category = product.category.toLowerCase();
     const requiresSize = ['guantes', 'indumentaria'].includes(category) && !['accesorios', 'reparacion'].includes(category);
 
-    if (requiresSize && sizeSelect && !sizeSelect.value) {
-        showToast('Por favor seleccioná un talle para continuar', 'error');
+    if (requiresSize && sizeInput && !sizeInput.value) {
+        showToast('Seleccioná un talle para continuar', 'error');
+        // Sacudir el selector para llamar la atención
+        sizeInput.classList.add('shake');
+        setTimeout(() => sizeInput.classList.remove('shake'), 400);
         return;
     }
-    const size = sizeSelect ? sizeSelect.value : 'N/A';
+    const size = sizeInput ? sizeInput.value : 'N/A';
     let cart = getSafeJSON('lc1-cart', []);
     
     // Check if same product with same size exists
@@ -298,16 +316,18 @@ window.addToCartWithSize = (productId) => {
 };
 
 window.buyWhatsappWithSize = (productId) => {
-    const sizeSelect = document.getElementById(`shop-size-${productId}`);
+    const sizeInput = document.getElementById(`shop-size-input-${productId}`);
     const product = productsList.find(p => String(p.id) === String(productId));
     const category = product.category.toLowerCase();
     const requiresSize = ['guantes', 'indumentaria'].includes(category) && !['accesorios', 'reparacion'].includes(category);
 
-    if (requiresSize && sizeSelect && !sizeSelect.value) {
-        showToast('Por favor seleccioná un talle para continuar', 'error');
+    if (requiresSize && sizeInput && !sizeInput.value) {
+        showToast('Seleccioná un talle para continuar', 'error');
+        sizeInput.classList.add('shake');
+        setTimeout(() => sizeInput.classList.remove('shake'), 400);
         return;
     }
-    const size = sizeSelect ? sizeSelect.value : 'N/A';
+    const size = sizeInput ? sizeInput.value : 'N/A';
     
     const msg = `Hola LC1! 👋 Quiero comprar el producto: *${product.name}* (Talle: ${size}) que tiene un precio de *$${product.price.toLocaleString('es-AR')}*. ¿Tienen stock?`;
     const whatsappNumber = siteSettings.whatsapp || '541140236384';

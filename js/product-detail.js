@@ -172,7 +172,8 @@ function renderProductDetail(product) {
     const sizeContainer = document.querySelector('.pd-size-selector');
     const selectedSizeInput = document.getElementById('selected-size');
     const category = product.category.toLowerCase();
-    const requiresSize = ['guantes', 'indumentaria'].includes(category) && !['accesorios', 'reparacion'].includes(category);
+    // Mejora: Detección flexible de categoría para mostrar talles (Bug 1 Fix)
+    const requiresSize = category.includes('guante') || category.includes('indumentaria');
 
     if (sizeContainer) {
         sizeContainer.style.display = requiresSize ? 'block' : 'none';
@@ -184,8 +185,19 @@ function renderProductDetail(product) {
         
         if (availableSizes.length === 0) {
             if (category === 'indumentaria') availableSizes = ["S", "M", "L", "XL", "XXL"];
-            else availableSizes = ["7", "8", "9", "10", "11"]; // Fallback por defecto
+            else if (product.ageCategory === 'junior') availableSizes = ["4", "5"];
+            else availableSizes = ["6", "7", "8", "9", "10", "11"]; // Fallback adultos (6 al 11)
         }
+
+        // Determinar si los talles son numéricos (guantes) o letras (indumentaria)
+        const isNumeric = availableSizes.some(s => !isNaN(s));
+        const helpText = isNumeric 
+            ? "¿No sabés tu talle? Medí desde el inicio de la palma hasta la punta del dedo medio."
+            : "Si estás entre dos talles, elegí el más grande.";
+            
+        // Actualizar texto de ayuda dinámicamente
+        const helpTextEl = document.getElementById('size-help-text');
+        if (helpTextEl) helpTextEl.textContent = helpText;
 
         sizeButtonsContainer.innerHTML = availableSizes.map(size => `
             <button class="size-btn" onclick="selectProductSize('${size}', this)">${size}</button>
@@ -211,7 +223,10 @@ function renderProductDetail(product) {
         const size = selectedSizeInput.value;
         
         if (!size) {
-            if (errorMsg) errorMsg.style.display = 'block';
+            if (errorMsg) {
+                errorMsg.textContent = "Por favor seleccioná un talle"; // Mensaje específico solicitado
+                errorMsg.style.display = 'block';
+            }
             return null;
         }
         if (errorMsg) errorMsg.style.display = 'none';

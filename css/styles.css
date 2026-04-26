@@ -198,6 +198,33 @@ nav {
     100% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0); }
 }
 
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.size-select-pro:focus {
+    outline: none;
+    border-color: var(--accent-color) !important;
+}
+
+.shake {
+    animation: shake 0.4s ease-in-out;
+    border-color: #ff3e3e !important;
+}
+
+.size-chip:hover {
+    border-color: var(--accent-color) !important;
+    transform: scale(1.05);
+}
+
+.size-chip.active {
+    background: var(--accent-color) !important;
+    color: #000 !important;
+    border-color: var(--accent-color) !important;
+}
+
 .hero-tagline.boxed {
     display: inline-block;
     border: 1px solid rgba(255, 255, 255, 0.4);

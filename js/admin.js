@@ -86,9 +86,26 @@ function renderCategorySelect() {
     const select = document.getElementById('p-category');
     if (!select) return;
     
-    select.innerHTML = adminCategories.map(cat => `
-        <option value="${cat.slug}">${cat.name}</option>
-    `).join('');
+    // Si la lista de categorías está vacía, usamos las básicas por defecto
+    const categoriesToShow = (adminCategories && adminCategories.length > 0) ? adminCategories : [
+        { slug: 'guantes', name: 'Guantes' },
+        { slug: 'indumentaria', name: 'Indumentaria' },
+        { slug: 'reparacion', name: 'Reparación' }
+    ];
+    
+    select.innerHTML = `
+        <option value="" disabled selected>Seleccionar Categoría</option>
+        ${categoriesToShow.map(cat => `
+            <option value="${cat.slug}">${cat.name}</option>
+        `).join('')}
+    `;
+
+    // Vincular la visibilidad de la categoría de edad
+    select.onchange = () => {
+        if (typeof window.toggleAgeCategoryVisibility === 'function') {
+            window.toggleAgeCategoryVisibility();
+        }
+    };
 }
 
 // Listas negras para evitar que la sincronización restaure items eliminados
@@ -99,8 +116,8 @@ adminSettings = getSafeJSON('lc1-settings', window.LC1_Data ? window.LC1_Data.se
     storeName: 'LC1 GOALKEEPER',
     whatsapp: '541140236384',
     currency: '$',
-    catSectionTitle: 'Explora <span>Categorías</span>',
-    featuredSectionTitle: 'Lanzamientos <span>Elite</span>'
+    catSectionTitle: 'Nuestras <span>Categorías</span>',
+    featuredSectionTitle: 'PRODUCTOS <span>TOP</span>'
 });
 
 // Instancias de Chart.js para limpieza
@@ -584,17 +601,32 @@ window.saveProduct = async () => {
         const finalImages = (await Promise.all(uploadPromises)).filter(img => img != null);
         console.log("[LC1 Admin] Imágenes procesadas con éxito:", finalImages.length);
 
+        const selectedCategory = document.getElementById('p-category').value;
         const ageCategory = document.getElementById('p-age-category').value;
-        const autoSizes = ageCategory === 'junior' ? ["4", "5"] : ["6", "7", "8", "9", "10", "11"];
+
+        // Mejora: Lógica de talles automáticos refinada por categoría
+        let autoSizes;
+        let finalAgeCategory = null;
+
+        if (selectedCategory === 'indumentaria') {
+            autoSizes = ["S", "M", "L", "XL", "XXL"];
+            finalAgeCategory = null;
+        } else if (selectedCategory === 'guantes' || selectedCategory.includes('guante')) {
+            autoSizes = ageCategory === 'junior' ? ["4", "5"] : ["6", "7", "8", "9", "10", "11"];
+            finalAgeCategory = ageCategory;
+        } else {
+            autoSizes = []; // Reparación u otros sin talle
+            finalAgeCategory = null;
+        }
 
         const newProduct = {
             id: idToEdit ? String(idToEdit) : String(Date.now()),
             name: name,
             sku: document.getElementById('p-sku').value.trim(),
             price: price,
-            category: document.getElementById('p-category').value,
-            ageCategory: ageCategory, // Nueva categoría de edad
-            sizes: autoSizes,         // Talles automáticos
+            category: selectedCategory,
+            ageCategory: finalAgeCategory, // Nueva categoría de edad (null si no aplica)
+            sizes: autoSizes,              // Talles automáticos
             desc: document.getElementById('p-desc').value.trim(),
             label: document.getElementById('p-label').value.trim(),
             available: document.getElementById('p-available').checked,
@@ -661,7 +693,11 @@ window.editProduct = (id) => {
     document.getElementById('p-sku').value = p.sku || '';
     document.getElementById('p-price').value = p.price;
     document.getElementById('p-category').value = p.category;
-    document.getElementById('p-age-category').value = p.ageCategory || 'adulto'; // Cargar categoría de edad
+    document.getElementById('p-age-category').value = p.ageCategory || 'adulto'; 
+    
+    // Disparar visibilidad de edad
+    window.toggleAgeCategoryVisibility();
+    
     document.getElementById('p-desc').value = p.desc || '';
     document.getElementById('p-label').value = p.label || '';
     document.getElementById('p-available').checked = p.available !== undefined ? p.available : true;
@@ -1076,6 +1112,10 @@ window.openModal = (isFeatured = false) => {
     window.renderProductImagesPreview();
     delete document.getElementById('product-form').dataset.editId;
     
+    // Asegurar que las categorías estén cargadas y la visibilidad reseteada
+    renderCategorySelect();
+    window.toggleAgeCategoryVisibility();
+
     // Si viene desde "Añadir Destacado", marcamos el checkbox
     if (isFeatured) {
         document.getElementById('p-featured').checked = true;
@@ -1228,4 +1268,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
+    // Listener para cambio de categoría en el formulario de producto
+    const categorySelect = document.getElementById('p-category');
+    if (categorySelect) {
+        categorySelect.addEventListener('change', window.toggleAgeCategoryVisibility);
+    }
 });
+
+// Función para controlar la visibilidad del selector de edad según la categoría
+window.toggleAgeCategoryVisibility = () => {
+    const category = document.getElementById('p-category').value;
+    const wrapper = document.getElementById('age-category-wrapper');
+    if (wrapper) {
+        // Solo mostrar si la categoría es guantes
+        const isGuantes = category === 'guantes' || category.includes('guante');
+        wrapper.style.display = isGuantes ? 'block' : 'none';
+    }
+};

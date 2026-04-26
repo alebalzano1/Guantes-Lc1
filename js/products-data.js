@@ -166,7 +166,7 @@ const initialSettings = {
     whatsapp: '541140236384',
     currency: '$',
     catSectionTitle: 'Nuestras <span>Categorías</span>',
-    featuredSectionTitle: 'Equipamiento <span>Elite</span>'
+    featuredSectionTitle: 'PRODUCTOS <span>TOP</span>'
 };
 
 // Exportar para uso global
