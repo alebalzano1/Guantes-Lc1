@@ -1512,6 +1512,30 @@ nav {
     .form-group-full {
         grid-column: span 1 !important;
     }
+
+    /* Admin Product Card Mobile Optimization */
+    .admin-product-card {
+        text-align: center;
+        padding: 1.5rem !important;
+    }
+
+    .admin-product-card .card-actions {
+        justify-content: center !important;
+        flex-wrap: wrap;
+        gap: 0.5rem !important;
+    }
+
+    .admin-product-card .btn-editor {
+        width: 100%;
+        flex: none !important;
+        margin-bottom: 0.5rem;
+    }
+
+    .admin-product-card .card-title {
+        white-space: normal !important;
+        height: auto !important;
+        margin-bottom: 1rem !important;
+    }
 }
 
 /* Utils */
