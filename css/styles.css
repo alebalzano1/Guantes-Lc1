@@ -1337,15 +1337,16 @@ nav {
         display: grid !important;
         grid-template-columns: 40px 1fr 40px;
         align-items: center;
-        padding: 0.7rem 5%;
-        height: auto;
+        padding: 0.4rem 5% !important;
+        height: 60px !important;
+        background: #000000 !important;
     }
 
     nav .logo {
         text-align: center;
         justify-self: center;
         grid-column: 2;
-        font-size: 1.2rem;
+        font-size: 1rem !important;
     }
 
     nav .menu-toggle {
