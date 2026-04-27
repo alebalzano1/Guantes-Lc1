@@ -1341,7 +1341,7 @@ nav {
         grid-template-columns: 50px 1fr 50px;
         align-items: center;
         padding: 0 5% !important;
-        height: 50px !important;
+        height: 65px !important;
         background: #000000 !important;
     }
 
@@ -1356,12 +1356,20 @@ nav {
     nav .menu-toggle {
         justify-self: start;
         grid-column: 1;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
     }
 
     nav .cart-icon {
         justify-self: end;
         grid-column: 3;
         margin: 0;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
     }
 
     /* Hero Tuning */
