@@ -1332,13 +1332,16 @@ nav {
         margin-right: 0;
     }
 
-    /* Navigation Mobile Redesign */
+    .hide-mobile {
+        display: none !important;
+    }
+
     nav {
         display: grid !important;
-        grid-template-columns: 45px 1fr 45px;
+        grid-template-columns: 50px 1fr 50px;
         align-items: center;
         padding: 0 5% !important;
-        height: 55px !important;
+        height: 50px !important;
         background: #000000 !important;
     }
 
@@ -1346,7 +1349,8 @@ nav {
         text-align: center;
         justify-self: center;
         grid-column: 2;
-        font-size: 0.9rem !important;
+        font-size: 1.1rem !important;
+        white-space: nowrap;
     }
 
     nav .menu-toggle {
