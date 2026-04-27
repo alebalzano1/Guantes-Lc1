@@ -624,14 +624,30 @@
         }
 
         @media (max-width: 600px) {
+            .modal {
+                padding: 0.5rem;
+            }
+            .modal-content {
+                width: 100%;
+                border-radius: 12px;
+                max-height: 95vh;
+            }
+            .modal-header, .modal-body, .modal-footer {
+                padding: 1.2rem !important;
+            }
             .modal-form-grid {
                 grid-template-columns: 1fr;
+                gap: 1rem;
             }
             .modal-footer {
                 flex-direction: column-reverse;
             }
             .modal-footer button {
                 width: 100%;
+                margin: 0 !important;
+            }
+            .form-group-full {
+                grid-column: span 1;
             }
         }
 
