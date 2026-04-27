@@ -1335,10 +1335,10 @@ nav {
     /* Navigation Mobile Redesign */
     nav {
         display: grid !important;
-        grid-template-columns: 40px 1fr 40px;
+        grid-template-columns: 45px 1fr 45px;
         align-items: center;
-        padding: 0.4rem 5% !important;
-        height: 60px !important;
+        padding: 0 5% !important;
+        height: 55px !important;
         background: #000000 !important;
     }
 
@@ -1346,7 +1346,7 @@ nav {
         text-align: center;
         justify-self: center;
         grid-column: 2;
-        font-size: 1rem !important;
+        font-size: 0.9rem !important;
     }
 
     nav .menu-toggle {
