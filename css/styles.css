@@ -1343,6 +1343,10 @@ nav {
         padding: 0 5% !important;
         height: 65px !important;
         background: #000000 !important;
+        position: absolute !important;
+        top: 0;
+        left: 0;
+        width: 100%;
     }
 
     nav .logo {
@@ -1375,7 +1379,7 @@ nav {
     /* Hero Tuning */
     .pro-hero {
         padding: 0 5%;
-        padding-top: 120px !important;
+        padding-top: 80px !important;
         min-height: 85vh;
         display: flex;
         flex-direction: column;
