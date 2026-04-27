@@ -1337,7 +1337,7 @@ nav {
         display: grid !important;
         grid-template-columns: 40px 1fr 40px;
         align-items: center;
-        padding: 1rem 5%;
+        padding: 0.7rem 5%;
         height: auto;
     }
 
@@ -1345,6 +1345,7 @@ nav {
         text-align: center;
         justify-self: center;
         grid-column: 2;
+        font-size: 1.2rem;
     }
 
     nav .menu-toggle {
