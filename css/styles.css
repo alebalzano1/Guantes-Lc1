@@ -1332,54 +1332,36 @@ nav {
         margin-right: 0;
     }
 
-    .hide-mobile {
-        display: none !important;
-    }
-
+    /* Navigation Mobile Redesign */
     nav {
         display: grid !important;
-        grid-template-columns: 50px 1fr 50px;
+        grid-template-columns: 40px 1fr 40px;
         align-items: center;
-        padding: 0 5% !important;
-        height: 65px !important;
-        background: #000000 !important;
-        position: absolute !important;
-        top: 0;
-        left: 0;
-        width: 100%;
+        padding: 1rem 5%;
+        height: auto;
     }
 
     nav .logo {
         text-align: center;
         justify-self: center;
         grid-column: 2;
-        font-size: 1.1rem !important;
-        white-space: nowrap;
     }
 
     nav .menu-toggle {
         justify-self: start;
         grid-column: 1;
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
     }
 
     nav .cart-icon {
         justify-self: end;
         grid-column: 3;
         margin: 0;
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
     }
 
     /* Hero Tuning */
     .pro-hero {
         padding: 0 5%;
-        padding-top: 80px !important;
+        padding-top: 120px !important;
         min-height: 85vh;
         display: flex;
         flex-direction: column;
