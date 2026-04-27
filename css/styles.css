@@ -1,11 +1,11 @@
 :root {
     --bg-color: #ffffff;
-    --card-bg: #fdfdfd;
-    --primary-color: #ffffff; /* White is Primary */
-    --accent-color: #F9FF20;  /* Neon Yellow for Details */
+    --bg-secondary: #f5f5f5;
+    --primary-color: #ffffff; 
+    --accent-color: #F9FF20;  
     --primary-hover: #f4f4f4;
-    --text-color: #000000;
-    --text-muted: #444444;
+    --text-color: #111111;
+    --text-muted: #666666;
     --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.08);
     --glass-bg: rgba(255, 255, 255, 0.8);
     --glass-border: rgba(0, 0, 0, 0.08);
@@ -35,27 +35,38 @@ h1, h2, h3, .sport-font {
     letter-spacing: 1px;
 }
 
-/* --- Navigation --- */
+/* --- Navigation (Black Theme) --- */
 nav {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     padding: 1rem 5%;
-    background: #ffffff !important;
-    backdrop-filter: blur(10px);
+    background: #000000 !important;
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 1000;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); /* Added shadow for depth */
-    transition: var(--transition);
+}
+
+.logo {
+    justify-self: start;
+}
+
+.nav-links {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    list-style: none;
+}
+
+.cart-icon {
+    justify-self: end;
 }
 
 .menu-toggle {
     display: none;
     font-size: 1.5rem;
-    color: #000000;
+    color: #ffffff;
     cursor: pointer;
     z-index: 2500;
     padding: 0.5rem;
@@ -72,7 +83,7 @@ nav {
     gap: 10px;
     font-size: 1.5rem;
     font-weight: 900;
-    color: #000000 !important; /* BLACK LOGO ON WHITE NAV */
+    color: #ffffff !important; /* WHITE LOGO ON BLACK NAV */
     text-decoration: none;
 }
 
@@ -87,7 +98,7 @@ nav {
 }
 
 .nav-links a {
-    color: #000000; /* BLACK LINKS ON WHITE NAV */
+    color: #ffffff; /* WHITE LINKS ON BLACK NAV */
     text-decoration: none;
     font-weight: 700;
     font-size: 0.9rem;
@@ -103,7 +114,7 @@ nav {
 .cart-icon {
     position: relative;
     cursor: pointer;
-    color: #000000;
+    color: #ffffff;
 }
 
 .cart-count {
@@ -125,10 +136,9 @@ nav {
     align-items: center;
     justify-content: center;
     position: relative;
-    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), 
-                url('../assets/hero-stadium.png') center/cover no-repeat;
+    background: #ffffff;
     overflow: hidden;
-    padding-top: 80px;
+    padding-top: 140px; /* Increased to avoid sticking to nav */
 }
 
 .hero-container {
@@ -227,10 +237,10 @@ nav {
 
 .hero-tagline.boxed {
     display: inline-block;
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(0, 0, 0, 0.2);
     padding: 0.5rem 1.5rem;
     font-size: 1rem;
-    color: #ffffff;
+    color: #111111;
     text-transform: uppercase;
     font-weight: 300;
     letter-spacing: 2px;
@@ -250,13 +260,13 @@ nav {
 }
 
 .pro-hero .elite-title span {
-    color: #ffffff;
+    color: #111111;
     display: block;
 }
 
 .hero-subtext {
     font-size: 1.25rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: #444444;
     margin-bottom: 0;
     max-width: 600px;
     line-height: 1.4;
@@ -376,17 +386,16 @@ nav {
     }
 }
 
-/* --- Identity Section (Dark Impact Edition) --- */
+/* --- Identity Section (White Theme) --- */
 .section-identity {
     padding: 12rem 10%;
     text-align: center;
     position: relative;
-    background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), 
-                url('../assets/identity-bg.png') center/cover no-repeat fixed;
+    background: #ffffff;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px solid rgba(0,0,0,0.05);
 }
 
 .identity-container {
@@ -399,7 +408,7 @@ nav {
     font-size: 3.5rem;
     letter-spacing: 0;
     text-transform: uppercase;
-    color: #ffffff; /* WHITE TITLE ON DARK BG */
+    color: #111111; /* DARK TITLE ON WHITE BG */
     margin-bottom: 3rem;
     position: relative;
     display: inline-block;
@@ -418,22 +427,20 @@ nav {
 
 .identity-text {
     font-size: clamp(1.8rem, 4vw, 2.8rem);
-    color: #ffffff; /* BRILLIANT WHITE TEXT */
+    color: #111111; /* DARK TEXT */
     font-weight: 400;
-    text-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
-/* --- Categories Section (Dark Impact Edition) --- */
+/* --- Categories Section (White Theme) --- */
 .section-categories {
-    background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), 
-                url('../assets/cat-locker-bg.png') center/cover no-repeat fixed;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    background: #f5f5f5;
+    border-top: 1px solid rgba(0,0,0,0.05);
     position: relative;
     padding: 8rem 10%;
 }
 
 .section-categories .section-title h2 {
-    color: #ffffff; /* White title for contrast */
+    color: #111111; /* Dark title for contrast */
 }
 
 .section-categories .section-title h2 span {
@@ -443,10 +450,10 @@ nav {
 /* --- Reusable Dark Footer (REVERTED TO WHITE) --- */
 .dark-footer {
     padding: 5rem 5% !important;
-    background: #ffffff !important;
-    border-top: 1px solid rgba(0,0,0,0.05) !important;
+    background: #111111 !important;
+    border-top: 1px solid rgba(255,255,255,0.05) !important;
     text-align: center;
-    color: var(--text-muted) !important;
+    color: #888888 !important;
     font-size: 0.9rem;
 }
 
@@ -464,16 +471,15 @@ nav {
     text-decoration: underline;
 }
 
-/* --- Featured Section (Dark Impact Edition) --- */
+/* --- Featured Section (White Theme) --- */
 .section-featured {
-    background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
-                url('../assets/featured-turf-bg.png') center/cover no-repeat fixed;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    background: #ffffff;
+    border-top: 1px solid rgba(0,0,0,0.05);
     position: relative;
 }
 
 .section-featured .section-title h2 {
-    color: #ffffff;
+    color: #111111;
 }
 
 /* --- Categories --- */
@@ -633,8 +639,8 @@ nav {
 
 /* Common Product Card Styles (Enhanced) */
 .product-card, .admin-product-card {
-    background: rgba(255, 255, 255, 0.03); /* ULTRA TRANSPARENT WHITE */
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff; 
+    border: 1px solid #e8e8e8;
     border-radius: 20px;
     padding: 1.25rem;
     position: relative;
@@ -642,8 +648,7 @@ nav {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
 .product-card:hover, .admin-product-card:hover {
@@ -775,7 +780,7 @@ nav {
 .section-categories .card-title,
 .section-identity .card-title,
 .admin-section .card-title {
-    color: #ffffff !important; /* FORCED WHITE ON DARK BG */
+    color: #111111 !important; /* DARK ON WHITE BG */
 }
 
 .section-featured .card-category {
@@ -1111,7 +1116,7 @@ nav {
 
     .nav-links a {
         font-size: 1.5rem;
-        color: #000000;
+        color: #ffffff;
         font-weight: 800;
     }
 
@@ -1123,7 +1128,7 @@ nav {
     .menu-toggle {
         display: block !important;
         font-size: 1.5rem;
-        color: #000000;
+        color: #ffffff;
         cursor: pointer;
         z-index: 2500;
         margin-left: auto;
@@ -1131,9 +1136,9 @@ nav {
     }
 
     /* Hero Tuning */
-    /* Hero Tuning */
     .pro-hero {
-        padding: 0 5% ;
+        padding: 0 5%;
+        padding-top: 120px !important;
         min-height: 85vh;
         display: flex;
         flex-direction: column;
@@ -1286,14 +1291,16 @@ nav {
         right: -100%;
         width: 80%;
         height: 100vh;
-        background: #ffffff;
+        background: #000000;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         z-index: 2000;
         transition: 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
         box-shadow: -10px 0 40px rgba(0,0,0,0.1);
-        border-left: 1px solid var(--glass-border);
+        border-left: 1px solid rgba(255,255,255,0.1);
+        flex: none; /* Reset flex for mobile sidebar */
+        gap: 0;
     }
 
     .nav-links.active {
@@ -1306,7 +1313,7 @@ nav {
 
     .nav-links a {
         font-size: 1.5rem;
-        color: #000000;
+        color: #ffffff;
         font-weight: 800;
     }
 
@@ -1318,17 +1325,43 @@ nav {
     .menu-toggle {
         display: block !important;
         font-size: 1.5rem;
-        color: #000000;
+        color: #ffffff;
         cursor: pointer;
         z-index: 2500;
-        margin-left: auto;
-        margin-right: 1.5rem;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    /* Navigation Mobile Redesign */
+    nav {
+        display: grid !important;
+        grid-template-columns: 40px 1fr 40px;
+        align-items: center;
+        padding: 1rem 5%;
+        height: auto;
+    }
+
+    nav .logo {
+        text-align: center;
+        justify-self: center;
+        grid-column: 2;
+    }
+
+    nav .menu-toggle {
+        justify-self: start;
+        grid-column: 1;
+    }
+
+    nav .cart-icon {
+        justify-self: end;
+        grid-column: 3;
+        margin: 0;
     }
 
     /* Hero Tuning */
-    /* Hero Tuning */
     .pro-hero {
-        padding: 0 5% ;
+        padding: 0 5%;
+        padding-top: 120px !important;
         min-height: 85vh;
         display: flex;
         flex-direction: column;
@@ -1844,10 +1877,9 @@ nav {
     font-weight: 600;
 }
 
-/* --- About Section (Dark Impact Edition) --- */
+/* --- About Section (White Theme) --- */
 .section-about {
-    background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.9)), 
-                url('../assets/identity-bg.png') center/cover no-repeat fixed;
+    background: #000000;
     color: #ffffff;
     padding: 8rem 10%;
     text-align: center;
@@ -1857,6 +1889,7 @@ nav {
 .about-container {
     max-width: 900px;
     margin: 0 auto;
+    text-align: center;
 }
 
 .about-container h2 {
@@ -1893,7 +1926,7 @@ nav {
 .about-content {
     font-size: 1.2rem;
     line-height: 1.9;
-    text-align: left;
+    text-align: center;
     color: #ffffff;
 }
 
@@ -1903,7 +1936,7 @@ nav {
 
 .about-content strong {
     font-weight: 950;
-    color: #ffffff; /* Text inside about is now white */
+    color: #ffffff; 
     text-decoration: underline;
     text-decoration-color: var(--accent-color); /* Yellow underline as detail */
     text-underline-offset: 4px;
@@ -1952,7 +1985,7 @@ nav {
 
 /* --- FAQ Accordion (Redesigned Dark Impact) --- */
 #faq.section {
-    background: #000000 !important; /* Force black background */
+    background: #ffffff !important; /* Force white background */
     padding: 8rem 5% !important;
 }
 
@@ -1965,8 +1998,8 @@ nav {
 }
 
 #faq .faq-item {
-    background: #1a1a1a !important;
-    border: 1px solid #2e2e2e !important;
+    background: #fdfdfd !important;
+    border: 1px solid #e8e8e8 !important;
     border-radius: 8px !important;
     overflow: hidden !important;
     transition: all 0.3s ease;
@@ -1989,7 +2022,7 @@ nav {
 .faq-question {
     font-size: 16px !important;
     font-weight: 600 !important;
-    color: #ffffff !important;
+    color: #111111 !important;
     font-family: 'Inter', sans-serif !important;
     line-height: 1.2 !important;
 }
@@ -2014,7 +2047,7 @@ nav {
 
 .faq-content {
     padding: 0 20px 16px !important;
-    color: #cccccc !important;
+    color: #666666 !important;
     font-size: 14px !important;
     line-height: 1.7 !important;
     font-family: 'Inter', sans-serif !important;
@@ -2022,6 +2055,13 @@ nav {
 
 .faq-item.active {
     border-color: #F5C518 !important;
+}
+
+/* Category Filter Active Fix */
+.filter-btn.active, .category-filter.active {
+    background: #111111 !important;
+    color: #ffffff !important;
+    border-color: #111111 !important;
 }
 
 @media (max-width: 600px) {
