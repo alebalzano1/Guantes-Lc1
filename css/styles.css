@@ -2097,25 +2097,3 @@ nav {
     }
 }
 
-/* --- Mejoras de lectura del amarillo en celular --- */
-@media (max-width: 768px) {
-    /* Hero Title "NO SON PARA" */
-    .pro-hero .elite-title {
-        color: #FFD700 !important; /* Bien amarillo */
-        -webkit-text-stroke: 1px #111111; /* Borde negro para que resalte en el blanco */
-        text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
-    }
-    /* El span "CUALQUIERA" sigue siendo negro */
-    .pro-hero .elite-title span {
-        color: #111111 !important;
-        -webkit-text-stroke: 0;
-        text-shadow: none;
-    }
-    /* Títulos de secciones "Nuestras Categorías", "Productos Top" */
-    .section-title h2 span {
-        color: #FFD700 !important;
-        -webkit-text-stroke: 1px #111111;
-        text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
-    }
-}
-
