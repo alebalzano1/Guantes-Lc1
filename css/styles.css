@@ -2104,3 +2104,57 @@ nav {
     }
 }
 
+/* --- Mejoras UI en Mobile (max-width: 768px) --- */
+@media (max-width: 768px) {
+    /* Cambio 1 — Títulos amarillos a negro con subrayado */
+    .section-title h2 span,
+    .pro-hero .elite-title {
+        color: #111111 !important;
+        text-decoration: underline;
+        text-decoration-color: #f5c518;
+        text-underline-offset: 4px;
+        -webkit-text-stroke: 0 !important;
+        text-shadow: none !important;
+    }
+
+    /* Cambio 2 — Nav en mobile (una sola línea) */
+    nav {
+        display: grid !important;
+        grid-template-columns: 44px 1fr 44px !important;
+        align-items: center !important;
+        padding: 0 16px !important;
+        height: 60px !important;
+    }
+    nav .logo {
+        grid-column: 2 !important;
+        text-align: center !important;
+        font-size: 1rem !important;
+        justify-content: center !important;
+    }
+    nav .menu-toggle {
+        display: block !important;
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+    }
+    nav .cart-icon {
+        grid-column: 3 !important;
+        grid-row: 1 !important;
+        position: relative !important;
+    }
+    nav .nav-links {
+        display: none !important;
+    }
+
+    /* Cambio 3 — Filtros de tienda en mobile (más pequeños) */
+    .filters {
+        padding: 12px !important;
+    }
+    .filters h4 {
+        font-size: 0.85rem !important;
+        margin-bottom: 8px !important;
+    }
+    .filter-btn {
+        font-size: 0.8rem !important;
+        padding: 6px 10px !important;
+    }
+}
