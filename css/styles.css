@@ -2104,18 +2104,19 @@ nav {
     }
 }
 
+/* --- Títulos amarillos a negro con subrayado (Global para Desktop y Mobile) --- */
+.section-title h2 span,
+.pro-hero .elite-title {
+    color: #111111 !important;
+    text-decoration: underline;
+    text-decoration-color: var(--accent-color);
+    text-underline-offset: 4px;
+    -webkit-text-stroke: 0 !important;
+    text-shadow: none !important;
+}
+
 /* --- Mejoras UI en Mobile (max-width: 768px) --- */
 @media (max-width: 768px) {
-    /* Cambio 1 — Títulos amarillos a negro con subrayado */
-    .section-title h2 span,
-    .pro-hero .elite-title {
-        color: #111111 !important;
-        text-decoration: underline;
-        text-decoration-color: #f5c518;
-        text-underline-offset: 4px;
-        -webkit-text-stroke: 0 !important;
-        text-shadow: none !important;
-    }
 
     /* Cambio 2 — Nav en mobile (una sola línea) */
     nav {
