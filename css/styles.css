@@ -1114,7 +1114,7 @@ nav {
     }
 
     .nav-links.active {
-        right: 0;
+        right: 0 !important;
     }
 
     .nav-links li {
@@ -1311,7 +1311,7 @@ nav {
     }
 
     .nav-links.active {
-        right: 0;
+        right: 0 !important;
     }
 
     .nav-links li {
@@ -2142,7 +2142,7 @@ nav {
         position: relative !important;
     }
     nav .nav-links {
-        display: none !important;
+        display: flex !important;
     }
 
     /* Cambio 3 — Filtros de tienda en mobile (más pequeños) */
