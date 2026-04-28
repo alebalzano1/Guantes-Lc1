@@ -161,7 +161,7 @@ nav {
 
 .urgency-badge {
     display: inline-block;
-    background: rgba(204, 255, 0, 0.1);
+    background: rgba(249, 255, 32, 0.1);
     color: var(--primary-color);
     padding: 0.6rem 1.2rem;
     border-radius: 50px;
@@ -169,7 +169,7 @@ nav {
     font-weight: 800;
     letter-spacing: 2px;
     margin-bottom: 2rem;
-    border: 1px solid rgba(204, 255, 0, 0.3);
+    border: 1px solid rgba(249, 255, 32, 0.3);
     animation: pulse-glow 2s infinite;
 }
 
@@ -189,12 +189,12 @@ nav {
     text-transform: uppercase;
     font-size: 1rem;
     border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(204, 255, 0, 0.25);
+    box-shadow: 0 10px 25px rgba(249, 255, 32, 0.25);
 }
 
 .checkout-btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 15px 35px rgba(204, 255, 0, 0.4);
+    box-shadow: 0 15px 35px rgba(249, 255, 32, 0.4);
     background: #e6ff00 !important;
 }
 
@@ -203,9 +203,9 @@ nav {
 }
 
 @keyframes pulse-glow {
-    0% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(204, 255, 0, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0); }
+    0% { box-shadow: 0 0 0 0 rgba(249, 255, 32, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(249, 255, 32, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(249, 255, 32, 0); }
 }
 
 @keyframes shake {
@@ -546,7 +546,7 @@ nav {
 }
 
 .category-card:hover .category-overlay {
-    background: linear-gradient(transparent, rgba(204, 255, 0, 0.1) 20%, rgba(0,0,0,0.7));
+    background: linear-gradient(transparent, rgba(249, 255, 32, 0.1) 20%, rgba(0,0,0,0.7));
 }
 
 .category-overlay h3 {
@@ -655,7 +655,7 @@ nav {
     transform: translateY(-5px);
     background: rgba(255, 255, 255, 0.04);
     border-color: var(--primary-color);
-    box-shadow: 0 10px 30px -10px rgba(204, 255, 0, 0.2);
+    box-shadow: 0 10px 30px -10px rgba(249, 255, 32, 0.2);
     z-index: 10;
 }
 
@@ -866,13 +866,13 @@ nav {
     justify-content: center;
     gap: 12px;
     margin-top: auto;
-    box-shadow: 0 4px 15px rgba(204, 255, 0, 0.2);
+    box-shadow: 0 4px 15px rgba(249, 255, 32, 0.2);
 }
 
 .btn-buy:hover {
     filter: brightness(1.1);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(204, 255, 0, 0.4);
+    box-shadow: 0 8px 20px rgba(249, 255, 32, 0.4);
 }
 
 .btn-buy:active {
@@ -1072,7 +1072,7 @@ nav {
     border-radius: 10px;
     width: 0%;
     transition: width 1.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-    box-shadow: 0 0 15px rgba(204, 255, 0, 0.3);
+    box-shadow: 0 0 15px rgba(249, 255, 32, 0.3);
 }
 /* --- Responsive Tuning (Mobile First) --- */
 
@@ -1267,7 +1267,7 @@ nav {
     border-radius: 10px;
     width: 0%;
     transition: width 1.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-    box-shadow: 0 0 15px rgba(204, 255, 0, 0.3);
+    box-shadow: 0 0 15px rgba(249, 255, 32, 0.3);
 }
 /* --- Responsive Tuning (Mobile First) --- */
 
@@ -1771,7 +1771,7 @@ nav {
 
 .pd-btn-cart:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(204, 255, 0, 0.4);
+    box-shadow: 0 10px 30px rgba(249, 255, 32, 0.4);
 }
 
 .pd-btn-wa {
@@ -1890,7 +1890,7 @@ nav {
 .pd-size-selector select:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 15px rgba(204, 255, 0, 0.15);
+    box-shadow: 0 0 15px rgba(249, 255, 32, 0.15);
 }
 
 #size-error {
@@ -2031,7 +2031,7 @@ nav {
 }
 
 #faq .faq-item:hover {
-    border-color: #F5C518 !important;
+    border-color: #F9FF20 !important;
 }
 
 .faq-header {
@@ -2053,7 +2053,7 @@ nav {
 
 .faq-icon {
     font-size: 20px !important;
-    color: #F5C518 !important;
+    color: #F9FF20 !important;
     font-weight: 400 !important;
 }
 
@@ -2094,6 +2094,28 @@ nav {
     }
     .faq-question {
         font-size: 15px !important;
+    }
+}
+
+/* --- Mejoras de lectura del amarillo en celular --- */
+@media (max-width: 768px) {
+    /* Hero Title "NO SON PARA" */
+    .pro-hero .elite-title {
+        color: #FFD700 !important; /* Bien amarillo */
+        -webkit-text-stroke: 1px #111111; /* Borde negro para que resalte en el blanco */
+        text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+    }
+    /* El span "CUALQUIERA" sigue siendo negro */
+    .pro-hero .elite-title span {
+        color: #111111 !important;
+        -webkit-text-stroke: 0;
+        text-shadow: none;
+    }
+    /* Títulos de secciones "Nuestras Categorías", "Productos Top" */
+    .section-title h2 span {
+        color: #FFD700 !important;
+        -webkit-text-stroke: 1px #111111;
+        text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
     }
 }
 
