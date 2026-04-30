@@ -1746,7 +1746,7 @@ nav {
         background-attachment: scroll !important;
     }
 
-    /* Navigation Mobile */
+    /* Navigation Mobile (Main Site Only) */
     nav {
         display: grid !important;
         grid-template-columns: 44px 1fr 44px !important;
@@ -1754,6 +1754,9 @@ nav {
         padding: 0 16px !important;
         height: 60px !important;
         background: #000000 !important;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
     }
 
     nav .logo {
@@ -1819,6 +1822,86 @@ nav {
 
     .nav-links a:hover {
         color: var(--accent-color);
+    }
+
+    /* Admin Sidebar Fix (Crucial for Dashboard) */
+    aside.sidebar {
+        width: 0 !important;
+        padding: 0 !important;
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100%;
+        z-index: 4000;
+        overflow: hidden;
+    }
+
+    aside.sidebar.active {
+        width: 260px !important;
+        padding: 2rem 1.5rem !important;
+        box-shadow: 30px 0 60px rgba(0,0,0,0.2);
+    }
+
+    main.main-content {
+        padding: 1.2rem !important;
+        width: 100% !important;
+        overflow-x: hidden;
+    }
+
+    .admin-section-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1rem !important;
+    }
+
+    .admin-section-header h2 {
+        font-size: 1.8rem !important;
+        line-height: 1.2;
+    }
+
+    #mobile-sidebar-toggle {
+        display: flex !important;
+        background: var(--primary-color) !important;
+        color: #000 !important;
+        box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .analytics-grid, .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .card-pro {
+        padding: 1rem !important;
+        gap: 1rem !important;
+    }
+
+    /* Modal Admin Mobile */
+    .modal-content {
+        width: 95% !important;
+        margin: 1rem !important;
+        max-height: 90vh;
+    }
+
+    .modal-form-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Admin Product Card Mobile Optimization */
+    .admin-product-card {
+        text-align: center;
+        padding: 1.5rem !important;
+    }
+
+    .admin-product-card .card-actions {
+        justify-content: center !important;
+        flex-wrap: wrap;
+        gap: 0.5rem !important;
+    }
+
+    .admin-product-card .btn-editor {
+        width: 100%;
+        flex: none !important;
+        margin-bottom: 0.5rem;
     }
 
     /* Hero Tuning */
