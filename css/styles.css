@@ -1081,99 +1081,7 @@ nav {
     transition: width 1.5s cubic-bezier(0.165, 0.84, 0.44, 1);
     box-shadow: 0 0 15px rgba(249, 255, 32, 0.3);
 }
-/* --- Responsive Tuning (Mobile First) --- */
 
-@media (max-width: 768px) {
-    /* Base Overflow Fix */
-    body, html {
-        width: 100% !important;
-        overflow-x: hidden !important;
-        position: relative;
-    }
-
-    /* Navigation Mobile */
-    nav {
-        padding: 1rem 5%;
-        height: auto;
-    }
-
-    .nav-links {
-        position: fixed;
-        top: 0;
-        left: -100%;
-        width: 80%;
-        height: 100vh;
-        background: #ffffff;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 2000;
-        transition: 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-        box-shadow: 10px 0 40px rgba(0,0,0,0.1);
-        border-right: 1px solid var(--glass-border);
-    }
-
-    .nav-links.active {
-        left: 0 !important;
-    }
-
-    .nav-links li {
-        margin: 1.5rem 0;
-    }
-
-    .nav-links a {
-        font-size: 1.5rem;
-        color: #ffffff;
-        font-weight: 800;
-    }
-
-    .nav-links a:hover {
-        color: var(--primary-color);
-    }
-
-    /* Burger Button */
-    .menu-toggle {
-        display: block !important;
-        font-size: 1.5rem;
-        color: #ffffff;
-        cursor: pointer;
-        z-index: 2500;
-        margin-left: auto;
-        margin-right: 1.5rem;
-    }
-
-    /* Hero Tuning */
-    .pro-hero {
-        padding: 0 5%;
-        padding-top: 120px !important;
-        min-height: 85vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-
-    .pro-hero .elite-title {
-        font-size: clamp(2.5rem, 12vw, 4.5rem) !important;
-        margin-bottom: 1.5rem;
-        line-height: 1.05;
-        word-break: break-word; /* Prevent overflow on long words */
-    }
-
-    .hero-subtext {
-        font-size: 1rem;
-        opacity: 0.9;
-    }
-
-    /* Grids to 1 Column */
-    .categories-grid, .products-grid, .product-cards-grid {
-        grid-template-columns: 1fr !important;
-        gap: 2rem;
-    }
-
-    .category-card {
-        height: 350px;
-    }
-}
 
 @media (max-width: 850px) {
     .testimonials-grid, .info-grid {
@@ -1276,274 +1184,7 @@ nav {
     transition: width 1.5s cubic-bezier(0.165, 0.84, 0.44, 1);
     box-shadow: 0 0 15px rgba(249, 255, 32, 0.3);
 }
-/* --- Responsive Tuning (Mobile First) --- */
 
-@media (max-width: 768px) {
-    /* Base Overflow Fix */
-    body, html {
-        width: 100% !important;
-        overflow-x: hidden !important;
-        position: relative;
-    }
-
-    /* Navigation Mobile */
-    nav {
-        padding: 1rem 5%;
-        height: auto;
-    }
-
-    .nav-links {
-        position: fixed;
-        top: 0;
-        left: -100%;
-        width: 80%;
-        height: 100vh;
-        background: #000000;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 2000;
-        transition: 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-        box-shadow: 10px 0 40px rgba(0,0,0,0.1);
-        border-right: 1px solid rgba(255,255,255,0.1);
-        flex: none; /* Reset flex for mobile sidebar */
-        gap: 0;
-    }
-
-    .nav-links.active {
-        left: 0 !important;
-    }
-
-    .nav-links li {
-        margin: 1.5rem 0;
-    }
-
-    .nav-links a {
-        font-size: 1.5rem;
-        color: #ffffff;
-        font-weight: 800;
-    }
-
-    .nav-links a:hover {
-        color: var(--primary-color);
-    }
-
-    /* Burger Button */
-    .menu-toggle {
-        display: block !important;
-        font-size: 1.5rem;
-        color: #ffffff;
-        cursor: pointer;
-        z-index: 2500;
-        margin-left: 0;
-        margin-right: 0;
-    }
-
-    /* Navigation Mobile Redesign */
-    nav {
-        display: grid !important;
-        grid-template-columns: 40px 1fr 40px;
-        align-items: center;
-        padding: 1rem 5%;
-        height: auto;
-    }
-
-    nav .logo {
-        text-align: center;
-        justify-self: center;
-        grid-column: 2;
-    }
-
-    nav .menu-toggle {
-        justify-self: start;
-        grid-column: 1;
-    }
-
-    nav .cart-icon {
-        justify-self: end;
-        grid-column: 3;
-        margin: 0;
-    }
-
-    /* Hero Tuning */
-    .pro-hero {
-        padding: 0 5%;
-        padding-top: 90px !important;
-        min-height: 85vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-
-    .pro-hero .elite-title {
-        font-size: clamp(2.5rem, 12vw, 4.5rem) !important;
-        margin-bottom: 1.5rem;
-        line-height: 1.05;
-        word-break: break-word; /* Prevent overflow on long words */
-    }
-
-    .hero-subtext {
-        font-size: 1rem;
-        opacity: 0.9;
-    }
-
-    /* Grids to 1 Column */
-    .categories-grid, .products-grid, .product-cards-grid {
-        grid-template-columns: 1fr !important;
-        gap: 2rem;
-    }
-
-    .category-card {
-        height: 350px;
-    }
-
-    /* Section Adjustment */
-    .section {
-        padding: 3.5rem 5% !important; /* Unified density */
-    }
-
-    .section-identity, .section-categories, .section-featured, .section-about {
-        padding: 4rem 5% !important;
-    }
-
-    .section-title {
-        margin-bottom: 2.5rem;
-    }
-
-    .section-title h2 {
-        font-size: 1.8rem !important;
-    }
-
-    /* Cart Sidebar Mobile Fix */
-    #cart-sidebar {
-        width: 100% !important;
-        right: -100% !important;
-        border-left: none !important;
-    }
-    
-    #cart-sidebar[style*="right: 0"] {
-        right: 0 !important;
-    }
-
-    #cart-sidebar * {
-        box-sizing: border-box !important;
-    }
-
-    #cart-items {
-        padding: 1rem !important;
-    }
-
-    /* Badge Stacking in Shop */
-    .product-card {
-        padding-top: 2.5rem !important; /* Spacing for badges */
-    }
-    
-    .product-card .badge-featured {
-        top: 10px !important;
-        left: 10px !important;
-    }
-
-    .product-card .badge-label {
-        position: absolute;
-        top: 40px !important;
-        left: 10px !important;
-        background: #333;
-        color: var(--accent-color);
-        padding: 4px 10px;
-        border-radius: 4px;
-        font-size: 0.7rem;
-        font-weight: 800;
-        z-index: 5;
-    }
-
-    /* Admin Sidebar Fix */
-    aside.sidebar {
-        width: 0 !important;
-        padding: 0 !important;
-        position: fixed;
-        left: 0;
-        top: 0;
-        height: 100%;
-        z-index: 4000;
-        overflow: hidden;
-    }
-
-    aside.sidebar.active {
-        width: 260px !important;
-        padding: 2rem 1.5rem !important;
-    }
-
-    main.main-content {
-        padding: 1.2rem !important;
-        width: 100% !important;
-        overflow-x: hidden;
-    }
-
-    .admin-section-header {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 1rem !important;
-    }
-
-    .admin-section-header h1 {
-        font-size: 1.8rem !important;
-    }
-
-    #mobile-sidebar-toggle {
-        display: flex !important;
-        background: var(--primary-color) !important;
-        color: #000 !important;
-        box-shadow: 0 0 15px var(--accent-glow);
-    }
-
-    .analytics-grid, .stats-grid {
-        grid-template-columns: 1fr !important;
-    }
-
-    .card-pro {
-        padding: 1rem !important;
-        gap: 1rem !important;
-    }
-
-    /* Modal Mobile */
-    .modal-content {
-        width: 95% !important;
-        margin: 1rem !important;
-        max-height: 90vh;
-    }
-
-    .modal-form-grid {
-        grid-template-columns: 1fr !important;
-    }
-
-    .form-group-full {
-        grid-column: span 1 !important;
-    }
-
-    /* Admin Product Card Mobile Optimization */
-    .admin-product-card {
-        text-align: center;
-        padding: 1.5rem !important;
-    }
-
-    .admin-product-card .card-actions {
-        justify-content: center !important;
-        flex-wrap: wrap;
-        gap: 0.5rem !important;
-    }
-
-    .admin-product-card .btn-editor {
-        width: 100%;
-        flex: none !important;
-        margin-bottom: 0.5rem;
-    }
-
-    .admin-product-card .card-title {
-        white-space: normal !important;
-        height: auto !important;
-        margin-bottom: 1rem !important;
-    }
-}
 
 /* Utils */
 .menu-toggle {
@@ -1554,17 +1195,7 @@ nav {
     display: none !important;
 }
 
-/* Optimización Móvil: Desactivar efectos pesados */
-@media (max-width: 768px) {
-    .section-identity, 
-    .section-categories, 
-    .section-featured, 
-    .section-about,
-    .pro-hero,
-    body {
-        background-attachment: scroll !important; /* Elimina lag de scroll en móviles */
-    }
-}
+
 
 /* Size Selector Enhancements */
 .size-buttons-grid {
@@ -1973,17 +1604,7 @@ nav {
     text-underline-offset: 4px;
 }
 
-@media (max-width: 768px) {
-    .section-about {
-        padding: 4rem 8%;
-    }
-    .about-container h2 {
-        font-size: 2.2rem;
-    }
-    .about-content {
-        font-size: 1.1rem;
-    }
-}
+
 
 
 /* Admin Preview Fixes - Prevent Overflow and Improve UX */
@@ -2117,36 +1738,139 @@ nav {
 
 /* --- Mejoras UI en Mobile (max-width: 768px) --- */
 @media (max-width: 768px) {
+    /* Base Overflow Fix */
+    body, html {
+        width: 100% !important;
+        overflow-x: hidden !important;
+        position: relative;
+        background-attachment: scroll !important;
+    }
 
-    /* Cambio 2 — Nav en mobile (una sola línea) */
+    /* Navigation Mobile */
     nav {
         display: grid !important;
         grid-template-columns: 44px 1fr 44px !important;
         align-items: center !important;
         padding: 0 16px !important;
         height: 60px !important;
+        background: #000000 !important;
     }
+
     nav .logo {
         grid-column: 2 !important;
         text-align: center !important;
         font-size: 1rem !important;
         justify-content: center !important;
+        display: flex !important;
     }
+
     nav .menu-toggle {
         display: block !important;
         grid-column: 1 !important;
         grid-row: 1 !important;
+        justify-self: start;
+        margin: 0 !important;
+        z-index: 2500;
+        color: #ffffff !important;
     }
+
     nav .cart-icon {
         grid-column: 3 !important;
         grid-row: 1 !important;
+        justify-self: end;
+        margin: 0 !important;
         position: relative !important;
     }
-    nav .nav-links {
+
+    .nav-links {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 80%;
+        height: 100vh;
+        background: #000000;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        transition: 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+        box-shadow: 10px 0 40px rgba(0,0,0,0.1);
+        border-right: 1px solid rgba(255,255,255,0.1);
         display: flex !important;
     }
 
-    /* Cambio 3 — Filtros de tienda en mobile (más pequeños) */
+    .nav-links.active {
+        left: 0 !important;
+    }
+
+    .nav-links li {
+        margin: 1.5rem 0;
+        list-style: none;
+    }
+
+    .nav-links a {
+        font-size: 1.5rem;
+        color: #ffffff;
+        font-weight: 800;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .nav-links a:hover {
+        color: var(--accent-color);
+    }
+
+    /* Hero Tuning */
+    .pro-hero {
+        padding: 0 5%;
+        padding-top: 100px !important;
+        min-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .pro-hero .elite-title {
+        font-size: clamp(2.5rem, 12vw, 4.5rem) !important;
+        margin-bottom: 1.5rem;
+        line-height: 1.05;
+    }
+
+    /* Grids to 1 Column */
+    .categories-grid, .products-grid, .product-cards-grid {
+        grid-template-columns: 1fr !important;
+        gap: 2rem;
+    }
+
+    .category-card {
+        height: 350px;
+    }
+
+    .section {
+        padding: 4rem 5% !important;
+    }
+
+    .section-title h2 {
+        font-size: 1.8rem !important;
+    }
+
+    .section-about {
+        padding: 4rem 8%;
+    }
+
+    /* Cart Sidebar Mobile Fix */
+    #cart-sidebar {
+        width: 100% !important;
+        right: -100% !important;
+        border-left: none !important;
+    }
+    
+    #cart-sidebar[style*="right: 0"] {
+        right: 0 !important;
+    }
+
+    /* Tienda Filters Tuning */
     .filters {
         padding: 12px !important;
     }
