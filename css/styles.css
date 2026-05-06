@@ -1332,7 +1332,7 @@ nav {
     display: flex;
     gap: 1rem;
     margin-bottom: 1.5rem;
-    margin-top: 20px; /* Added margin to prevent overlap in mobile */
+    margin-top: 25px; /* Increased margin slightly for better mobile spacing */
     position: relative;
     z-index: 5;
 }

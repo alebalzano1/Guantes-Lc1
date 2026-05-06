@@ -132,6 +132,15 @@ let chartMix = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("[LC1 Admin] Iniciando procesos base...");
+
+    // SEGURIDAD: Si no hay un flag de sesión activa en sessionStorage, forzamos logout de Firebase.
+    // Esto asegura que al cerrar la pestaña o el navegador, la sesión se considere terminada
+    // incluso si Firebase intentara recuperarla de IndexedDB.
+    if (!sessionStorage.getItem('lc1_active_session')) {
+        console.log("[LC1 Admin] No se detectó sesión activa en esta pestaña. Limpiando...");
+        await FirebaseService.logout();
+    }
+
     
     // 0. DIAGNÓSTICO DE SISTEMA
     const statusDot = document.getElementById('status-dot');
@@ -269,6 +278,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             adminNameDisplay.innerHTML = `<i class="fas fa-user-circle"></i> ${user.email.split('@')[0]}`;
         }
 
+        // Marcar sesión como activa en esta pestaña/ventana
+        sessionStorage.setItem('lc1_active_session', 'true');
+
         // Cargar datos
         loadInitialData();
         
@@ -394,9 +406,11 @@ window.togglePassVisibility = (id, el) => {
 
 window.logout = async () => {
     try {
+        sessionStorage.removeItem('lc1_active_session');
         await FirebaseService.logout();
         location.reload();
     } catch (error) {
+        sessionStorage.removeItem('lc1_active_session');
         location.reload();
     }
 };
