@@ -7,6 +7,15 @@ const db = firebase.firestore();
 
 const auth = firebase.auth();
 
+// Configurar persistencia a SESSION (se borra al cerrar la pestaña/navegador)
+auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+    .then(() => {
+        console.log("[Firebase] Persistencia configurada: SESSION");
+    })
+    .catch((error) => {
+        console.error("[Firebase] Error al configurar la persistencia:", error);
+    });
+
 const FirebaseService = {
     // --- Authentication ---
     login: async (email, password) => {

@@ -394,11 +394,10 @@ window.togglePassVisibility = (id, el) => {
 
 window.logout = async () => {
     try {
-        sessionStorage.removeItem('lc1_admin_auth');
         await FirebaseService.logout();
         location.reload();
     } catch (error) {
-        location.reload(); // Incluso si falla Firebase, recargar para limpiar UI
+        location.reload();
     }
 };
 
