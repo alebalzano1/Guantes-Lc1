@@ -1332,7 +1332,7 @@ nav {
     display: flex;
     gap: 1rem;
     margin-bottom: 1.5rem;
-    margin-top: 25px; /* Increased margin slightly for better mobile spacing */
+    margin-top: 50px; /* Increased significantly for mobile spacing */
     position: relative;
     z-index: 5;
 }
@@ -1492,7 +1492,7 @@ nav {
 @media (max-width: 1000px) {
     .pd-container {
         grid-template-columns: 1fr !important;
-        gap: 3rem;
+        gap: 4.5rem;
         margin: 2rem auto;
     }
     .pd-image-section {
