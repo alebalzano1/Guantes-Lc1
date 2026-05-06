@@ -1332,6 +1332,15 @@ nav {
     display: flex;
     gap: 1rem;
     margin-bottom: 1.5rem;
+    margin-top: 20px; /* Added margin to prevent overlap in mobile */
+    position: relative;
+    z-index: 5;
+}
+
+.pd-thumbnails {
+    position: relative;
+    z-index: 10;
+    margin-bottom: 10px;
 }
 
 .pd-badge {
@@ -1754,7 +1763,8 @@ nav {
         padding: 0 16px !important;
         height: 60px !important;
         background: #000000 !important;
-        position: sticky;
+        position: fixed;
+        width: 100%;
         top: 0;
         z-index: 1000;
     }
