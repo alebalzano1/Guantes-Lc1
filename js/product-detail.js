@@ -185,19 +185,19 @@ function renderProductDetail(product) {
         
         if (availableSizes.length === 0) {
             if (category === 'indumentaria') availableSizes = ["S", "M", "L", "XL", "XXL"];
-            else if (product.ageCategory === 'junior') availableSizes = ["4", "5"];
+            else if (product.ageCategory === 'junior' || product.ageCategory === 'niño') availableSizes = ["4", "5"];
             else availableSizes = ["6", "7", "8", "9", "10", "11"]; // Fallback adultos (6 al 11)
         }
 
         // Determinar si los talles son numéricos (guantes) o letras (indumentaria)
         const isNumeric = availableSizes.some(s => !isNaN(s));
         const helpText = isNumeric 
-            ? "¿No sabés tu talle? Medí desde el inicio de la palma hasta la punta del dedo medio."
+            ? "¿No sabés tu talle? Medí desde el inicio de la palma hasta la punta del dedo medio.<br><br><strong>T4</strong>=14cm · <strong>T5</strong>=15cm · <strong>T6</strong>=16.5cm · <strong>T7</strong>=18cm · <strong>T8</strong>=19cm · <strong>T9</strong>=20.5cm · <strong>T10</strong>=21.5cm · <strong>T11</strong>=22cm.<br><br>Si estás entre dos talles, elegí el más grande."
             : "Si estás entre dos talles, elegí el más grande.";
             
         // Actualizar texto de ayuda dinámicamente
         const helpTextEl = document.getElementById('size-help-text');
-        if (helpTextEl) helpTextEl.textContent = helpText;
+        if (helpTextEl) helpTextEl.innerHTML = helpText;
 
         sizeButtonsContainer.innerHTML = availableSizes.map(size => `
             <button class="size-btn" onclick="selectProductSize('${size}', this)">${size}</button>

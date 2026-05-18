@@ -7,10 +7,10 @@ const db = firebase.firestore();
 
 const auth = firebase.auth();
 
-// Configurar persistencia a SESSION (se borra al cerrar la pestaña/navegador)
-auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+// Configurar persistencia a NONE (solo en memoria, se pierde al recargar o cerrar)
+auth.setPersistence(firebase.auth.Auth.Persistence.NONE)
     .then(() => {
-        console.log("[Firebase] Persistencia configurada: SESSION");
+        console.log("[Firebase] Persistencia configurada: NONE (Solo Memoria)");
     })
     .catch((error) => {
         console.error("[Firebase] Error al configurar la persistencia:", error);

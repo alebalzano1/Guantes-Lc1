@@ -204,7 +204,7 @@ function productCard(product) {
     let availableSizes = product.sizes || [];
     if (availableSizes.length === 0) {
         if (category === 'indumentaria') availableSizes = ["S", "M", "L", "XL", "XXL"];
-        else if (product.ageCategory === 'junior') availableSizes = ["4", "5"];
+        else if (product.ageCategory === 'junior' || product.ageCategory === 'niño') availableSizes = ["4", "5"];
         else availableSizes = ["6", "7", "8", "9", "10", "11"];
     }
 

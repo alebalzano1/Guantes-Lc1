@@ -133,14 +133,6 @@ let chartMix = null;
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("[LC1 Admin] Iniciando procesos base...");
 
-    // SEGURIDAD: Si no hay un flag de sesión activa en sessionStorage, forzamos logout de Firebase.
-    // Esto asegura que al cerrar la pestaña o el navegador, la sesión se considere terminada
-    // incluso si Firebase intentara recuperarla de IndexedDB.
-    if (!sessionStorage.getItem('lc1_active_session')) {
-        console.log("[LC1 Admin] No se detectó sesión activa en esta pestaña. Limpiando...");
-        await FirebaseService.logout();
-    }
-
     
     // 0. DIAGNÓSTICO DE SISTEMA
     const statusDot = document.getElementById('status-dot');
@@ -278,9 +270,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             adminNameDisplay.innerHTML = `<i class="fas fa-user-circle"></i> ${user.email.split('@')[0]}`;
         }
 
-        // Marcar sesión como activa en esta pestaña/ventana
-        sessionStorage.setItem('lc1_active_session', 'true');
-
         // Cargar datos
         loadInitialData();
         
@@ -406,11 +395,9 @@ window.togglePassVisibility = (id, el) => {
 
 window.logout = async () => {
     try {
-        sessionStorage.removeItem('lc1_active_session');
         await FirebaseService.logout();
         location.reload();
     } catch (error) {
-        sessionStorage.removeItem('lc1_active_session');
         location.reload();
     }
 };
@@ -617,8 +604,8 @@ window.saveProduct = async () => {
         if (selectedCategory === 'indumentaria') {
             autoSizes = ["S", "M", "L", "XL", "XXL"];
             finalAgeCategory = null;
-        } else if (selectedCategory === 'guantes' || selectedCategory.includes('guante')) {
-            autoSizes = ageCategory === 'junior' ? ["4", "5"] : ["6", "7", "8", "9", "10", "11"];
+        } else if (selectedCategory === 'guantes' || selectedCategory.includes('guante') || selectedCategory.includes('junior')) {
+            autoSizes = (ageCategory === 'junior' || ageCategory === 'niño') ? ["4", "5"] : ["6", "7", "8", "9", "10", "11"];
             finalAgeCategory = ageCategory;
         } else {
             autoSizes = []; // Reparación u otros sin talle
@@ -1408,8 +1395,16 @@ window.toggleAgeCategoryVisibility = () => {
     const category = document.getElementById('p-category').value;
     const wrapper = document.getElementById('age-category-wrapper');
     if (wrapper) {
-        // Solo mostrar si la categoría es guantes
-        const isGuantes = category === 'guantes' || category.includes('guante');
-        wrapper.style.display = isGuantes ? 'block' : 'none';
+        // Mostrar si es guantes, o si incluye "guante" o "junior"
+        const isGuantesOrJunior = category === 'guantes' || category.includes('guante') || category.includes('junior');
+        wrapper.style.display = isGuantesOrJunior ? 'block' : 'none';
+        
+        // Auto-seleccionar "junior" si la categoría contiene la palabra "junior"
+        if (category.includes('junior')) {
+            const ageCategorySelect = document.getElementById('p-age-category');
+            if (ageCategorySelect && ageCategorySelect.value !== 'junior') {
+                ageCategorySelect.value = 'junior';
+            }
+        }
     }
 };

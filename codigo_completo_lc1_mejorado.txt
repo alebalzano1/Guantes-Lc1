@@ -1,4 +1,4 @@
-﻿********************************************************************************
+********************************************************************************
 PROYECTO: LC1 GOALKEEPER - PLATAFORMA ELITE
 RESUMEN DE MEJORAS Y CÓDIGO COMPLETO (ACTUALIZADO 26/04/2026 - v3.2)
 ********************************************************************************
@@ -751,7 +751,7 @@ ARCHIVO: product.html
                 <input type="hidden" id="selected-size" value="">
                 <small id="size-error" style="display:none; color:#ff3e3e; font-weight:700; margin-top:10px;">Por favor seleccioná un talle para continuar.</small>
                 <p id="size-help-text" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 15px;">
-                    ¿No sabés tu talle? Medí desde el inicio de la palma hasta la punta del dedo medio.
+                    ¿No sabés tu talle? Medí desde el inicio de la palma hasta la punta del dedo medio.<br><br><strong>T4</strong>=14cm · <strong>T5</strong>=15cm · <strong>T6</strong>=16.5cm · <strong>T7</strong>=18cm · <strong>T8</strong>=19cm · <strong>T9</strong>=20.5cm · <strong>T10</strong>=21.5cm · <strong>T11</strong>=22cm.<br><br>Si estás entre dos talles, elegí el más grande.
                 </p>
             </div>
 
@@ -5067,8 +5067,8 @@ window.saveProduct = async () => {
         if (selectedCategory === 'indumentaria') {
             autoSizes = ["S", "M", "L", "XL", "XXL"];
             finalAgeCategory = null;
-        } else if (selectedCategory === 'guantes' || selectedCategory.includes('guante')) {
-            autoSizes = ageCategory === 'junior' ? ["4", "5"] : ["6", "7", "8", "9", "10", "11"];
+        } else if (selectedCategory === 'guantes' || selectedCategory.includes('guante') || selectedCategory.includes('junior')) {
+            autoSizes = (ageCategory === 'junior' || ageCategory === 'niño') ? ["4", "5"] : ["6", "7", "8", "9", "10", "11"];
             finalAgeCategory = ageCategory;
         } else {
             autoSizes = []; // Reparación u otros sin talle
@@ -5734,12 +5734,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Función para controlar la visibilidad del selector de edad según la categoría
 window.toggleAgeCategoryVisibility = () => {
-    const category = document.getElementById('p-category').value;
+    const category = document.getElementById('p-category').value.toLowerCase();
     const wrapper = document.getElementById('age-category-wrapper');
     if (wrapper) {
-        // Solo mostrar si la categoría es guantes
-        const isGuantes = category === 'guantes' || category.includes('guante');
-        wrapper.style.display = isGuantes ? 'block' : 'none';
+        // Mostrar si es guantes, o si incluye "guante" o "junior"
+        const isGuantesOrJunior = category === 'guantes' || category.includes('guante') || category.includes('junior');
+        wrapper.style.display = isGuantesOrJunior ? 'block' : 'none';
+        
+        // Auto-seleccionar "junior" si la categoría contiene la palabra "junior"
+        if (category.includes('junior')) {
+            const ageCategorySelect = document.getElementById('p-age-category');
+            if (ageCategorySelect && ageCategorySelect.value !== 'junior') {
+                ageCategorySelect.value = 'junior';
+            }
+        }
     }
 };
  
@@ -6359,12 +6367,12 @@ function renderProductDetail(product) {
         // Determinar si los talles son numéricos (guantes) o letras (indumentaria)
         const isNumeric = availableSizes.some(s => !isNaN(s));
         const helpText = isNumeric 
-            ? "¿No sabés tu talle? Medí desde el inicio de la palma hasta la punta del dedo medio."
+            ? "¿No sabés tu talle? Medí desde el inicio de la palma hasta la punta del dedo medio.<br><br><strong>T4</strong>=14cm · <strong>T5</strong>=15cm · <strong>T6</strong>=16.5cm · <strong>T7</strong>=18cm · <strong>T8</strong>=19cm · <strong>T9</strong>=20.5cm · <strong>T10</strong>=21.5cm · <strong>T11</strong>=22cm.<br><br>Si estás entre dos talles, elegí el más grande."
             : "Si estás entre dos talles, elegí el más grande.";
             
         // Actualizar texto de ayuda dinámicamente
         const helpTextEl = document.getElementById('size-help-text');
-        if (helpTextEl) helpTextEl.textContent = helpText;
+        if (helpTextEl) helpTextEl.innerHTML = helpText;
 
         sizeButtonsContainer.innerHTML = availableSizes.map(size => `
             <button class="size-btn" onclick="selectProductSize('${size}', this)">${size}</button>
